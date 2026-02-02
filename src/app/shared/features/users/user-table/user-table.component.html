@@ -1,0 +1,90 @@
+<!-- user-table.component.html -->
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-toolbar class="mb-4">
+  
+  <!-- LEFT -->
+  <ng-template #start>
+    <h2 class="text-3xl font-bold text-gray-700">
+      User Management
+    </h2>
+  </ng-template>
+
+  <!-- RIGHT -->
+  <ng-template #end>
+    <p-button
+      label="Add New User"
+      icon="pi pi-user-plus"
+      severity="success"
+      (click)="openNew()"
+    ></p-button>
+  </ng-template>
+
+</p-toolbar>
+
+
+
+<!-- SmartTable Component -->
+<app-smart-table
+  [value]="users"
+  [columns]="columns"
+  [loading]="loading"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [selectionMode]="'multiple'"
+  [globalFilterFields]="['username', 'firstName', 'lastName', 'role']"
+  [showGlobalFilter]="true"
+  [showClearButton]="true"
+  (selectionChange)="selectedUsers = $event"
+  printTitle="Users Report"
+></app-smart-table>
+
+<!-- User Dialog -->
+<p-dialog [(visible)]="userDialog" header="User Details" [modal]="true" [style]="{ width: '50vw' }">
+  <ng-container *ngIf="user">
+    <div class="flex flex-col gap-4">
+      <div>
+        <label class="block mb-2 font-semibold">First Name</label>
+        <input pInputText [(ngModel)]="user.firstName" placeholder="First Name" class="w-full" />
+        <small class="text-red-500" *ngIf="submitted && !user.firstName">First Name is required</small>
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">Last Name</label>
+        <input pInputText [(ngModel)]="user.lastName" placeholder="Last Name" class="w-full" />
+        <small class="text-red-500" *ngIf="submitted && !user.lastName">Last Name is required</small>
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">Username</label>
+        <input pInputText [(ngModel)]="user.username" placeholder="Username" class="w-full" />
+        <small class="text-red-500" *ngIf="submitted && !user.username">Username is required</small>
+      </div>
+      <div>
+        <label class="block relative  mb-2 font-semibold">Role</label>
+        <p-select
+          [(ngModel)]="user.role"
+          [options]="roles"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          placeholder="Select Role"
+          class="w-full"
+        />
+      </div>
+      <div *ngIf="user.userId === 0">
+        <label class="block mb-2 font-semibold">Password</label>
+        <input pInputText type="password" [(ngModel)]="user.password" placeholder="Password" class="w-full" />
+        <small class="text-red-500" *ngIf="submitted && !user.password">Password is required</small>
+      </div>
+
+
+    </div>
+  </ng-container>
+
+  <ng-template #footer>
+    <p-button label="Cancel" text (click)="hideDialog()" />
+    <p-button label="Save" (click)="saveUser()" />
+  </ng-template>
+</p-dialog>

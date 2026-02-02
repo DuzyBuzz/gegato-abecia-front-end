@@ -1,0 +1,390 @@
+
+  <h1 class="text-center  text-5xl mb-6 mt-6">
+    FUNERAL SERVICE CONTRACT
+  </h1>
+    <h2 class="text-left  text-4xl font-bold mb-6 mt-6">
+    DECEASED NAME
+  </h2>
+
+    <!-- ========== CONTRACT HEADER SECTION ========== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 border-b pb-2 pt-3 sm:pt-4 text-xs sm:text-sm">
+      <div>
+        <label class="block font-medium text-xs sm:text-sm">Contract Date</label>
+        <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+      </div>
+      <div>
+        <label class="block font-medium text-xs sm:text-sm">Contract No.</label>
+        <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+      </div>
+      <div>
+        <label class="block font-medium text-xs sm:text-sm">Type of Service</label>
+        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+      </div>
+      <div>
+        <label class="block font-medium text-xs sm:text-sm">Type of Cremation</label>
+        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+      </div>
+      <div>
+        <label class="block font-medium text-xs sm:text-sm">Financial Assistance</label>
+        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+      </div>
+    </div>
+
+    <!-- ========== MAIN 3 COLUMN LAYOUT ========== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mt-3 sm:mt-4">
+
+      <!-- LEFT COLUMN -->
+      <div>
+        <fieldset class="border p-2 sm:p-3">
+          <legend class="text-xs sm:text-sm font-bold">Information of the Deceased</legend>
+
+          <!-- Date Retrieved & Informant -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Date Retrieved</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Informant</label>
+              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <!-- First Name + Suffix (Flexible Layout) -->
+          <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">First Name</label>
+              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Suffix</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option value=""></option>
+                <option value="Jr">Jr.</option>
+                <option value="Sr">Sr.</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium text-xs sm:text-sm">Middle Name</label>
+            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
+          </div>
+
+          <div>
+            <label class="block font-medium text-xs sm:text-sm">Last Name</label>
+            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
+          </div>
+
+          <!-- Personal Information (2 Columns, 2 Rows) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+
+            <!-- ROW 1 -->
+            <div >
+              <label class="block text-xs sm:text-sm font-medium">Date of Birth</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+
+            <div>
+              <label class="block text-xs sm:text-sm font-medium">Age</label>
+              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm" min="0">
+            </div>
+
+            <!-- ROW 2 -->
+            <div>
+              <label class="block text-xs sm:text-sm font-medium">Sex</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option value="">-- Select --</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs sm:text-sm font-medium">Civil Status</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option value="">-- Select --</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Widowed</option>
+                <option>Widower</option>
+                <option>Divorced</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Date of Death</label>
+          <input type="date" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Address of Deceased</label>
+          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Place of Death</label>
+          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+        </fieldset>
+
+        <fieldset class="border p-2 sm:p-3 mt-3 sm:mt-4">
+          <legend class="text-xs sm:text-sm font-bold">Information of the Contractee</legend>
+
+          <!-- First Name + Suffix (Flexible Layout) -->
+          <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Contractee</label>
+              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Age</label>
+              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Occupation</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Address 1</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Barangay</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">District</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">City/Municipality</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Relationship</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Contact No</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Email Address</label>
+          <input type="email" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Plan</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">No.</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Referred by</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+        </fieldset>
+      </div>
+
+      <!-- MIDDLE COLUMN -->
+      <div class="space-y-3 sm:space-y-4">
+
+        <fieldset class="border p-2 sm:p-3">
+          <legend class="font-bold text-xs sm:text-sm">Casket / Urn Information</legend>
+
+          <div class="border p-2 bg-yellow-100 rounded mb-2">
+            <legend class="text-xs sm:text-sm font-semibold mb-1">Contract Price</legend>
+
+            <div class="flex items-center gap-2">
+              <span class="text-lg sm:text-xl">₱</span>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm" type="number" value="0.00">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Casket</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option value="">-- Select Casket --</option>
+                <option value="none">None</option>
+                <option value="wooden-basic">Wooden Basic</option>
+                <option value="wooden-deluxe">Wooden Deluxe</option>
+                <option value="wooden-premium">Wooden Premium</option>
+                <option value="metal-standard">Metal Standard</option>
+                <option value="metal-deluxe">Metal Deluxe</option>
+                <option value="stainless-premium">Stainless Premium</option>
+                <option value="bronze-premium">Bronze Premium</option>
+                <option value="gold-series">Gold Series</option>
+                <option value="imported-europe-series">Imported Europe Series</option>
+                <option value="cremation-box">Cremation Box</option>
+              </select>
+            </div>
+            <label class="block font-medium text-xs sm:text-sm">Description</label>
+            <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Urn Type</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option value="">-- Select Urn Type --</option>
+                <option value="none">None</option>
+                <option value="basic-ceramic">Basic Ceramic</option>
+                <option value="classic-ceramic">Classic Ceramic (White / Ivory)</option>
+                <option value="wood-classic">Wood Classic (Mahogany / Narra)</option>
+                <option value="wood-deluxe">Wood Deluxe (Carved / Premium Finish)</option>
+                <option value="metal-polished">Metal Polished (Silver / Chrome)</option>
+                <option value="metal-gold">Metal Gold Plated (Premium)</option>
+                <option value="glass-crystal">Glass Crystal (Memorial Crystal)</option>
+                <option value="marble-standard">Marble Standard</option>
+                <option value="marble-premium">Marble Premium (Imported)</option>
+                <option value="jade-imported">Jade Imported (Asian Memorial Style)</option>
+                <option value="custom-engraved">Custom Engraved (Name & Dates)</option>
+              </select>
+            </div>
+          </div>
+          <label class="block font-medium text-xs sm:text-sm">Description</label>
+          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
+
+          <label class="block font-medium text-xs sm:text-sm">Casket other details</label>
+          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
+        </fieldset>
+
+        <fieldset class="border p-2 sm:p-3">
+          <legend class="font-bold text-xs sm:text-sm">Delivery Information</legend>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Date</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Time</label>
+              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Location</label>
+          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Driver</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Helper</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="border p-2 sm:p-3">
+          <legend class="font-bold text-xs sm:text-sm">Transfer Information</legend>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Date</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Time</label>
+              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Location</label>
+          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Deliveries / Transfer Notes</label>
+          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm"></textarea>
+        </fieldset>
+
+        <fieldset class="border p-2 sm:p-3">
+          <legend class="font-bold text-xs sm:text-sm">Burial / Cremation Schedule</legend>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Burial</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Take Off</label>
+              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Mass</label>
+              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Holding Area</label>
+              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+                <option>NONE</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Cremation</label>
+              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Time</label>
+              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+
+          <label class="block font-medium text-xs sm:text-sm">Church</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Cemetery</label>
+          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+
+          <label class="block font-medium text-xs sm:text-sm">Burial Notes</label>
+          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Driver</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Helper</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
+              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="space-y-3 sm:space-y-4">
+        <label class="block font-medium text-xs sm:text-sm">Contract Remarks</label>
+        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+
+        <label class="block font-medium text-xs sm:text-sm">Operations Remarks</label>
+        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+
+        <label class="block font-medium text-xs sm:text-sm">Morgue Remarks</label>
+        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+
+        <div class="flex flex-col gap-2 pt-2">
+          <button class="bg-blue-600 text-white py-2 rounded text-xs sm:text-sm font-medium">Submit Contract</button>
+        </div>
+                        <select
+                  class="border w-full px-2 py-1 text-xs sm:text-sm"
+                  (change)="onPrintSelect($event)"
+                >
+                  <option value="">Select to Print</option>
+                  <option value="funeral-contract">Funeral Service Contract</option>
+                  <option value="cremation-certificate">Cremation Certificate</option>
+                  <option value="authority-cremate">Authority to Cremate Remains</option>
+                  <option value="statement-account">Statement of Accounts</option>
+                </select>
+      </div>
+
+    </div><!-- END 3 COLUMNS -->

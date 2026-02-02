@@ -1,0 +1,177 @@
+<div class="min-h-screen bg-slate-100">
+
+  <!-- SIDEBAR -->
+  <aside
+    class="fixed top-0 left-0 h-screen
+           bg-[#3A1247] text-white
+           flex flex-col z-50
+           transition-all duration-300"
+    [class.w-64]="sidebarExpanded"
+    [class.w-20]="!sidebarExpanded"
+  >
+
+    <!-- LOGO + TOGGLE -->
+    <div class="h-20 px-2 flex items-center justify-between border-b border-white/10">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <img src="assets/images/gegato-logo.jpg"
+             class="w-10 h-10 object-cover rounded ml-1" />
+
+        <div *ngIf="sidebarExpanded">
+          <h1 class="text-sm font-bold">Gegato Abecia</h1>
+          <p class="text-xs text-white/70">Funeral System</p>
+        </div>
+      </div>
+
+      <button
+        (click)="toggleSidebar()"
+        class="text-white/70 hover:text-white"
+      >
+        <span class="material-icons text-lg">
+          {{ sidebarExpanded ? 'chevron_left' : 'chevron_right' }}
+        </span>
+      </button>
+    </div>
+
+    <!-- NAV -->
+    <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
+
+      <a routerLink="/dashboard" class="sidebar-item">
+        <span class="material-icons">dashboard</span>
+        <span *ngIf="sidebarExpanded">Dashboard</span>
+      </a>
+
+      <a routerLink="/admin/users" class="sidebar-item">
+        <span class="material-icons">people</span>
+        <span *ngIf="sidebarExpanded">Users</span>
+      </a>
+
+      <!-- CONTRACTS -->
+      <button
+        (click)="toggle('contracts')"
+        class="sidebar-item w-full justify-between"
+        [disabled]="!sidebarExpanded"
+      >
+        <div class="flex items-center gap-3">
+          <span class="material-icons">description</span>
+          <span *ngIf="sidebarExpanded">Contracts</span>
+        </div>
+
+        <span
+          *ngIf="sidebarExpanded"
+          class="material-icons transition-transform"
+          [class.rotate-180]="isOpen('contracts')"
+        >
+          expand_more
+        </span>
+      </button>
+
+      <div
+        *ngIf="sidebarExpanded && isOpen('contracts')"
+        class="ml-9 mt-1 space-y-1"
+      >
+        <a routerLink="/user/entry-forms/funeral-service-contract"
+           class="sidebar-child">
+          New Contract
+        </a>
+        <a routerLink="/user/client-record"
+           class="sidebar-child">
+          Contract Records
+        </a>
+      </div>
+
+      <!-- INVENTORY -->
+      <button
+        (click)="toggle('inventory')"
+        class="sidebar-item w-full justify-between"
+        [disabled]="!sidebarExpanded"
+      >
+        <div class="flex items-center gap-3">
+          <span class="material-icons">inventory_2</span>
+          <span *ngIf="sidebarExpanded">Inventory</span>
+        </div>
+
+        <span
+          *ngIf="sidebarExpanded"
+          class="material-icons transition-transform"
+          [class.rotate-180]="isOpen('inventory')"
+        >
+          expand_more
+        </span>
+      </button>
+
+      <div
+        *ngIf="sidebarExpanded && isOpen('inventory')"
+        class="ml-9 mt-1 space-y-1"
+      >
+        <a routerLink="/user/entry-forms/items-entry" class="sidebar-child">
+          Create Item
+        </a>
+        <a routerLink="/user/inventory" class="sidebar-child">
+          Item List
+        </a>
+        <a class="sidebar-child">Stock In</a>
+        <a class="sidebar-child">Stock Movement</a>
+      </div>
+
+      <a class="sidebar-item">
+        <span class="material-icons">bar_chart</span>
+        <span *ngIf="sidebarExpanded">Reports</span>
+      </a>
+
+
+
+    </nav>
+
+    <!-- USER -->
+    <div class="p-4 border-t border-white/10">
+      <div *ngIf="sidebarExpanded">
+        
+
+  
+
+              <a class="sidebar-item">
+
+      </a>
+      </div>
+           <button
+        class="mt-3 w-full text-left text-white  text-sm flex items-center gap-2"
+      >
+        <span class="material-icons text-sm">person</span>
+        <span *ngIf="sidebarExpanded">  <div class="flex col-span-2">
+    <div>
+
+    </div>
+    <div>
+<p class="text-sm font-semibold">{{ currentUser.name }}</p>
+        <p class="text-xs text-white/70">{{ currentUser.role }}</p>
+    </div>
+
+  </div></span>
+      </button>
+      <button
+        class="mt-3 w-full text-left text-white  text-sm flex items-center gap-2"
+      >
+        <span class="material-icons text-sm">settings</span>
+        <span *ngIf="sidebarExpanded">Settings</span>
+      </button>
+      <button
+        (click)="logout()"
+        class="mt-3 w-full text-left text-red-300 hover:text-red-200 text-sm flex items-center gap-2"
+      >
+        <span class="material-icons text-sm">logout</span>
+        <span *ngIf="sidebarExpanded">Logout</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main
+    class="min-h-screen bg-slate-100 px-8 py-6 transition-all duration-300"
+    [class.ml-64]="sidebarExpanded"
+    [class.ml-20]="!sidebarExpanded"
+  >
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

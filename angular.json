@@ -2,17 +2,43 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "cb26d823-fea1-4749-8a1e-c72631d99c99"
   },
   "newProjectRoot": "projects",
   "projects": {
     "gegato-abecia": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
+  "schematics": {
+    "@schematics/angular:component": {
+      "style": "scss",
+      "type": "component",
+
+      "standalone": true,
+      "skipTests": false
+    },
+    "@schematics/angular:service": {
+      "type": "service",
+      "skipTests": false
+    },
+
+    "@schematics/angular:guard": {
+      "type": "guard",
+      "skipTests": false
+    },
+    "@schematics/angular:pipe": {
+      "type": "pipe",
+      "skipTests": false
+    },
+    "@schematics/angular:directive": {
+      "type": "directive",
+      "skipTests": false
+    },
+    "@schematics/angular:resolver": {
+      "type": "resolver",
+      "skipTests": false
+    }
+  },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -23,11 +49,15 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "outputPath": "dist/gegato-abecia",
+
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/assets",
+              "src/favicon.ico"
             ],
             "styles": [
               "src/styles.scss"
@@ -38,8 +68,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "5mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",

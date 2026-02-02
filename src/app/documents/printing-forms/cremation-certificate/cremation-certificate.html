@@ -1,0 +1,64 @@
+
+<div class="flex items-center justify-center h-full">
+  
+
+<!-- PRINT PAGE -->
+<div class="print-page text-black text-[12px] leading-tight">
+
+    <app-print-header></app-print-header>
+
+  <h3 class="text-center font-bold text-xl mb-6 mt-4 underline">CREMATION CERTIFICATE</h3>
+
+
+
+
+
+
+
+
+
+
+  <!-- INTRO -->
+  <p class="text-justify indent-8 mb-6 space-y-2">
+    This certifies that the late 
+    <strong class="underline-field text-center w-[400px]">{{ contract.authorizer }}</strong>
+    {{contract.age}} years old,<br> and a resident of <strong class="underline-field text-center w-[550px]">{{ contract.address }}</strong>,
+    who died last <strong class="underline-field text-center w-[150px]">{{ contract.cremationDate }}</strong> at <strong class="underline-field text-center w-[400px]">{{ contract.placeOfDeath }}</strong>.
+  </p>
+    <p class="text-justify indent-8 mb-4 space-y-2">
+        That the body was mot embalmed and was directly cremated on/last <strong class="underline-field text-center w-[150px]">{{ contract.cremationDate }}</strong>
+        at Chapel of the Hills Gegato Abecia Funeral Homes Inc. Costal Road, Monfort Highway Brgy. Balabago, Jaro, Iloilo City Philippines.
+  </p>
+      <p class="text-justify indent-8 mb-4 space-y-2">
+        this certification is issued upon for whatever legal purpose it may serve.
+        Issue on <strong class="underline-field text-center w-[200px]">{{ contract.deliveryDate }}</strong> at Iloilo City, Philippines.
+  </p>
+ 
+  <!-- FOOTER -->
+
+
+      <div class="grid grid-cols-4  gap-2 w-full mb-0">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div>    <div class="mt-6 text-center ">
+        <div class="underline font-black">
+     {{contract.officer}}<br/>
+
+        </div>
+     <div></div>Officer-In-Charge <br>
+     Chapel of the Hills Crematory
+
+    </div></div>
+  </div>
+
+<!-- PRINT BUTTON (HIDDEN WHEN PRINTING) -->
+<div class="no-print mb-4 justify-center  flex w-full mt-4">
+  <button
+    class="px-4 py-2 bg-blue-600 text-white rounded"
+    (click)="print()"
+  >
+Print
+  </button>
+</div>
+</div>

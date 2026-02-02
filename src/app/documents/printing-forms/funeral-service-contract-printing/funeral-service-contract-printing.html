@@ -1,0 +1,161 @@
+<div class="flex items-center justify-center h-full">
+  
+
+<!-- PRINT PAGE -->
+<div class="print-page text-black text-[12px] leading-tight ">
+
+    <app-print-header></app-print-header>
+
+  <h2 class="text-center font-light text-xl mb-0">
+    FUNERAL SERVICE CONTRACT
+  </h2>
+
+
+  <div class="flex justify-between mb-4">
+    <div></div>
+    <div class="text-right">
+      <div>Time: <span class="underline-field text-center">{{ contract.time }}</span></div>
+      <div>Date: <span class="underline-field text-center">{{ contract.date }}</span></div>
+    </div>
+  </div>
+
+
+
+  <!-- CASSET DETAILS -->
+  <div class="grid grid-cols-2 gap-2 mb-3">
+    <div>Casket: <span class="underline-field text-center w-10/12">{{ contract.casket }}</span></div>
+    <div>Casket Description:
+      <span class="underline-field text-center w-8/12">{{ contract.casketDescription }}</span>
+    </div>
+    <div>Contract Price:
+      <span class="underline-field text-center w-8/12">{{ contract.price }}</span>
+    </div>
+  </div>
+
+  <!-- DECEASED INFO -->
+  <div class="mb-3">
+    Name of the Deceased:
+    <span class="underline-field  text-center w-9/12">
+      {{ contract.deceasedName }}
+    </span>
+  </div>
+
+  <div class="grid grid-cols-3 gap-2 w-full mb-3">
+    <div>Date of Birth: <span class="underline-field text-center w-7/12">{{ contract.dob }}</span></div>
+    <div>Date of Death: <span class="underline-field text-center w-7/12">{{ contract.dod }}</span></div>
+    <div>Age: <span class="underline-field text-center w-8/12">{{ contract.age }}</span></div>
+  </div>
+
+  <div class="mb-3">
+    Address:
+    <span class="underline-field text-center w-10/12  inline-block">
+      {{ contract.address }}
+    </span>
+  </div>
+
+  <div class="mb-3">
+    Place of Death:
+    <span class="underline-field text-center w-10/12 inline-block">
+      {{ contract.placeOfDeath }}
+    </span>
+  </div>
+
+  <div class="grid  gap-2 mb-3">
+    <div>Wake will be held:
+      <span class="underline-field text-center w-10/12">{{ contract.wake }}</span>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-2 gap-2 mb-3">
+        <div>Church:
+      <span class="underline-field text-center w-10/12">{{ contract.church }}</span>
+    </div>
+    <div>Date of Burial:
+      <span class="underline-field text-center w-9/12">{{ contract.burialDate }}</span>
+    </div>
+
+  </div> 
+    <div >
+        Cemetery:
+      <span class="underline-field text-center w-11/12">{{ contract.cemetery }}</span>
+    </div>
+
+
+
+
+
+
+
+  <!-- AGREEMENT TEXT -->
+  <h3 class="text-center font-bold text-xl mb-3 mt-4 underline">CONTRACT AGREEMENT</h3>
+
+  <p class="text-justify indent-8 mb-3">
+    Thus, the undersigned hereby acknowledged that he/she solely authorized
+    CHAPEL OF THE HILLS (Gegato-Abecia Funeral Homes Inc.) at Montfort Highway,
+    Balabago, Jaro, Iloilo City to perform services and to provide casket and
+    other funeral equipments for the deceased.
+  </p>
+
+  <p class="text-justify indent-8 mb-3">
+    Thus, it is also agreed that the contract price shall be paid in <strong>FULL</strong>
+    on <strong>THREE (3) DAYS BEFORE THE BURIAL SCHEDULE</strong>. Payment should be made at
+    the office.
+  </p>
+
+  <p class="text-justify indent-8 mb-4">
+    In case of controversy and/or litigation that will arise from this
+    transaction, the undersigned agree(s) to pay 25% attorney's fee, legal
+    rate of interest and other incidental expenses.I/We also agrees that the venue of litigation shall be at Iloilo City.
+  </p>
+
+
+
+
+  <!-- CONTRACTEE -->
+  <div class="grid grid-cols-2 gap-2 mb-3">
+    <div>Name of Contractee: <span class="underline-field text-center w-8/12">{{ contract.contractee }}</span></div>
+    <div>Relationship to the Deceased: <span class="underline-field text-center w-6/12">{{ contract.relationship }}</span></div>
+  </div>
+
+    <div class="grid  gap-2 mb-3">
+    <div>      Address: <span class="underline-field text-center w-11/12">{{ contract.address }}</span></div>
+  </div>
+
+    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div>Contact No.: <span class="underline-field text-center w-8/12">{{ contract.contactNo }}</span></div>
+  </div>
+    <div class="grid grid-cols-2  gap-2 mb-3">
+    <div class="font-bold">Date of Delivery: <span class="underline-field text-center w-8/12">{{ contract.deliveryDate }}</span></div>
+    <div>Signed: <span class="underline-field text-center w-9/12">{{ contract.contractee }}</span></div>
+  </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div class="text-center"> <span ></span></div>
+    <div  class="text-center">Print Name and Signiture <span ></span></div>
+  </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+    <div> <span ></span></div>
+    <div class="font-bold text-lg">CONTRACT NO.: <span class="">{{ contract.contractNo }}</span></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="text-center text-4xl text-red-500 font-black mt-10">
+    This is a certified reproduction copy of the original on file
+  </div>
+    <div class="text-end font-black mt-10">
+    <div class="mt-6 underline">
+      Rizalina P. Panes<br />
+
+    </div>
+    <div>      Officer in Charge</div>
+  </div>
+<!-- PRINT BUTTON (HIDDEN WHEN PRINTING) -->
+<div class="no-print mb-4 justify-center flex w-full mt-4">
+  <button
+    class="px-4 py-2 bg-blue-600 text-white rounded"
+    (click)="print()"
+  >
+Print
+  </button>
+</div>
+</div>

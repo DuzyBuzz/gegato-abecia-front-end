@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@example.com",
+      "role": "ADMIN",
+      "createdAt": "2025-01-10"
+    },
+    {
+      "id": 2,
+      "name": "Maria Santos",
+      "email": "maria.santos@example.com",
+      "role": "USER",
+      "createdAt": "2025-01-12"
+    },
+    {
+      "id": 3,
+      "name": "Pedro Reyes",
+      "email": "pedro.reyes@example.com",
+      "role": "USER",
+      "createdAt": "2025-01-15"
+    },
+    {
+      "id": 4,
+      "name": "Ana Lopez",
+      "email": "ana.lopez@example.com",
+      "role": "STAFF",
+      "createdAt": "2025-01-18"
+    },
+    {
+      "id": 5,
+      "name": "Carlo Mendoza",
+      "email": "carlo.mendoza@example.com",
+      "role": "USER",
+      "createdAt": "2025-01-20"
+    }
+  ],
+  "total": 5
+}
