@@ -9,7 +9,7 @@ export class UserService {
 
   private api = 'http://localhost:8080/api/users';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}          
 
   /** READ */
   getUsers() {
@@ -55,5 +55,24 @@ export class UserService {
   /** DELETE */
   delete(id: number) {
     return this.http.delete(`${this.api}/${id}`);
+  }
+
+  /** SEARCH */
+  search(searchTerm: string) {
+    return this.http.get<any[]>(`${this.api}/search`, {
+      params: { query: searchTerm }
+    }).pipe(
+      map(res =>
+        res.map(u => ({
+          userId: u.userId,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          username: u.userName,
+          role: u.role,
+          position: u.position,
+          createdAt: u.createdAt
+        }) as User)
+      )
+    );
   }
 }

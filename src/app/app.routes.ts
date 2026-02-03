@@ -5,6 +5,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UsersComponent } from './pages/users/users.component';
 import { AuthorityToCremateRemainsPrinting } from './documents/printing-forms/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
 import { StatementOfAccount } from './documents/printing-forms/statement-of-account/statement-of-account';
+import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
+import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
 
 export const routes: Routes = [
 
@@ -30,6 +32,19 @@ export const routes: Routes = [
       },
             {
         path: 'statement-of-account',
+        component: StatementOfAccount
+      }
+    ]
+  },
+    {
+    path: 'entry-forms',
+    children: [
+      {
+        path: 'statements-of-account',
+        component: BillingEntry
+      },
+            {
+        path: '',
         component: StatementOfAccount
       }
     ]

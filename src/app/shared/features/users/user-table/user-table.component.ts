@@ -63,7 +63,7 @@ user: User = {
   lastName: '',
   username: '',
   password: '',
-  role: 'Staff'
+  role: ''
 };
 
 
@@ -82,6 +82,32 @@ user: User = {
 
   ngOnInit() {
     this.loadUsers();
+  }
+
+  onTableSearch(searchTerm: string) {
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.loadUsers();
+      return;
+    }
+
+    this.loading = true;
+    this.userService.search(searchTerm).subscribe({
+      next: data => {
+        this.users = data;
+        this.totalRecords = data.length;
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to search users'
+        });
+        this.loading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   loadUsers() {

@@ -54,6 +54,7 @@ export class SmartTableComponent {
 
   @Output() selectionChange = new EventEmitter<any[]>();
   @Output() rowSelect = new EventEmitter<any>();
+  @Output() onSearch = new EventEmitter<string>();
 
   // Custom template for body rows
   @ContentChild('bodyTemplate') bodyTemplate!: TemplateRef<any>;
@@ -77,8 +78,13 @@ export class SmartTableComponent {
     this.selectionChange.emit(this.selectedRows);
   }
 
+  onSearchInput(searchValue: string) {
+    this.onSearch.emit(searchValue);
+  }
+
   clear(dt: Table) {
     this.searchValue = '';
+    this.onSearch.emit('');
     dt.reset();
   }
 
@@ -109,6 +115,10 @@ export class SmartTableComponent {
 
   onRowSelect(event: any) {
     this.rowSelect.emit(event.data);
+  }
+
+  onRowClick(row: any) {
+    this.rowSelect.emit(row);
   }
 
   /**
@@ -273,7 +283,7 @@ export class SmartTableComponent {
           <table>
             <thead>
               <tr>${columnHeaders}</tr>
-            </thead>
+            </thead> 
             <tbody>
               ${rows}
             </tbody>

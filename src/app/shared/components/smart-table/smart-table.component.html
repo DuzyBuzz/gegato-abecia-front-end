@@ -26,7 +26,7 @@
             pInputText
             type="text"
             [(ngModel)]="searchValue"
-            (input)="dt.filterGlobal($event.target.value, 'contains')"
+            (input)="onSearchInput($event.target.value)"
             placeholder="Search..."
             class="w-full"
           />
@@ -97,7 +97,7 @@
       </ng-container>
 
       <ng-template #defaultBody>
-        <tr class="p-selectable-row">
+        <tr class="p-selectable-row" (click)="onRowClick(row)" style="cursor: pointer;">
           <!-- Selection Checkbox
           <td *ngIf="selectionMode === 'multiple'">
             <p-tableCheckbox [value]="row" />

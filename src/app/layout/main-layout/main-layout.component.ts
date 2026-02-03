@@ -11,7 +11,7 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router';
 export class MainLayout {
   showContractModal = true;
    expandedMenu: string | null = null;
-  sidebarExpanded = false;
+  sidebarExpanded = true;
 
   toggle(menu: string) {
     this.expandedMenu = this.expandedMenu === menu ? null : menu;
@@ -75,4 +75,37 @@ export class MainLayout {
       this.isUserMenuOpen = false;
     }
   }
+  formatUserName(fullName: string): string {
+  if (!fullName) return '';
+
+  const parts = fullName.trim().split(/\s+/);
+
+  if (parts.length === 1) {
+    return parts[0];
+  }
+
+  const firstName = parts[0];
+  const initials = parts
+    .slice(1)
+    .map(p => p.charAt(0).toUpperCase() + '.')
+    .join(' ');
+
+  return `${firstName} ${initials}`;
+}
+
+getUserInitials(fullName: string): string {
+  if (!fullName) return '';
+
+  const parts = fullName.trim().split(/\s+/);
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[1].charAt(0).toUpperCase()
+  );
+}
+
 }

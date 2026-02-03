@@ -32,11 +32,12 @@
   [loading]="loading"
   [rows]="10"
   [rowsPerPageOptions]="[10, 25, 50]"
-  [selectionMode]="'multiple'"
+  [selectionMode]="'single'"
   [globalFilterFields]="['username', 'firstName', 'lastName', 'role']"
   [showGlobalFilter]="true"
   [showClearButton]="true"
   (selectionChange)="selectedUsers = $event"
+  (onSearch)="onTableSearch($event)"
   printTitle="Users Report"
 ></app-smart-table>
 
