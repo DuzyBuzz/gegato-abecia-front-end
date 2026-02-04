@@ -240,61 +240,107 @@ export class SmartTableComponent {
       })
       .join('');
 
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${this.printTitle}</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 20px;
-              color: #333;
-            }
-            h1 {
-              text-align: center;
-              margin-bottom: 20px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th {
-              font-weight: bold;
-            }
-            .footer {
-              margin-top: 30px;
-              text-align: right;
-              font-size: 12px;
-              color: #666;
-            }
-            @media print {
-              body {
-                margin: 0;
-              }
-              table {
-                page-break-inside: avoid;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <table>
-            <thead>
-              <tr>${columnHeaders}</tr>
-            </thead> 
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-          <div class="footer">
-            <p>Generated on: ${new Date().toLocaleString()}</p>
-            <p>Total Records: ${data.length}</p>
-          </div>
-        </body>
-      </html>
-    `;
+return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>${this.printTitle}</title>
+    <style>
+      /* ===== PAGE SETUP ===== */
+      @page {
+        margin: 24px;
+      }
+
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        color: #1f2937;
+      }
+
+      /* ===== TABLE ===== */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      caption {
+        caption-side: top;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #111827;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      th {
+        border: 1px solid #d1d5db;
+        padding: 8px;
+        background-color: #f3f4f6;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-align: left;
+      }
+
+      td {
+        border: 1px solid #e5e7eb;
+        padding: 8px;
+        font-size: 0.875rem;
+      }
+
+      tr:nth-child(even) td {
+        background-color: #f9fafb;
+      }
+
+      /* ===== FOOTER / PAGE NUMBER ===== */
+      .footer {
+        position: fixed;
+        bottom: 12px;
+        right: 24px;
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+
+      .pageNumber::after {
+        content: counter(page);
+      }
+
+      .totalPages::after {
+        content: counter(pages);
+      }
+
+      @media print {
+        body {
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <table>
+      <caption>${this.printTitle}</caption>
+
+      <thead>
+        <tr>${columnHeaders}</tr>
+      </thead>
+
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+
+    <div class="footer">
+      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+    </div>
+  </body>
+</html>
+`;
+
   }
 
   /**

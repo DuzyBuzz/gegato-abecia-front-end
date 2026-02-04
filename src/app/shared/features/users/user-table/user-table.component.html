@@ -17,7 +17,7 @@
       label="Add New User"
       icon="pi pi-user-plus"
       severity="success"
-      (click)="openNew()"
+      routerLink="/entry-forms/statements-of-account"
     ></p-button>
   </ng-template>
 
@@ -39,6 +39,7 @@
   (selectionChange)="selectedUsers = $event"
   (onSearch)="onTableSearch($event)"
   printTitle="Users Report"
+  (rowSelect)="onRowClicked($event)"
 ></app-smart-table>
 
 <!-- User Dialog -->

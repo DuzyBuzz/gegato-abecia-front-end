@@ -16,6 +16,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { SmartTableComponent } from '../../../components/smart-table/smart-table.component';
 import { SmartTableColumn } from '../../../components/smart-table/smart-table-column.model';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-users-table',
@@ -33,8 +34,9 @@ import { SmartTableColumn } from '../../../components/smart-table/smart-table-co
     ButtonModule,
     SelectModule,
     TagModule,
-    TooltipModule
-    ],
+    TooltipModule,
+    RouterLink
+],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -83,6 +85,10 @@ user: User = {
   ngOnInit() {
     this.loadUsers();
   }
+onRowClicked(row: User) {
+  console.log('Row clicked:', row);
+}
+
 
   onTableSearch(searchTerm: string) {
     if (!searchTerm || searchTerm.trim() === '') {
