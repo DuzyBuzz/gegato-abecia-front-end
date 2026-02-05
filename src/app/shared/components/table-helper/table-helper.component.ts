@@ -14,7 +14,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableHelperColumn } from './table-helper-column.model';
 
 @Component({
-  selector: 'app-smart-table',
+  selector: 'app-table-helper',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,14 +30,14 @@ import { TableHelperColumn } from './table-helper-column.model';
     TagModule,
     InputTextModule
   ],
-  templateUrl: './smart-table.component.html',
-  styleUrl: './smart-table.component.scss'
+  templateUrl: './table-helper.component.html',
+  styleUrl: './table-helper.component.scss'
 })
 export class TableHelperComponent {
   @ViewChild('dt') table!: Table;
 
   @Input() value: any[] = [];
-  @Input() columns: SmartTableColumn[] = [];
+  @Input() columns: TableHelperColumn[] = [];
   @Input() loading = false;
   @Input() rows = 10;
   @Input() rowsPerPageOptions = [10, 25, 50];

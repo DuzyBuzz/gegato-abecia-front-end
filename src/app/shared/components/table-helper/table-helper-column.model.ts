@@ -1,7 +1,7 @@
 // shared/components/smart-table/smart-table-column.model.ts
 import { FilterMatchMode } from 'primeng/api';
 
-export interface SmartTableColumn {
+export interface TableHelperColumn {
   field: string;
   header: string;
   sortable?: boolean;

@@ -1,5 +1,5 @@
 export interface BillingAccount {
-  id: number;
+  billing_account_id: number;
 
   funeral_contract_id: number;
 

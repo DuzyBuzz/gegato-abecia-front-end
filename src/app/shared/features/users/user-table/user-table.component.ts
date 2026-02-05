@@ -14,16 +14,16 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { SmartTableComponent } from '../../../components/table-helper/table-helpercomponent';
-import { SmartTableColumn } from '../../../components/table-helper/table-helper-column.model';
+import { TableHelperColumn } from '../../../components/table-helper/table-helper-column.model';
 import { RouterLink } from "@angular/router";
+import { TableHelperComponent } from '../../../components/table-helper/table-helper.component';
 
 @Component({
   selector: 'app-users-table',
   standalone: true,
   imports: [
     CommonModule,
-    SmartTableComponent,
+    TableHelperComponent,
     ToolbarModule,
     DialogModule,
     ConfirmDialogModule,
@@ -51,7 +51,7 @@ export class UsersTableComponent implements OnInit {
   userDialog = false;
   submitted = false;
 
-  columns: SmartTableColumn[] = [
+  columns: TableHelperColumn[] = [
     { field: 'username', header: 'Username', sortable: true, filterable: true, width: '150px', filterType: 'text' },
     { field: 'firstName', header: 'First Name', sortable: true, filterable: true, filterType: 'text' },
     { field: 'lastName', header: 'Last Name', sortable: true, filterable: true, filterType: 'text' },

@@ -1,5 +1,5 @@
 export interface BillingTransaction {
-  id: number;
+  billing_transaction_id: number;
 
   billing_account_id: number;
 

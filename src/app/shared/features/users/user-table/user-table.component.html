@@ -25,8 +25,7 @@
 
 
 
-<!-- SmartTable Component -->
-<app-smart-table
+<app-table-helper
   [value]="users"
   [columns]="columns"
   [loading]="loading"
@@ -40,7 +39,7 @@
   (onSearch)="onTableSearch($event)"
   printTitle="Users Report"
   (rowSelect)="onRowClicked($event)"
-></app-smart-table>
+></app-table-helper>
 
 <!-- User Dialog -->
 <p-dialog [(visible)]="userDialog" header="User Details" [modal]="true" [style]="{ width: '50vw' }">

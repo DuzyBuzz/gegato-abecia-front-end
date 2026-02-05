@@ -8,7 +8,7 @@ import { DeliveryInfo } from "./delivery-info.model";
 import { TransferInfo } from "./transfer-info.model";
 
 export interface FuneralContract {
-  id: number;
+  contract_id: number;
 
   header: ContractHeader;
   deceased: Deceased;
@@ -20,7 +20,7 @@ export interface FuneralContract {
   transfer: TransferInfo;
   burial_schedule: BurialSchedule;
 
-  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'ON-HOLD' | 'DRAFT' | 'PENDING';
 
   remarks: ContractRemarks;
 
