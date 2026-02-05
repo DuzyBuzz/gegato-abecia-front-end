@@ -1,14 +1,21 @@
 {
   "name": "gegato-abecia",
   "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "tauri": "tauri"
-  },
+ "scripts": {
+  "ng": "ng",
+  "start": "ng serve",
+  "build": "ng build",
+  "watch": "ng build --watch --configuration development",
+  "test": "ng test",
+
+  "tauri": "tauri",
+
+  "all:web": "ng serve",
+  "all:desktop": "wait-on http://localhost:4200 && npm run tauri dev",
+
+  "all": "concurrently \"npm run all:web\" \"npm run all:desktop\""
+}
+,
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,

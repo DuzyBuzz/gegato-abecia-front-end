@@ -11,7 +11,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { SliderModule } from 'primeng/slider';
 import { TagModule } from 'primeng/tag';
 import { InputTextModule } from 'primeng/inputtext';
-import { SmartTableColumn } from './smart-table-column.model';
+import { TableHelperColumn } from './table-helper-column.model';
 
 @Component({
   selector: 'app-smart-table',
@@ -33,7 +33,7 @@ import { SmartTableColumn } from './smart-table-column.model';
   templateUrl: './smart-table.component.html',
   styleUrl: './smart-table.component.scss'
 })
-export class SmartTableComponent {
+export class TableHelperComponent {
   @ViewChild('dt') table!: Table;
 
   @Input() value: any[] = [];

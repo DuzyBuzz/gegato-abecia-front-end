@@ -40,8 +40,8 @@ export const routes: Routes = [
     path: 'entry-forms',
     children: [
       {
-        path: 'statements-of-account',
-        component: BillingEntry
+        path: 'funeral-contract',
+        component: FuneralContractEntry
       },
             {
         path: '',

@@ -14,8 +14,8 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { SmartTableComponent } from '../../../components/smart-table/smart-table.component';
-import { SmartTableColumn } from '../../../components/smart-table/smart-table-column.model';
+import { SmartTableComponent } from '../../../components/table-helper/table-helpercomponent';
+import { SmartTableColumn } from '../../../components/table-helper/table-helper-column.model';
 import { RouterLink } from "@angular/router";
 
 @Component({
