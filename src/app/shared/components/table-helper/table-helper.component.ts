@@ -176,24 +176,83 @@ export class TableHelperComponent {
 
   /**
    * Print the currently filtered table
+   * Works in both web browser and Tauri desktop app
    */
   printTable() {
-    const printWindow = window.open('', '', 'height=600,width=900');
-    if (!printWindow) {
-      alert('Please disable popup blockers to print the table.');
-      return;
+    try {
+      const filteredData = this.getFilteredTableData();
+      const html = this.generatePrintHTML(filteredData);
+      
+      // Try window.open() first (for web browsers)
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url, '_blank');
+      
+      if (printWindow) {
+        // window.open() succeeded - set up callbacks for web browsers
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+        
+        setTimeout(() => {
+          if (printWindow && !printWindow.closed) {
+            printWindow.print();
+          }
+        }, 500);
+        
+        printWindow.onafterprint = () => {
+          URL.revokeObjectURL(url);
+          printWindow.close();
+        };
+        return;
+      }
+      
+      // Fallback for Tauri: Use hidden iframe approach
+      this.printTableViaIframe(html);
+    } catch (error) {
+      console.error('Error printing table:', error);
+      alert('An error occurred while printing the table.');
     }
+  }
 
-    const filteredData = this.getFilteredTableData();
-    const html = this.generatePrintHTML(filteredData);
-    
-    printWindow.document.write(html);
-    printWindow.document.close();
-    
-    // Wait for content to load before printing
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
+  /**
+   * Print using hidden iframe (works in Tauri desktop)
+   */
+  private printTableViaIframe(html: string) {
+    try {
+      // Create a hidden iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.style.visibility = 'hidden';
+      iframe.style.height = '0';
+      iframe.style.width = '0';
+      iframe.style.border = 'none';
+      
+      document.body.appendChild(iframe);
+      
+      // Wait for iframe to be ready
+      if (iframe.contentDocument) {
+        iframe.contentDocument.open();
+        iframe.contentDocument.write(html);
+        iframe.contentDocument.close();
+        
+        // Wait for content to render before printing
+        setTimeout(() => {
+          iframe.contentWindow?.print();
+          
+          // Clean up after printing
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 100);
+        }, 250);
+      } else {
+        console.error('Unable to write to iframe document');
+        alert('Unable to open print dialog. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error in iframe print:', error);
+      alert('An error occurred while printing the table.');
+    }
   }
 
   /**

@@ -6,25 +6,24 @@
 
   "build": {
     "devUrl": "http://localhost:4200",
-  "frontendDist": "../dist/gegato-abecia/browser"
+    "frontendDist": "../dist/gegato-abecia/browser"
   },
 
-"app": {
-  "windows": [
-    {
-      "title": "Gegato-Abecia Funeral Management System",
-      "width": 1280,
-      "height": 800,
-      "resizable": true,
-      "fullscreen": false,
-      "maximized": true
+  "app": {
+    "windows": [
+      {
+        "title": "Gegato-Abecia Funeral Management System",
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": true
+      }
+    ],
+    "security": {
+      "csp": null
     }
-  ],
-  "security": {
-    "csp": null
-  }
-},
-
+  },
 
   "bundle": {
     "active": true,

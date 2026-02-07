@@ -22,11 +22,15 @@ pub fn run() {
         .expect("main window not found");
 
       // ---- menu items ----
-      let reload = MenuItem::with_id(app, "reload", "Reload", true, None::<String>)?;
+      let prev = MenuItem::with_id(app, "prev", "←", true, None::<String>)?;
+      let next = MenuItem::with_id(app, "next", "→", true, None::<String>)?;
+      let reload = MenuItem::with_id(app, "reload", "↻", true, None::<String>)?;
       let separator = PredefinedMenuItem::separator(app)?;
 
       // ---- build menu ----
       let menu = Menu::with_items(app, &[
+        &prev,
+        &next,
         &reload,
         &separator,
       ])?;
@@ -42,6 +46,12 @@ pub fn run() {
         .expect("main window not found");
 
       match event.id().as_ref() {
+        "prev" => {
+          let _ = window.eval("window.history.back()");
+        }
+        "next" => {
+          let _ = window.eval("window.history.forward()");
+        }
         "reload" => {
           let _ = window.eval("window.location.reload()");
         }

@@ -67,7 +67,7 @@
 
   <!-- SUBMIT -->
   <button
-    type="submit"
+  (click)="submit()"
     class="w-full mt-6 py-3 bg-purple-800 text-white rounded"
   >
     Login
@@ -76,7 +76,7 @@
 </form>
 
 <button
-    type="button" routerLink="/admin"
+    type="button" routerLink="/admin/users"
     class="mt-6 text-purple-600 hover:underline text-sm sm:text-base"
   >
     Don't have an account? Register here.

@@ -5,7 +5,7 @@ import { tap } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private api = 'http://localhost:8080/api/auth';
+  private api = 'http://localhost:8080/api/auth/';
 
   constructor(private http: HttpClient) {}
 
@@ -61,4 +61,13 @@ export class AuthService {
 
     return loggedIn;
   }
+  getRole(): string | null {
+  return this.currentUser?.role ?? null;
+}
+
+hasRole(allowedRoles: string[]): boolean {
+  const role = this.getRole();
+  return role ? allowedRoles.includes(role) : false;
+}
+
 }

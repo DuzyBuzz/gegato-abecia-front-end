@@ -7,6 +7,7 @@ import { AuthorityToCremateRemainsPrinting } from './documents/printing-forms/au
 import { StatementOfAccount } from './documents/printing-forms/statement-of-account/statement-of-account';
 import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
 import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
+import { roleGuard } from './guards/auth/auth-guard';
 
 export const routes: Routes = [
 
@@ -23,56 +24,69 @@ export const routes: Routes = [
     component: LoginComponent
   },
 
-  {
-    path: 'printing',
-    children: [
-      {
-        path: 'authority-to-cremate-remains',
-        component: AuthorityToCremateRemainsPrinting
-      },
-            {
-        path: 'statement-of-account',
-        component: StatementOfAccount
-      }
-    ]
-  },
-    {
-    path: 'entry-forms',
-    children: [
-      {
-        path: 'funeral-contract',
-        component: FuneralContractEntry
-      },
-            {
-        path: '',
-        component: StatementOfAccount
-      }
-    ]
-  },
-  // ADMIN AREA
+  // 🔐 ADMIN (ADMIN ROLE ONLY)
   {
     path: 'admin',
     component: MainLayout,
+    // canActivate: [roleGuard],
     children: [
 
-      // /admin → redirect to dashboard
       {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },
 
-      // /admin/dashboard
       {
         path: 'dashboard',
         component: DashboardComponent
       },
 
-      // /admin/users
       {
         path: 'users',
         component: UsersComponent
+      },
+
+      // DOCUMENT ENTRY FORMS
+      {
+        path: 'documents',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral',
+                component: FuneralContractEntry
+              }
+            ]
+          },
+          {
+            path: 'billing',
+            component: BillingEntry
+          }
+        ]
+      },
+
+      // DOCUMENT PRINTING
+      {
+        path: 'print',
+        children: [
+          {
+            path: 'authority-to-cremate-remains',
+            component: AuthorityToCremateRemainsPrinting
+          },
+          {
+            path: 'statement-of-account',
+            component: StatementOfAccount
+          }
+        ]
       }
     ]
+  },
+
+  // FALLBACK
+  {
+    path: '**',
+    redirectTo: 'login'
   }
 ];

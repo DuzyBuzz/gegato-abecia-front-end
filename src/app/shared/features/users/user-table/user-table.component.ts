@@ -15,7 +15,6 @@ import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { TableHelperColumn } from '../../../components/table-helper/table-helper-column.model';
-import { RouterLink } from "@angular/router";
 import { TableHelperComponent } from '../../../components/table-helper/table-helper.component';
 
 @Component({
@@ -34,8 +33,7 @@ import { TableHelperComponent } from '../../../components/table-helper/table-hel
     ButtonModule,
     SelectModule,
     TagModule,
-    TooltipModule,
-    RouterLink
+    TooltipModule
 ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-table.component.html',
