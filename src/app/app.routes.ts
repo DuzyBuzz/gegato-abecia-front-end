@@ -7,7 +7,8 @@ import { AuthorityToCremateRemainsPrinting } from './documents/printing-forms/au
 import { StatementOfAccount } from './documents/printing-forms/statement-of-account/statement-of-account';
 import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
 import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
-import { roleGuard } from './guards/auth/auth-guard';
+import { authGuard, roleGuard } from './guards/auth/auth-guard';
+import { DeceasedComponent } from './pages/deceased/deceased.component';
 
 export const routes: Routes = [
 
@@ -24,11 +25,12 @@ export const routes: Routes = [
     component: LoginComponent
   },
 
-  // 🔐 ADMIN (ADMIN ROLE ONLY)
+  // 🔐 ADMIN (AUTHENTICATED USERS)
   {
     path: 'admin',
     component: MainLayout,
-    // canActivate: [roleGuard],
+    canActivate: [authGuard],
+    data: { roles: ['Admin'] },
     children: [
 
       {
@@ -44,7 +46,14 @@ export const routes: Routes = [
 
       {
         path: 'users',
-        component: UsersComponent
+        component: UsersComponent,
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] }
+      },
+
+            {
+        path: 'deceased',
+        component: DeceasedComponent
       },
 
       // DOCUMENT ENTRY FORMS

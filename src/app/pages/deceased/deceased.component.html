@@ -1,1 +1,33 @@
-<p>deceased works!</p>
+<p-toolbar class="mb-4">
+  <!-- LEFT -->
+  <ng-template #start>
+    <h2 class="text-3xl font-bold text-gray-700">
+      Deceased List
+    </h2>
+  </ng-template>
+
+  <!-- RIGHT -->
+  <ng-template #end>
+    <p-button
+      label="Funeral Contract"
+      icon="pi pi-user-plus"
+      severity="success"
+      (onClick)="openModal()"
+    ></p-button>
+  </ng-template>
+</p-toolbar>
+
+<app-deceased-table></app-deceased-table>
+
+<p-dialog
+  header="Funeral Contract"
+  [(visible)]="showModal"
+  [modal]="true"
+  [style]="{ width: '80vw' }"
+  [closable]="true"
+  [dismissableMask]="true"
+>
+  <app-funeral-contract-entry
+    (close)="closeModal()"
+  ></app-funeral-contract-entry>
+</p-dialog>

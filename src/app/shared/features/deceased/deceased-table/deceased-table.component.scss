@@ -1,0 +1,23 @@
+.deceased-table-container {
+  width: 100%;
+  
+  :deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        background-color: #f3f4f6;
+        color: #111827;
+        font-weight: 600;
+      }
+
+      .p-datatable-tbody > tr {
+        &:hover {
+          background-color: #f9fafb;
+        }
+
+        > td {
+          color: #374151;
+        }
+      }
+    }
+  }
+}

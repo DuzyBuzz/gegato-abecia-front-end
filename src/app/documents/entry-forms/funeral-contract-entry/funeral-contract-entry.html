@@ -1,10 +1,11 @@
-<div class="p-4 sm:p-6 lg:p-8">
+<form [formGroup]="form">
+  <div class="p-4 sm:p-6 lg:p-8">
   
   <h1 class="text-center  text-5xl mb-6 mt-6">
     FUNERAL SERVICE CONTRACT
   </h1>
     <h2 class="text-left  text-4xl font-bold mb-6 mt-6">
-    DECEASED NAME
+       {{ fullName }}
   </h2>
 
     <!-- ========== CONTRACT HEADER SECTION ========== -->
@@ -56,12 +57,12 @@
           <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">First Name</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="text" formControlName="firstName" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
 
             <div>
               <label class="block font-medium text-xs sm:text-sm">Suffix</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="suffix" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option value=""></option>
                 <option value="Jr">Jr.</option>
                 <option value="Sr">Sr.</option>
@@ -74,12 +75,12 @@
 
           <div>
             <label class="block font-medium text-xs sm:text-sm">Middle Name</label>
-            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
+            <input type="text" formControlName="middleName" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
           </div>
 
           <div>
             <label class="block font-medium text-xs sm:text-sm">Last Name</label>
-            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
+            <input type="text" formControlName="lastName" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
           </div>
 
           <!-- Personal Information (2 Columns, 2 Rows) -->
@@ -391,3 +392,4 @@
     </div><!-- END 3 COLUMNS -->
 
 </div>
+</form>
