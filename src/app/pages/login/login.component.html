@@ -36,12 +36,22 @@
   />
 
   <!-- PASSWORD -->
+<div class="relative w-full mt-4">
   <input
-    type="password"
+    [type]="showPassword ? 'text' : 'password'"
     formControlName="password"
     placeholder="Password"
-    class="w-full px-4 py-3 border rounded mt-4"
+    class="w-full px-4 py-3 border rounded pr-12"
   />
+
+  <button
+    type="button"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+    (click)="showPassword = !showPassword"
+  >
+    {{ showPassword ? 'Hide' : 'Show' }}
+  </button>
+</div>
 
   <!-- SUBMIT -->
   <button
@@ -53,7 +63,7 @@
 
 </form>
 
-<!-- Mock Users Quick Access (Development/Testing) -->
+<!-- Mock Users Quick Access (Development/Testing)
 <div *ngIf="mockUsers.length > 0" class="w-full mt-8 pt-8 border-t border-gray-300">
   <p class="text-center text-gray-600 text-sm font-semibold mb-4">Test Accounts</p>
   <div class="space-y-2">
@@ -71,17 +81,17 @@
     </div>
   </div>
   <p class="text-center text-xs text-gray-500 mt-3">Password: password123</p>
-</div>
+</div> -->
 
-<button
-    type="button" routerLink="/admin/users"
-    class="mt-6 text-purple-600 hover:underline text-sm sm:text-base"
-  >
-    Don't have an account? Register here.
-  </button>
-<a href="/downloads/MyAppSetup.exe" download class="mt-3 text-purple-600 hover:underline text-sm sm:text-base block">
+
+<a
+  href="assets\downloads\Gegato Abecia_1.0.0_x64-setup.zip"
+  download
+ class="absolute top-4 left-4 text-white text-sm sm:text-base hover:underline"
+>
   Download Desktop App
 </a>
+
 
 </div>
 

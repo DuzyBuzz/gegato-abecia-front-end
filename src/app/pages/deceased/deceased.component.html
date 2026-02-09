@@ -12,23 +12,9 @@
       label="Funeral Contract"
       icon="pi pi-user-plus"
       severity="success"
-      (onClick)="openModal()"
+      (onClick)="openNewFuneralContract()"
     ></p-button>
   </ng-template>
 </p-toolbar>
 
 <app-deceased-table (contractSelected)="onContractRowSelected($event)"></app-deceased-table>
-
-<p-dialog
-  header="Funeral Contract"
-  [(visible)]="showModal"
-  [modal]="true"
-  [style]="{ width: '95vw' }"
-  [closable]="true"
-  [dismissableMask]="true"
->
-  <app-funeral-contract-entry
-    [selectedContract]="selectedContract"
-    (close)="closeModal()"
-  ></app-funeral-contract-entry>
-</p-dialog>

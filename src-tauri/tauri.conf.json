@@ -5,8 +5,8 @@
   "identifier": "com.gegato.abecia.desktop",
 
   "build": {
-    "devUrl": "http://localhost:4200",
-    "frontendDist": "../dist/gegato-abecia/browser"
+    "devUrl": "https://gegato-abecia-management-sys.web.app",
+    "frontendDist": "https://gegato-abecia-management-sys.web.app"
   },
 
   "app": {

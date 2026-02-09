@@ -65,13 +65,13 @@ export const routes: Routes = [
             path: 'contracts',
             children: [
               {
-                path: 'funeral',
+                path: 'funeral/:contractId',
                 component: FuneralContractEntry
               }
             ]
           },
           {
-            path: 'billing',
+            path: 'billing/:contractId',
             component: BillingEntry
           }
         ]
@@ -120,13 +120,13 @@ export const routes: Routes = [
             path: 'contracts',
             children: [
               {
-                path: 'funeral',
+                path: 'funeral/:contractId',
                 component: FuneralContractEntry
               }
             ]
           },
           {
-            path: 'billing',
+            path: 'billing/:contractId',
             component: BillingEntry
           }
         ]

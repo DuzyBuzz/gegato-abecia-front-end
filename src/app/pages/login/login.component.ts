@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 interface MockUser {
   username: string;
@@ -15,10 +15,11 @@ interface MockUser {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
+showPassword = false;
 
   errorMessage = '';
   form: FormGroup;
@@ -30,9 +31,10 @@ export class LoginComponent implements OnInit {
     private auth: AuthService,
     private router: Router
   ) {
+    
     this.form = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(1)]],
+      username: ['test_user', Validators.required],
+      password: ['password', [Validators.required, Validators.minLength(1)]],
     });
   }
 
@@ -80,9 +82,20 @@ export class LoginComponent implements OnInit {
         console.log('user.role:', user.role);
         console.log('typeof user.role:', typeof user.role);
 
-        // Navigate to dashboard for any authenticated user
-        console.log('User authenticated → redirecting to /admin/dashboard');
-        this.router.navigate(['/admin/dashboard']);
+        // Navigate based on user role
+        let redirectPath = '/login';
+        
+        if (user.role === 'Admin') {
+          redirectPath = '/admin/dashboard';
+          console.log('Admin user → redirecting to /admin/dashboard');
+        } else if (user.role === 'Biller') {
+          redirectPath = '/billing/deceased';
+          console.log('Biller user → redirecting to /billing/deceased');
+        } else {
+          console.warn('Unknown role:', user.role, '→ redirecting to login');
+        }
+
+        this.router.navigate([redirectPath]);
 
         console.log('--- LOGIN SUBMIT END ---');
       },

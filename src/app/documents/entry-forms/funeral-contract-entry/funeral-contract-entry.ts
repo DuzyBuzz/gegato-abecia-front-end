@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FuneralContract } from '../../../models/funeral-contract.model';
+import { AuthService } from '../../../services/auth.service';
+import { FUNERAL_CONTRACTS_MOCK } from '../../../../assets/mock/funeral-contract.mock';
 
 @Component({
   selector: 'app-funeral-contract-entry',
@@ -11,18 +13,19 @@ import { FuneralContract } from '../../../models/funeral-contract.model';
   templateUrl: './funeral-contract-entry.html',
   styleUrl: './funeral-contract-entry.scss',
 })
-export class FuneralContractEntry implements OnChanges {
+export class FuneralContractEntry implements OnInit {
 
   form: FormGroup;
-
-  @Input() selectedContract: FuneralContract | null = null;
-  @Output() close = new EventEmitter<void>();
-
+  selectedContract: FuneralContract | null = null;
+  contractId: string | null = null;
+  isNew: boolean = false;
   deceasedName = 'John Doe'; // replace later with real data
 
   constructor(
     private router: Router,
-    private fb: FormBuilder
+    private activatedRoute: ActivatedRoute,
+    private fb: FormBuilder,
+    private auth: AuthService
   ) {
     this.form = this.fb.group({
       // Contract Header
@@ -108,11 +111,59 @@ export class FuneralContractEntry implements OnChanges {
     });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedContract'] && this.selectedContract) {
-      this.loadContractData(this.selectedContract);
+  ngOnInit(): void {
+    this.contractId = this.activatedRoute.snapshot.paramMap.get('contractId');
+    this.isNew = !this.contractId || this.contractId === 'new';
+
+    if (!this.isNew && this.contractId) {
+      this.loadContractFromMock(this.contractId);
     }
   }
+
+  private loadContractFromMock(contractId: string): void {
+    // Load from mock data - replace with actual service call
+    const numericId = parseInt(contractId, 10);
+    const contract = FUNERAL_CONTRACTS_MOCK.find(c => c.contract_id === numericId);
+    if (contract) {
+      this.selectedContract = contract;
+      this.loadContractData(contract);
+    } else {
+      console.warn('[FuneralContractEntry] Contract not found:', contractId);
+    }
+  }
+
+  get isBillingDisabled(): boolean {
+    return !this.selectedContract;
+  }
+
+  goToBilling(): void {
+    if (!this.selectedContract) {
+      return; // hard stop
+    }
+
+    // Navigate to the appropriate billing entry based on user role
+    const userRole = this.auth.getRole();
+    let billingPath = '';
+
+    if (userRole === 'Admin') {
+      billingPath = `/admin/documents/billing/${this.selectedContract.contract_id}`;
+    } else if (userRole === 'Biller') {
+      billingPath = `/billing/documents/billing/${this.selectedContract.contract_id}`;
+    } else {
+      console.warn('[FuneralContractEntry] User role not supported for billing:', userRole);
+      return;
+    }
+
+    console.log('[FuneralContractEntry] Navigating to billing:', billingPath);
+    this.router.navigateByUrl(billingPath);
+  }
+
+  goBack(): void {
+    const userRole = this.auth.getRole();
+    const backPath = userRole === 'Admin' ? '/admin/deceased' : '/billing/deceased';
+    this.router.navigateByUrl(backPath);
+  }
+
 
   private loadContractData(contract: FuneralContract): void {
     const { deceased, contractee, casket_urn, delivery, transfer, burial_schedule, remarks, header } = contract;

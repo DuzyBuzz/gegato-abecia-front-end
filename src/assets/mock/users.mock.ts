@@ -8,7 +8,7 @@ export const USERS_MOCK: User[] = [
     username: '1',
     password: '1', // In production, passwords should never be in mock data
     position: 'System Administrator',
-    role: 'Biller',
+    role: 'Admin',
     createdAt: '2026-01-01T08:00:00Z'
   },
   {
@@ -23,12 +23,12 @@ export const USERS_MOCK: User[] = [
   },
   {
     userId: 3,
-    firstName: 'Robert',
-    lastName: 'Lopez',
-    username: '3',
-    password: '3',
+    firstName: 'Juan',
+    lastName: 'Dela Cruz',
+    username: 'test_user',
+    password: 'password',
     position: 'Operations Manager',
-    role: 'Billing',
+    role: 'Biller',
     createdAt: '2026-01-10T10:30:00Z'
   },
   {
@@ -105,7 +105,8 @@ export const USERS_MOCK: User[] = [
 
 // Test user credentials for login
 export const LOGIN_TEST_CREDENTIALS = [
-  { username: 'admin', password: 'admin123', role: 'Admin' },
-  { username: 'maria.garcia', password: 'password123', role: 'Staff' },
-  { username: 'daniel.santos', password: 'password123', role: 'Viewer' }
+  { username: '1', password: '1', role: 'Admin' },
+  { username: '2', password: '2', role: 'Biller' },
+  { username: 'anthony.reyes', password: 'password123', role: 'Admin' },
+  { username: 'michael.tan', password: 'password123', role: 'Admin' }
 ];

@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
-interface User {
+interface DisplayUser {
   name: string;
   role: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 @Component({
@@ -14,15 +16,31 @@ interface User {
   templateUrl: './billing-layout.component.html',
   styleUrl: './billing-layout.component.scss',
 })
-export class BillingLayoutComponent {
-  currentUser: User = {
-    name: 'John Doe',
-    role: 'Administrator',
+export class BillingLayoutComponent implements OnInit {
+  currentUser: DisplayUser = {
+    name: 'User',
+    role: 'Biller'
   };
 
   userMenuOpen = false;
 
   constructor(private router: Router, private auth: AuthService) {}
+
+  ngOnInit() {
+    const authUser = this.auth.currentUser;
+    if (authUser) {
+      const firstName = authUser.firstName || '';
+      const lastName = authUser.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      
+      this.currentUser = {
+        name: fullName || authUser.username || 'User',
+        role: authUser.role || 'Biller',
+        firstName: authUser.firstName,
+        lastName: authUser.lastName
+      };
+    }
+  }
 
   getUserInitials(name: string): string {
     return name
