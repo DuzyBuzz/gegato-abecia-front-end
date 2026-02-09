@@ -8,7 +8,7 @@ export const USERS_MOCK: User[] = [
     username: '1',
     password: '1', // In production, passwords should never be in mock data
     position: 'System Administrator',
-    role: 'Admin',
+    role: 'Biller',
     createdAt: '2026-01-01T08:00:00Z'
   },
   {
@@ -18,7 +18,7 @@ export const USERS_MOCK: User[] = [
     username: '2',
     password: '2',
     position: 'Billing Officer',
-    role: 'Inventory',
+    role: 'Biller',
     createdAt: '2026-01-05T09:00:00Z'
   },
   {

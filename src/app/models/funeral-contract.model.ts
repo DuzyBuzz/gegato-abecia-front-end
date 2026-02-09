@@ -35,6 +35,12 @@ export interface Deceased {
   first_name: string;
   middle_name: string;
   last_name: string;
+  suffix?: string;
+
+  date_of_birth?: string; // ISO date string
+  age?: number;
+  sex?: string; // Male, Female
+  civil_status?: string; // Single, Married, Widowed, Widower, Divorced
 
   religion: string;
 
@@ -43,13 +49,15 @@ export interface Deceased {
   casket: string;
 
   date_of_death: string; // ISO date string
+  address_of_deceased?: string;
+  place_of_death?: string;
 
   retrived_date: string; // ISO date string
   office: string;
   deliviered_by: string;
-
-
+  informant?: string; // Person who provided the information
 }
+
 export interface Contractee {
   full_name: string;
   age: number;

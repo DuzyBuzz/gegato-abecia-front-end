@@ -9,6 +9,7 @@ import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-e
 import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
+import { BillingLayoutComponent } from './layout/billing-layout/billing-layout.component';
 
 export const routes: Routes = [
 
@@ -25,12 +26,12 @@ export const routes: Routes = [
     component: LoginComponent
   },
 
-  // 🔐 ADMIN (AUTHENTICATED USERS)
+  // 🔐 ADMIN (AUTHENTICATED USERS WITH ADMIN ROLE)
   {
     path: 'admin',
     component: MainLayout,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] },
+    canActivate: [roleGuard],
+    data: { roles: ['Admin'], redirectTo: '/admin/dashboard' },
     children: [
 
       {
@@ -51,7 +52,62 @@ export const routes: Routes = [
         data: { roles: ['Admin'] }
       },
 
-            {
+      {
+        path: 'deceased',
+        component: DeceasedComponent
+      },
+
+      // DOCUMENT ENTRY FORMS
+      {
+        path: 'documents',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral',
+                component: FuneralContractEntry
+              }
+            ]
+          },
+          {
+            path: 'billing',
+            component: BillingEntry
+          }
+        ]
+      },
+
+      // DOCUMENT PRINTING
+      {
+        path: 'print',
+        children: [
+          {
+            path: 'authority-to-cremate-remains',
+            component: AuthorityToCremateRemainsPrinting
+          },
+          {
+            path: 'statement-of-account',
+            component: StatementOfAccount
+          }
+        ]
+      }
+    ]
+  },
+
+  // 🔐 BILLER (AUTHENTICATED USERS WITH BILLER ROLE)
+  {
+    path: 'billing',
+    component: BillingLayoutComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Biller'], redirectTo: '/billing/deceased' },
+    children: [
+
+      {
+        path: '',
+        redirectTo: 'deceased',
+        pathMatch: 'full'
+      },
+      {
         path: 'deceased',
         component: DeceasedComponent
       },

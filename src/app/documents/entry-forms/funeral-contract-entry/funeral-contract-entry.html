@@ -12,23 +12,23 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 border-b pb-2 pt-3 sm:pt-4 text-xs sm:text-sm">
       <div>
         <label class="block font-medium text-xs sm:text-sm">Contract Date</label>
-        <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+        <input type="date" formControlName="contractDate" class="border w-full px-2 py-1 text-xs sm:text-sm">
       </div>
       <div>
         <label class="block font-medium text-xs sm:text-sm">Contract No.</label>
-        <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+        <input formControlName="contractNo" class="border w-full px-2 py-1 text-xs sm:text-sm">
       </div>
       <div>
         <label class="block font-medium text-xs sm:text-sm">Type of Service</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+        <select formControlName="typeOfService" class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
       </div>
       <div>
         <label class="block font-medium text-xs sm:text-sm">Type of Cremation</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+        <select formControlName="typeOfCremation" class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
       </div>
       <div>
         <label class="block font-medium text-xs sm:text-sm">Financial Assistance</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+        <select formControlName="financialAssistance" class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
       </div>
     </div>
 
@@ -44,35 +44,20 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Date Retrieved</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="dateRetrieved" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
 
             <div>
               <label class="block font-medium text-xs sm:text-sm">Informant</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="text" formControlName="informant" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <!-- First Name + Suffix (Flexible Layout) -->
-          <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">First Name</label>
-              <input type="text" formControlName="firstName" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Suffix</label>
-              <select formControlName="suffix" class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value=""></option>
-                <option value="Jr">Jr.</option>
-                <option value="Sr">Sr.</option>
-                <option value="II">II</option>
-                <option value="III">III</option>
-                <option value="IV">IV</option>
-              </select>
-            </div>
+          <div>
+            <label class="block font-medium text-xs sm:text-sm">First Name</label>
+            <input type="text" formControlName="firstName" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
           </div>
-
           <div>
             <label class="block font-medium text-xs sm:text-sm">Middle Name</label>
             <input type="text" formControlName="middleName" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
@@ -89,18 +74,18 @@
             <!-- ROW 1 -->
             <div >
               <label class="block text-xs sm:text-sm font-medium">Date of Birth</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="dateOfBirth" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
 
             <div>
               <label class="block text-xs sm:text-sm font-medium">Age</label>
-              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm" min="0">
+              <input type="number" formControlName="age" class="border w-full px-2 py-1 text-xs sm:text-sm" min="0">
             </div>
 
             <!-- ROW 2 -->
             <div>
               <label class="block text-xs sm:text-sm font-medium">Sex</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="sex" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option value="">-- Select --</option>
                 <option>Male</option>
                 <option>Female</option>
@@ -109,7 +94,7 @@
 
             <div>
               <label class="block text-xs sm:text-sm font-medium">Civil Status</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="civilStatus" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option value="">-- Select --</option>
                 <option>Single</option>
                 <option>Married</option>
@@ -121,13 +106,13 @@
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Date of Death</label>
-          <input type="date" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input type="date" formControlName="dateOfDeath" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Address of Deceased</label>
-          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="addressOfDeceased" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Place of Death</label>
-          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="placeOfDeath" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
         </fieldset>
 
         <fieldset class="border p-2 sm:p-3 mt-3 sm:mt-4">
@@ -137,52 +122,52 @@
           <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Contractee</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="text" formControlName="contracteeName" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
 
             <div>
               <label class="block font-medium text-xs sm:text-sm">Age</label>
-              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="number" formControlName="contracteeAge" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Occupation</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="occupation" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Address 1</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="address" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Barangay</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="barangay" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">District</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="district" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">City/Municipality</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="city" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Relationship</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="relationship" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Contact No</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="contactNo" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Email Address</label>
-          <input type="email" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input type="email" formControlName="email" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Plan</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="plan" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">No.</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="planNo" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Referred by</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="referredBy" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
         </fieldset>
       </div>
 
@@ -197,14 +182,14 @@
 
             <div class="flex items-center gap-2">
               <span class="text-lg sm:text-xl">₱</span>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm" type="number" value="0.00">
+              <input formControlName="contractPrice" class="border w-full px-2 py-1 text-xs sm:text-sm" type="number" value="0.00">
             </div>
           </div>
 
           <div class="grid grid-cols-1 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Casket</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="casketType" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option value="">-- Select Casket --</option>
                 <option value="none">None</option>
                 <option value="wooden-basic">Wooden Basic</option>
@@ -220,10 +205,10 @@
               </select>
             </div>
             <label class="block font-medium text-xs sm:text-sm">Description</label>
-            <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
+            <textarea formControlName="casketDescription" class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Urn Type</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="urnType" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option value="">-- Select Urn Type --</option>
                 <option value="none">None</option>
                 <option value="basic-ceramic">Basic Ceramic</option>
@@ -241,10 +226,10 @@
             </div>
           </div>
           <label class="block font-medium text-xs sm:text-sm">Description</label>
-          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
+          <textarea formControlName="urnDescription" class="border w-full h-10 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
 
           <label class="block font-medium text-xs sm:text-sm">Casket other details</label>
-          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
+          <textarea formControlName="casketOtherDetails" class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
         </fieldset>
 
         <fieldset class="border p-2 sm:p-3">
@@ -253,29 +238,29 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Date</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="deliveryDate" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="time" formControlName="deliveryTime" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Location</label>
-          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
+          <input formControlName="deliveryLocation" class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Driver</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="deliveryDriver" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Helper</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="deliveryHelper" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="deliveryVehicle" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
         </fieldset>
@@ -286,19 +271,19 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Date</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="transferDate" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="time" formControlName="transferTime" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Location</label>
-          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
+          <input formControlName="transferLocation" class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Deliveries / Transfer Notes</label>
-          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm"></textarea>
+          <textarea formControlName="transferNotes" class="border w-full h-16 px-2 py-1 text-xs sm:text-sm"></textarea>
         </fieldset>
 
         <fieldset class="border p-2 sm:p-3">
@@ -307,19 +292,19 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Burial</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="burialDate" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Take Off</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="time" formControlName="takeOffTime" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Mass</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="time" formControlName="massTime" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Holding Area</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <select formControlName="holdingArea" class="border w-full px-2 py-1 text-xs sm:text-sm">
                 <option>NONE</option>
               </select>
             </div>
@@ -328,35 +313,35 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Cremation</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="date" formControlName="cremationDate" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input type="time" formControlName="cremationTime" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
 
           <label class="block font-medium text-xs sm:text-sm">Church</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="church" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Cemetery</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
+          <input formControlName="cemetery" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
 
           <label class="block font-medium text-xs sm:text-sm">Burial Notes</label>
-          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
+          <textarea formControlName="burialNotes" class="border w-full h-16 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
             <div>
               <label class="block font-medium text-xs sm:text-sm">Driver</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="burialDriver" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Helper</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="burialHelper" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
             <div>
               <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
+              <input formControlName="burialVehicle" class="border w-full px-2 py-1 text-xs sm:text-sm">
             </div>
           </div>
         </fieldset>
@@ -366,16 +351,17 @@
       <!-- RIGHT COLUMN -->
       <div class="space-y-3 sm:space-y-4">
         <label class="block font-medium text-xs sm:text-sm">Contract Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+        <textarea formControlName="contractRemarks" class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
 
         <label class="block font-medium text-xs sm:text-sm">Operations Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+        <textarea formControlName="operationsRemarks" class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
 
         <label class="block font-medium text-xs sm:text-sm">Morgue Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
+        <textarea formControlName="morgueRemarks" class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
 
         <div class="flex flex-col gap-2 pt-2">
           <button class="bg-blue-600 text-white py-2 rounded text-xs sm:text-sm font-medium">Submit Contract</button>
+          <button class="bg-blue-400 text-white py-2 rounded text-xs sm:text-sm font-medium">Billing Record</button>
         </div>
                         <select
                   class="border w-full px-2 py-1 text-xs sm:text-sm"

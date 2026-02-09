@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
 import { FuneralContractEntry } from "../../documents/entry-forms/funeral-contract-entry/funeral-contract-entry";
 import { DialogModule } from 'primeng/dialog';
+import { FuneralContract } from '../../models/funeral-contract.model';
 
 @Component({
   selector: 'app-deceased',
@@ -14,10 +15,20 @@ import { DialogModule } from 'primeng/dialog';
 export class DeceasedComponent {
 
   showModal = false;
+  selectedContract: FuneralContract | null = null;
+
   openModal(){
     this.showModal = true;
   }
+
   closeModal(){
     this.showModal = false;
+    this.selectedContract = null;
+  }
+
+  onContractRowSelected(contract: FuneralContract): void {
+    this.selectedContract = contract;
+    this.openModal();
   }
 }
+

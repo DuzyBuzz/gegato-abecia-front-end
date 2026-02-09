@@ -1,8 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableHelperComponent } from '../../../components/table-helper/table-helper.component';
 import { TableHelperColumn } from '../../../components/table-helper/table-helper-column.model';
-import { Deceased } from '../../../../models/funeral-contract.model';
+import { Deceased, FuneralContract } from '../../../../models/funeral-contract.model';
 import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
 import { FUNERAL_CONTRACTS_MOCK } from '../../../../../assets/mock/funeral-contract.mock';
@@ -17,8 +17,14 @@ import { FUNERAL_CONTRACTS_MOCK } from '../../../../../assets/mock/funeral-contr
 })
 export class DeceasedTableComponent implements OnInit {
   
-  // Deceased data from mock funeral contracts
+  // Store full funeral contracts for complete data access
+  funeralContracts: FuneralContract[] = FUNERAL_CONTRACTS_MOCK;
+  
+  // Deceased data from mock funeral contracts (for table display)
   deceasedList: Deceased[] = FUNERAL_CONTRACTS_MOCK.map(contract => contract.deceased);
+
+  @Output() contractSelected = new EventEmitter<FuneralContract>();
+
 
   // Table columns configuration
   columns: TableHelperColumn[] = [
@@ -108,9 +114,13 @@ export class DeceasedTableComponent implements OnInit {
   selectedDeceased: Deceased[] = [];
   loading = false;
 
+
   ngOnInit() {
     // Load deceased data from service
     // In a real application, you would call a service here
+  }
+  onRowClicked(row: Deceased) {
+    console.log('Row clicked:', row.id);
   }
 
   /**
@@ -125,8 +135,12 @@ export class DeceasedTableComponent implements OnInit {
    * Handle row selection
    */
   onRowSelected(deceased: Deceased) {
-    console.log('Row selected:', deceased);
-    // Navigate to deceased details, edit, or perform other actions
+    console.log('Row selected:', deceased.id);
+    // Find the full funeral contract for this deceased
+    const contract = this.funeralContracts.find(c => c.deceased.id === deceased.id);
+    if (contract) {
+      this.contractSelected.emit(contract);
+    }
   }
 
   /**
