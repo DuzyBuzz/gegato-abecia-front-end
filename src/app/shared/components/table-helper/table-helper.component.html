@@ -97,7 +97,7 @@
       </ng-container>
 
       <ng-template #defaultBody>
-        <tr class="p-selectable-row" (click)="onRowClick(row)" style="cursor: pointer;">
+        <tr class="p-selectable-row" (dblclick)="onRowClick(row)" style="cursor: pointer;">
           <!-- Selection Checkbox
           <td *ngIf="selectionMode === 'multiple'">
             <p-tableCheckbox [value]="row" />

@@ -34,7 +34,7 @@ export class DeceasedTableComponent implements OnInit {
       sortable: true,
       filterable: true,
       filterType: 'text',
-      width: '12rem'
+      width: '12rem',
     },
     {
       field: 'first_name',
@@ -124,7 +124,7 @@ export class DeceasedTableComponent implements OnInit {
   }
 
   /**
-   * Handle deceased selection
+   * Handle deceased double-click selection
    */
   onDeceasedSelected(deceased: Deceased[]) {
     this.selectedDeceased = deceased;
@@ -132,10 +132,10 @@ export class DeceasedTableComponent implements OnInit {
   }
 
   /**
-   * Handle row selection
+   * Handle row double-click selection
    */
   onRowSelected(deceased: Deceased) {
-    console.log('Row selected:', deceased.id);
+    console.log('Row double-clicked:', deceased.id);
     // Find the full funeral contract for this deceased
     const contract = this.funeralContracts.find(c => c.deceased.id === deceased.id);
     if (contract) {
