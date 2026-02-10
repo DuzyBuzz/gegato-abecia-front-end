@@ -82,11 +82,11 @@ export const routes: Routes = [
         path: 'print',
         children: [
           {
-            path: 'authority-to-cremate-remains',
+            path: 'authority-to-cremate-remains/:contractId',
             component: AuthorityToCremateRemainsPrinting
           },
           {
-            path: 'statement-of-account',
+            path: 'statement-of-account/:contractId',
             component: StatementOfAccount
           }
         ]
@@ -132,23 +132,24 @@ export const routes: Routes = [
         ]
       },
 
+    ]
+  },
+
       // DOCUMENT PRINTING
       {
         path: 'print',
         children: [
           {
-            path: 'authority-to-cremate-remains',
+            path: 'authority-to-cremate-remains/:contractId',
             component: AuthorityToCremateRemainsPrinting
           },
           {
-            path: 'statement-of-account',
+            path: 'statement-of-account/:contractId',
             component: StatementOfAccount
-          }
+          },
+          
         ]
-      }
-    ]
-  },
-
+      },
   // FALLBACK
   {
     path: '**',

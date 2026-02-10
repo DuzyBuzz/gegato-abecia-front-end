@@ -4,7 +4,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FuneralContract } from '../../../models/funeral-contract.model';
 import { AuthService } from '../../../services/auth.service';
+import { PrintDataService } from '../../../services/print-data.service';
 import { FUNERAL_CONTRACTS_MOCK } from '../../../../assets/mock/funeral-contract.mock';
+import { BILLING_ACCOUNTS_MOCK } from '../../../../assets/mock/billing-account.mock';
 
 @Component({
   selector: 'app-funeral-contract-entry',
@@ -25,7 +27,8 @@ export class FuneralContractEntry implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
-    private auth: AuthService
+    private auth: AuthService,
+    private printDataService: PrintDataService
   ) {
     this.form = this.fb.group({
       // Contract Header
@@ -262,21 +265,44 @@ export class FuneralContractEntry implements OnInit {
   onPrintSelect(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
 
+    if (!this.selectedContract) {
+      console.warn('[FuneralContractEntry] No contract selected for printing');
+      return;
+    }
+
+    const userRole = this.auth.getRole();
+    const contractId = this.selectedContract.contract_id;
+    let printPath = '';
+
+    // Get billing account if available
+    const billingAccount = BILLING_ACCOUNTS_MOCK.find(b => b.funeral_contract_id === contractId);
+
+    // Set print data in service BEFORE navigating
+    this.printDataService.setPrintData(this.selectedContract, billingAccount);
+
     switch (value) {
       case 'funeral-contract':
-        this.router.navigate(['/printing-forms/funeral-service-contract']);
+        // TODO: Implement funeral-service-contract-printing route if needed
+        console.log('[FuneralContractEntry] Funeral Service Contract printing - route not yet configured');
         break;
 
       case 'cremation-certificate':
-        this.router.navigate(['/printing-forms/cremation-certificate']);
+        // TODO: Implement cremation-certificate-printing route if needed
+        console.log('[FuneralContractEntry] Cremation Certificate printing - route not yet configured');
         break;
 
       case 'authority-cremate':
-        this.router.navigate(['/printing-forms/authority-to-cremate-remains']);
+        printPath = userRole === 'Admin'
+          ? `/admin/print/authority-to-cremate-remains/${contractId}`
+          : `/billing/print/authority-to-cremate-remains/${contractId}`;
+        this.router.navigateByUrl(printPath);
         break;
 
       case 'statement-account':
-        this.router.navigate(['/printing-forms/statement-of-account']);
+        printPath = userRole === 'Admin'
+          ? `/admin/print/statement-of-account/${contractId}`
+          : `/billing/print/statement-of-account/${contractId}`;
+        this.router.navigateByUrl(printPath);
         break;
     }
 

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BillingAccount, BillingTransaction } from '../../../models/billing-account.model';
-import { BILLING_ACCOUNTS_MOCK, BILLING_TRANSACTIONS_MOCK } from '../../../../assets/mock/billing-account.mock';
+import { BILLING_ACCOUNTS_MOCK } from '../../../../assets/mock/billing-account.mock';
 
 interface BillingItem {
   transNo: string;
@@ -80,7 +80,7 @@ export class BillingEntry implements OnInit {
   // ===== DEPRECATED - FOR COMPATIBILITY IF NEEDED =====
   billingItems: BillingItem[] = [];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
     // Get contract ID from route parameters (contractId from funeral-contract-entry)
@@ -97,6 +97,18 @@ export class BillingEntry implements OnInit {
       }
     });
   }
+
+openSOA(): void {
+  if (!this.contractNo) {
+    console.error('contractNo is missing');
+    return;
+  }
+
+  this.router.navigate([
+    '/print/statement-of-account',
+    this.contractNo
+  ]);
+}
 
   /**
    * Load contract billing data based on contract ID
@@ -179,20 +191,32 @@ export class BillingEntry implements OnInit {
    * Load and display billing transactions for this account
    */
   private loadBillingTransactions(billingAccountId: number): void {
-    // Filter transactions by billing_account_id
-    const transactions = BILLING_TRANSACTIONS_MOCK.filter(
-      (tx) => tx.billing_account_id === billingAccountId
-    );
+    // For now, initialize with empty rows
+    // In production, this would fetch transactions from API
+    this.rows = [];
 
-    // Convert transactions to BillingRow with isEditing flag
-    this.rows = transactions.map((tx) => ({
-      ...tx,
-      isEditing: false
-    }));
-
-    console.log(`[BillingEntry] Loaded ${this.rows.length} transactions for account ${billingAccountId}`);
+    console.log(`[BillingEntry] Initialized transaction rows for account ${billingAccountId}`);
+    
+    // TODO: In production, fetch transactions from API:
+    // this.billingService.getBillingTransactions(billingAccountId).subscribe((transactions) => {
+    //   this.rows = transactions.map((tx) => ({
+    //     ...tx,
+    //     isEditing: false
+    //   }));
+    // });
   }
 
+OpenSOA() {
+  if (!this.contractNo) {
+    console.error('contractNo is missing');
+    return;
+  }
+
+  this.router.navigate([
+    '/print/statement-of-account',
+    this.contractNo
+  ]);
+}  
   /** Add empty editable row */
   addRow(): void {
     const newRow: BillingRow = {

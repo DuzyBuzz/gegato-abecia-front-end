@@ -7,15 +7,14 @@
   "build": "ng build",
   "watch": "ng build --watch --configuration development",
   "test": "ng test",
-
+  "generate-mock": "node generate-mock-data.js",
   "tauri": "tauri",
 
   "all:web": "ng serve",
   "all:desktop": "wait-on http://localhost:4200 && npm run tauri dev",
 
   "all": "concurrently \"npm run all:web\" \"npm run all:desktop\""
-}
-,
+},
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,

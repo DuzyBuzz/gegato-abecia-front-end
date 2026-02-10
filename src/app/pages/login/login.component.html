@@ -60,11 +60,15 @@
   >
     Login
   </button>
-
+  <button (click)="GenerateMockData()"
+    class="w-full mt-6 py-3 bg-purple-800 text-white rounded hover:bg-purple-900 transition-colors"
+  >
+    mock data
+  </button>
 </form>
 
-<!-- Mock Users Quick Access (Development/Testing)
-<div *ngIf="mockUsers.length > 0" class="w-full mt-8 pt-8 border-t border-gray-300">
+<!-- Mock Users Quick Access (Development/Testing) -->
+<!-- <div *ngIf="mockUsers.length > 0" class="w-full mt-8 pt-8 border-t border-gray-300">
   <p class="text-center text-gray-600 text-sm font-semibold mb-4">Test Accounts</p>
   <div class="space-y-2">
     <div *ngFor="let mockUser of mockUsers" 

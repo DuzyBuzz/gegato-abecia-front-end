@@ -1,6 +1,10 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { PrintHeader } from "../print-header/print-header";
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
+import { PrintHeader } from "../print-header/print-header";
+import { FuneralContract } from '../../../models/funeral-contract.model';
+import { FUNERAL_CONTRACTS_MOCK } from '../../../../assets/mock/funeral-contract.mock';
+import { PrintDataService } from '../../../services/print-data.service';
 
 @Component({
   selector: 'app-authority-to-cremate-remains-printing',
@@ -8,57 +12,92 @@ import { CommonModule, Location } from '@angular/common';
   templateUrl: './authority-to-cremate-remains-printing.html',
   styleUrl: '../print-header/print-header.scss',
 })
-export class AuthorityToCremateRemainsPrinting implements AfterViewInit, OnDestroy{
+export class AuthorityToCremateRemainsPrinting implements OnInit, AfterViewInit, OnDestroy {
 
+  contract: any = {};
+  contractId: string | null = null;
+  selectedContract: FuneralContract | null = null;
 
-  // // Mock data – replace with API response later
-  // contract = {
-  //   date: '1/2/2026',
+  constructor(
+    private location: Location,
+    private activatedRoute: ActivatedRoute,
+    private printDataService: PrintDataService
+  ) {}
 
-  //   authorizer: 'ALAIN DORIN',
-  //   deceasedName: 'HELEN D. DORIN',
+  ngOnInit(): void {
+    // First, try to get data from PrintDataService (passed from funeral-contract-entry)
+    const printData = this.printDataService.getCurrentPrintData();
+    
+    if (printData.contract) {
+      // Use data passed from funeral contract entry
+      this.selectedContract = printData.contract;
+      this.mapContractToDisplay(printData.contract);
+      console.log('[AuthorityToCremateRemainsPrinting] Using data from PrintDataService');
+    } else {
+      // Fallback: Load from route parameter
+      this.contractId = this.activatedRoute.snapshot.paramMap.get('contractId');
+      if (this.contractId) {
+        this.loadContractData(this.contractId);
+      }
+    }
+  }
 
-  //   dateOfDeath: 'Monday, December 29, 2025',
-  //   placeOfDeath: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
+  private loadContractData(contractId: string): void {
+    try {
+      const numericId = parseInt(contractId, 10);
+      const foundContract = FUNERAL_CONTRACTS_MOCK.find(c => c.contract_id === numericId);
 
-  //   dateOfCremation: 'Wednesday, January 07, 2026',
-  //   time: '11:00am',
+      if (foundContract) {
+        this.selectedContract = foundContract;
+        this.mapContractToDisplay(foundContract);
+      } else {
+        console.warn('[AuthorityToCremateRemainsPrinting] Contract not found:', contractId);
+        this.setFallbackData();
+      }
+    } catch (error) {
+      console.error('[AuthorityToCremateRemainsPrinting] Error loading contract:', error);
+      this.setFallbackData();
+    }
+  }
 
-  //   address: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
-  //   relationship: 'SON'
-  // };
-  contract = {
-    time: '11:08:13 AM',
-    date: '1/2/2026',
+  private mapContractToDisplay(contract: FuneralContract): void {
+    const { deceased, contractee, burial_schedule, header } = contract;
 
-    casket: 'SR FLEXI METAL',
-    casketDescription: 'ALL WHITE / ROSE HANDLE',
-    price: 'PHP 150,000.00',
+    this.contract = {
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString(),
+      deceasedName: `${deceased?.first_name || ''} ${deceased?.middle_name || ''} ${deceased?.last_name || ''}`.trim(),
+      dob: deceased?.date_of_birth || 'N/A',
+      dod: deceased?.date_of_death || 'N/A',
+      age: deceased?.age || 'N/A',
+      authorizer: `${contractee?.full_name || 'N/A'}`,
+      address: `${deceased?.address_of_deceased || 'N/A'}`,
+      placeOfDeath: `${deceased?.place_of_death || 'N/A'}`,
+      church: `${burial_schedule?.church || 'N/A'}`,
+      burialDate: `${burial_schedule?.burial_date || 'N/A'}`,
+      cemetery: `${burial_schedule?.cemetery || 'N/A'}`,
+      relationship: `${contractee?.relationship || 'N/A'}`,
+      contractNo: `${header?.contract_no || 'N/A'}`
+    };
+  }
 
-    deceasedName: 'HELEN D. DORIN',
-    dob: '02-Sep-40',
-    dod: '29-Dec-25',
-    age: '85',
-authorizer: 'ALAIN DORIN',
-    address: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
-    placeOfDeath: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
+  private setFallbackData(): void {
+    this.contract = {
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString(),
+      authorizer: 'N/A',
+      deceasedName: 'N/A',
+      dateOfDeath: 'N/A',
+      placeOfDeath: 'N/A',
+      dateOfCremation: 'N/A',
+      address: 'N/A',
+      relationship: 'N/A'
+    };
+  }
 
-    wake: 'CHAPEL - E',
-    church: 'CARMELITE SISTERS CHURCH JARO',
-    burialDate: 'Wednesday, January 07, 2026',
-    cemetery: 'FOREST LAKE MEMORIAL PARK',
-officer: 'Rizalina P. Panes',
+  /* ================= AUTO PRINT ================= */
 
-    contractee: 'ALAIN DORIN',
-    relationship: 'SON',
-    contactNo: '0961-424-6939',
-    deliveryDate: 'Friday, January 02, 2026',
-    contractNo: '12-013950-25'
-  };
-
-  constructor(private location: Location) {}
-   /* ================= AUTO PRINT ================= */
-ngAfterViewInit(): void {
+  ngAfterViewInit(): void {
     // Register handler BEFORE printing
     window.onafterprint = () => {
       this.goBack();
@@ -69,10 +108,10 @@ ngAfterViewInit(): void {
       window.print();
     }, 300);
   }
-    print(): void {
+
+  print(): void {
     window.print();
   }
-
 
   /* ================= CLEANUP ================= */
 
@@ -87,6 +126,4 @@ ngAfterViewInit(): void {
     // Uses browser history (best UX)
     this.location.back();
   }
-
-
 }

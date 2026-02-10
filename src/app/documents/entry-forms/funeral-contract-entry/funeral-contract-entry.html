@@ -365,7 +365,35 @@
         <label class="block font-medium text-xs sm:text-sm">Morgue Remarks</label>
         <textarea formControlName="morgueRemarks" class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
 
-        <div class="flex flex-col gap-2 pt-2">
+
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Date Retrieved</label>
+              <input type="date" formControlName="transferDateRetrieved" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Ret. Driver</label>
+              <input type="text" formControlName="transferDriver" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Caller</label>
+              <input type="text" formControlName="transferCaller" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Ret. Helper</label>
+              <input type="text" formControlName="transferHelper" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Checked By</label>
+              <input type="text" formControlName="transferCheckedBy" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block font-medium text-xs sm:text-sm">Embalmed By</label>
+              <input type="text" formControlName="transferEmbalmedBy" class="border w-full px-2 py-1 text-xs sm:text-sm">
+            </div>
+          </div>
+                  <div class="flex flex-col gap-2 pt-2">
           <button class="bg-blue-600 text-white py-2 rounded text-xs sm:text-sm font-medium">Submit Contract</button>
           <button 
             type="button"
@@ -375,16 +403,6 @@
             Billing Record
           </button>
         </div>
-                        <select
-                  class="border w-full px-2 py-1 text-xs sm:text-sm"
-                  (change)="onPrintSelect($event)"
-                >
-                  <option value="">Select to Print</option>
-                  <option value="funeral-contract">Funeral Service Contract</option>
-                  <option value="cremation-certificate">Cremation Certificate</option>
-                  <option value="authority-cremate">Authority to Cremate Remains</option>
-                  <option value="statement-account">Statement of Accounts</option>
-                </select>
       </div>
 
     </div><!-- END 3 COLUMNS -->

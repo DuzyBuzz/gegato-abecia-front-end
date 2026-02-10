@@ -1,6 +1,11 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { PrintHeader } from '../print-header/print-header';
 import { CommonModule, Location } from '@angular/common';
+import { FuneralContract } from '../../../models/funeral-contract.model';
+import { FUNERAL_CONTRACTS_MOCK } from '../../../../assets/mock/funeral-contract.mock';
+import { BILLING_ACCOUNTS_MOCK } from '../../../../assets/mock/billing-account.mock';
+import { PrintDataService } from '../../../services/print-data.service';
 
 interface StatementItem {
   description: string;
@@ -17,44 +22,140 @@ interface StatementItem {
   templateUrl: './statement-of-account.html',
   styleUrl: '../print-header/print-header.scss',
 })
-export class StatementOfAccount implements AfterViewInit, OnDestroy {
+export class StatementOfAccount implements OnInit, AfterViewInit, OnDestroy {
+
+  contractId: string | null = null;
+  selectedContract: FuneralContract | null = null;
 
   /* ================= HEADER ================= */
 
   header = {
-    dateAsOf: '02-Jan-26',
-    billedTo: 'ALDY MAY CALIXTRO',
-    address: 'BACOLOD CITY',
-    deceased: 'NONITO MONTAÑO MAKILAN',
-    contractNo: '11-013913-25'
+    dateAsOf: new Date().toLocaleDateString(),
+    billedTo: 'N/A',
+    address: 'N/A',
+    deceased: 'N/A',
+    contractNo: 'N/A'
+  };
+
+  /* ================= CONTRACT ================= */
+
+  contract = {
+    dod: 'N/A',
+    contractee: 'N/A',
+    address: 'N/A',
+    deceasedName: 'N/A',
+    contractNo: 'N/A',
+    officer: 'Officer in Charge'
   };
 
   /* ================= ITEMS ================= */
 
-  items: StatementItem[] = [
-    { description: 'JR HALF GLASS (METAL)', amount: 45000 },
-    { description: 'ADD: CRATE TO BACOLOD', amount: 3500 },
-    { description: 'SERVICES:' },
-    { description: 'RETRIEVAL' },
-    { description: 'EMBALMING' },
-    { description: 'PERPETUAL CARE AND HANDLING' },
-    { description: 'HOME DECOR SET UP (WAKE AREA)' },
-    { description: 'TRANSPORTATION TO RORO DUMANGAS' },
-    { description: 'WOODEN CRATE' },
-    { description: '*CASH FULL PAYMENT', payment: 40000, paymentDate: '12/23/2025' },
-    { description: '*BANK TRANSFER TO GREG ABECIA UNIONBANK', payment: 8500, paymentDate: '12/23/2025' },
-    { description: 'Bank Transfer by Aldy May Luping Calixtro' }
-  ];
-
-
+  items: StatementItem[] = [];
 
   constructor(
-    private location: Location
+    private location: Location,
+    private activatedRoute: ActivatedRoute,
+    private printDataService: PrintDataService
+  ) {}
 
-  ) {
-   }
+  ngOnInit(): void {
+    // First, try to get data from PrintDataService (passed from funeral-contract-entry)
+    const printData = this.printDataService.getCurrentPrintData();
+    
+    if (printData.contract) {
+      // Use data passed from funeral contract entry
+      this.selectedContract = printData.contract;
+      this.mapContractToDisplay(printData.contract);
+      console.log('[StatementOfAccount] Using data from PrintDataService');
+    } else {
+      // Fallback: Load from route parameter
+      this.contractId = this.activatedRoute.snapshot.paramMap.get('contractId');
+      if (this.contractId) {
+        this.loadContractData(this.contractId);
+      }
+    }
+  }
 
+  private loadContractData(contractId: string): void {
+    try {
+      const numericId = parseInt(contractId, 10);
+      const foundContract = FUNERAL_CONTRACTS_MOCK.find(c => c.contract_id === numericId);
 
+      if (foundContract) {
+        this.selectedContract = foundContract;
+        this.mapContractToDisplay(foundContract);
+      } else {
+        console.warn('[StatementOfAccount] Contract not found:', contractId);
+        this.setFallbackData();
+      }
+    } catch (error) {
+      console.error('[StatementOfAccount] Error loading contract:', error);
+      this.setFallbackData();
+    }
+  }
+
+  private mapContractToDisplay(contract: FuneralContract): void {
+    const { deceased, contractee, header } = contract;
+
+    this.header = {
+      dateAsOf: new Date().toLocaleDateString(),
+      billedTo: `${contractee?.full_name || 'N/A'}`,
+      address: `${contractee?.city || 'N/A'}`,
+      deceased: `${deceased?.first_name || ''} ${deceased?.middle_name || ''} ${deceased?.last_name || ''}`.trim() || 'N/A',
+      contractNo: `${header?.contract_no || 'N/A'}`
+    };
+
+    this.contract = {
+      dod: deceased?.date_of_death || 'N/A',
+      contractee: `${contractee?.full_name || 'N/A'}`,
+      address: `${contractee?.address || 'N/A'}`,
+      deceasedName: `${deceased?.first_name || ''} ${deceased?.middle_name || ''} ${deceased?.last_name || ''}`.trim() || 'N/A',
+      contractNo: `${header?.contract_no || 'N/A'}`,
+      officer: 'Officer in Charge'
+    };
+
+    // Load billing account from mock data using funeral_contract_id
+    const billingAccount = BILLING_ACCOUNTS_MOCK.find(b => b.funeral_contract_id === contract.contract_id);
+    if (billingAccount) {
+      this.items = [
+        { description: billingAccount.casket, amount: billingAccount.total_amount },
+        { description: `Discount`, discount: billingAccount.total_discount },
+        { description: `Services - ${billingAccount.service_type}` },
+        { description: `Financial Assistance: ${billingAccount.financial_asst}` },
+        { description: `Subtotal`, amount: billingAccount.amount_due },
+        { description: `Payment Plan`, payment: billingAccount.plan_amount },
+        { description: `Balance Due`, amount: billingAccount.balance }
+      ];
+    } else {
+      this.setDefaultItems();
+    }
+  }
+
+  private setDefaultItems(): void {
+    this.items = [
+      { description: 'Service Charges', amount: 0 },
+      { description: 'Casket/Urn', amount: 0 }
+    ];
+  }
+
+  private setFallbackData(): void {
+    this.header = {
+      dateAsOf: new Date().toLocaleDateString(),
+      billedTo: 'N/A',
+      address: 'N/A',
+      deceased: 'N/A',
+      contractNo: 'N/A'
+    };
+    this.contract = {
+      dod: 'N/A',
+      contractee: 'N/A',
+      address: 'N/A',
+      deceasedName: 'N/A',
+      contractNo: 'N/A',
+      officer: 'Officer in Charge'
+    };
+    this.setDefaultItems();
+  }
 
 
   /* ================= TOTALS ================= */
@@ -71,42 +172,9 @@ export class StatementOfAccount implements AfterViewInit, OnDestroy {
     return this.totalAmount - this.totalPayments;
   }
 
-  /* ================= CONTRACT INFO ================= */
-
-  contract = {
-    time: '11:08:13 AM',
-    date: '1/2/2026',
-
-    casket: 'SR FLEXI METAL',
-    casketDescription: 'ALL WHITE / ROSE HANDLE',
-    price: 'PHP 150,000.00',
-
-    deceasedName: 'HELEN D. DORIN',
-    dob: '02-Sep-40',
-    dod: '29-Dec-25',
-    age: '85',
-
-    authorizer: 'ALAIN DORIN',
-    address: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
-    placeOfDeath: '44N AMES SUBD., MANDURRIAO, ILOILO CITY',
-
-    wake: 'CHAPEL - E',
-    church: 'CARMELITE SISTERS CHURCH JARO',
-    burialDate: 'Wednesday, January 07, 2026',
-    cemetery: 'FOREST LAKE MEMORIAL PARK',
-
-    officer: 'Rizalina P. Panes',
-
-    contractee: 'ALAIN DORIN',
-    relationship: 'SON',
-    contactNo: '0961-424-6939',
-    deliveryDate: 'Friday, January 02, 2026',
-    contractNo: '12-013950-25',
-    cremationDate: 'January 10, 2026',
-  };
-
   /* ================= AUTO PRINT ================= */
-ngAfterViewInit(): void {
+
+  ngAfterViewInit(): void {
     // Register handler BEFORE printing
     window.onafterprint = () => {
       this.goBack();

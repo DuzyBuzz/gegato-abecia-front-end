@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { MockDataGeneratorService } from '../../services/mock-data-generator.service';
 import { Router } from '@angular/router';
 
 interface MockUser {
@@ -25,11 +26,13 @@ showPassword = false;
   form: FormGroup;
   mockUsers: MockUser[] = [];
   showMockUsers = true;
+  private mockDataGenerated = false;
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private mockDataGenerator: MockDataGeneratorService
   ) {
     
     this.form = this.fb.group({
@@ -82,6 +85,13 @@ showPassword = false;
         console.log('user.role:', user.role);
         console.log('typeof user.role:', typeof user.role);
 
+        // Generate fake data on first successful login if not already generated
+        if (!this.mockDataGenerated && !this.mockDataGenerator.hasMockData()) {
+          console.log('🚀 Generating 1000+ mock records...');
+          this.mockDataGenerator.generateAndStoreMockData(1000, 1000, 1000);
+          this.mockDataGenerated = true;
+        }
+
         // Navigate based on user role
         let redirectPath = '/login';
         
@@ -105,6 +115,22 @@ showPassword = false;
         this.errorMessage = 'Invalid username or password';
       }
     });
+  }
+  
+  /**
+   * Manually trigger mock data generation
+   */
+  GenerateMockData() {
+    console.log('Manually triggering mock data generation...');
+    
+    if (this.mockDataGenerator.hasMockData()) {
+      console.log('⚠️ Mock data already exists. Clearing and regenerating...');
+      this.mockDataGenerator.clearAllMockData();
+    }
+    
+    console.log('🚀 Generating 1000+ mock records...');
+    this.mockDataGenerator.generateAndStoreMockData(1000, 1000, 1000);
+    console.log('✅ Mock data generation complete!');
   }
 
 }
