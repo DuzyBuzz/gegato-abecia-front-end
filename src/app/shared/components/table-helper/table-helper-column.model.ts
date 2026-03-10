@@ -1,4 +1,3 @@
-// shared/components/smart-table/smart-table-column.model.ts
 import { FilterMatchMode } from 'primeng/api';
 
 export interface TableHelperColumn {
@@ -11,4 +10,3 @@ export interface TableHelperColumn {
   width?: string;
   template?: 'text' | 'date' | 'currency' | 'status' | 'progress' | 'tag';
 }
-

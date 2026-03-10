@@ -1,27 +1,33 @@
 <div class="card">
+
   <p-table
     #dt
     [value]="value"
-    [(selection)]="selectedRows"
-    (selectionChange)="onSelectionChange()"
-    [dataKey]="dataKey"
+    [(selection)]="selectedRow"
+    selectionMode="single"
+    (onRowSelect)="onRowSelect($event)"
+    dataKey="id"
     [rowHover]="showRowHover"
     [rows]="rows"
-    [showCurrentPageReport]="true"
     [rowsPerPageOptions]="rowsPerPageOptions"
-    [loading]="loading"
     [paginator]="true"
+    [loading]="loading"
+    [showCurrentPageReport]="true"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    [filterDelay]="300"
     [globalFilterFields]="globalFilterFields"
   >
-    <!-- CAPTION: Global Search & Clear Button -->
-    <ng-template #caption *ngIf="showGlobalFilter">
-      <div class="flex justify-between items-center gap-4 w-full flex-wrap ">
-                <p-iconField iconPosition="left" class="flex-grow">
+
+    <!-- CAPTION -->
+    <ng-template pTemplate="caption" *ngIf="showGlobalFilter">
+
+      <div class="flex justify-between items-center gap-4 w-full flex-wrap">
+
+        <p-iconField iconPosition="left" class="flex-grow">
+
           <p-inputIcon>
             <i class="pi pi-search"></i>
           </p-inputIcon>
+
           <input
             pInputText
             type="text"
@@ -30,127 +36,145 @@
             placeholder="Search..."
             class="w-full"
           />
+
         </p-iconField>
+
         <div class="flex gap-2">
-        <p-button
-        *ngIf="showClearButton"
-        severity="danger"
-        [outlined]="true"
-        icon="pi pi-filter-slash"
-        label="Clear"
-        (click)="clear(dt)"
-        ></p-button>
+
+          <p-button
+            *ngIf="showClearButton"
+            severity="danger"
+            [outlined]="true"
+            icon="pi pi-filter-slash"
+            label="Clear"
+            (click)="clear()"
+          ></p-button>
 
           <p-button
             *ngIf="showPrintButton"
             [outlined]="true"
             icon="pi pi-print"
             label="Print"
-            (click)="printTable()"
             severity="info"
-          />
+            (click)="printTable()"
+          ></p-button>
+
           <p-button
             *ngIf="showExportButton"
             [outlined]="true"
             icon="pi pi-download"
             label="Export Excel"
-            (click)="exportToExcel()"
             severity="success"
-          />
+            (click)="exportToExcel()"
+          ></p-button>
+
         </div>
 
       </div>
+
     </ng-template>
 
-    <!-- HEADER -->
-    <ng-template #header>
-      <tr>
-        <!-- Selection Checkbox
-        <th style="width: 4rem" *ngIf="selectionMode === 'multiple'">
-          <p-tableHeaderCheckbox />
-        </th> -->
 
-        <!-- Data Columns -->
-        <th *ngFor="let col of columns" [style.minWidth]="col.width || '14rem'" [pSortableColumn]="col.sortable ? col.field : undefined">
+    <!-- HEADER -->
+    <ng-template pTemplate="header">
+
+      <tr>
+
+        <th
+          *ngFor="let col of columns"
+          [style.minWidth]="col.width || '14rem'"
+          [pSortableColumn]="col.sortable ? col.field : undefined"
+        >
+
           <div class="flex justify-between items-center gap-2">
+
             <span>{{ col.header }}</span>
-            <p-sortIcon *ngIf="col.sortable" [field]="col.field" />
+
+            <p-sortIcon
+              *ngIf="col.sortable"
+              [field]="col.field"
+            ></p-sortIcon>
+
             <p-columnFilter
               *ngIf="col.filterable"
               [field]="col.field"
               [type]="col.filterType || 'text'"
               display="menu"
               class="ml-auto"
-            />
+            ></p-columnFilter>
+
           </div>
+
         </th>
 
-        <!-- Actions Column Header
-        <th style="width: 5rem"></th> -->
       </tr>
+
     </ng-template>
+
 
     <!-- BODY -->
-    <ng-template #body let-row>
-      <ng-container *ngIf="bodyTemplate; else defaultBody">
-        <ng-container *ngTemplateOutlet="bodyTemplate; context: { $implicit: row }"></ng-container>
-      </ng-container>
+    <ng-template pTemplate="body" let-row>
 
-      <ng-template #defaultBody>
-        <tr class="p-selectable-row" (dblclick)="onRowClick(row)" style="cursor: pointer;">
-          <!-- Selection Checkbox
-          <td *ngIf="selectionMode === 'multiple'">
-            <p-tableCheckbox [value]="row" />
-          </td> -->
+      <tr
+        [pSelectableRow]="row"
+        class="p-selectable-row"
+        (dblclick)="onRowClick(row)"
+        style="cursor:pointer"
+      >
 
-          <!-- Data Columns -->
-          <td *ngFor="let col of columns">
-            <ng-container [ngSwitch]="col.template">
-              <!-- Text (default) -->
-              <span *ngSwitchDefault>{{ row[col.field] }}</span>
+        <td *ngFor="let col of columns">
 
-              <!-- Date -->
-              <span *ngSwitchCase="'date'">{{ row[col.field] | date: 'MM/dd/yyyy' }}</span>
+          <ng-container [ngSwitch]="col.template">
 
-              <!-- Currency -->
-              <span *ngSwitchCase="'currency'">{{ row[col.field] | currency: 'USD': 'symbol' }}</span>
+            <span *ngSwitchDefault>
+              {{ row[col.field] }}
+            </span>
 
-              <!-- Status Tag -->
-              <p-tag
-                *ngSwitchCase="'status'"
-                [value]="row[col.field]"
-                severity="info"
-              />
+            <span *ngSwitchCase="'date'">
+              {{ row[col.field] | date:'MM/dd/yyyy' }}
+            </span>
 
-              <!-- Progress Bar -->
-              <p-progressBar *ngSwitchCase="'progress'" [value]="row[col.field]" [showValue]="false" />
+            <span *ngSwitchCase="'currency'">
+              {{ row[col.field] | currency:'USD':'symbol' }}
+            </span>
 
-              <!-- Badge/Tag -->
-              <p-tag *ngSwitchCase="'tag'" [value]="row[col.field]" />
-            </ng-container>
-          </td>
+            <p-tag
+              *ngSwitchCase="'status'"
+              [value]="row[col.field]"
+              severity="info"
+            ></p-tag>
 
-          <!-- Actions Column
-          <td class="text-center">
-            <p-button rounded icon="pi pi-cog" [text]="true" />
-          </td> -->
-        </tr>
-      </ng-template>
+            <p-progressBar
+              *ngSwitchCase="'progress'"
+              [value]="row[col.field]"
+              [showValue]="false"
+            ></p-progressBar>
+
+            <p-tag
+              *ngSwitchCase="'tag'"
+              [value]="row[col.field]"
+            ></p-tag>
+
+          </ng-container>
+
+        </td>
+
+      </tr>
+
     </ng-template>
 
-    <!-- EMPTY MESSAGE -->
-    <ng-template #emptymessage>
-      <ng-container *ngIf="emptyMessageTemplate; else defaultEmpty">
-        <ng-container *ngTemplateOutlet="emptyMessageTemplate"></ng-container>
-      </ng-container>
 
-      <ng-template #defaultEmpty>
-        <tr>
-          <td [attr.colspan]="columns.length + (selectionMode === 'multiple' ? 2 : 1)" class="text-center py-4">
-            No records found
-          </td>
-        </tr>
-      </ng-template>
+    <!-- EMPTY -->
+    <ng-template pTemplate="emptymessage">
+
+      <tr>
+        <td [attr.colspan]="columns.length" class="text-center py-4">
+          No records found
+        </td>
+      </tr>
+
     </ng-template>
+
   </p-table>
+
 </div>

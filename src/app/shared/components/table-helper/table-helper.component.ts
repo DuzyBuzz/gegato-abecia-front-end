@@ -31,9 +31,10 @@ import { TableHelperColumn } from './table-helper-column.model';
     InputTextModule
   ],
   templateUrl: './table-helper.component.html',
-  styleUrl: './table-helper.component.scss'
+  styleUrls: ['./table-helper.component.scss']
 })
 export class TableHelperComponent {
+
   @ViewChild('dt') table!: Table;
 
   @Input() value: any[] = [];
@@ -42,371 +43,137 @@ export class TableHelperComponent {
   @Input() rows = 10;
   @Input() rowsPerPageOptions = [10, 25, 50];
   @Input() showRowHover = true;
-  @Input() selectionMode: 'single' | 'multiple' | null = 'multiple';
   @Input() dataKey = 'id';
   @Input() globalFilterFields: string[] = [];
+
   @Input() showGlobalFilter = true;
   @Input() showClearButton = true;
   @Input() showPrintButton = true;
   @Input() showExportButton = true;
+
   @Input() exportFileName = 'table-export';
   @Input() printTitle = 'Table Print';
 
-  @Output() selectionChange = new EventEmitter<any[]>();
   @Output() rowSelect = new EventEmitter<any>();
   @Output() onSearch = new EventEmitter<string>();
 
-  // Custom template for body rows
-  @ContentChild('bodyTemplate') bodyTemplate!: TemplateRef<any>;
-  @ContentChild('emptyMessageTemplate') emptyMessageTemplate!: TemplateRef<any>;
+  selectedRow: any = null;
 
-  selectedRows: any[] = [];
   searchValue = '';
-  activityValues: number[] = [0, 100];
-
-  // Getter for selected rows
-  get selection(): any[] {
-    return this.selectedRows;
-  }
-
-  set selection(value: any[]) {
-    this.selectedRows = value;
-    this.selectionChange.emit(value);
-  }
-
-  onSelectionChange() {
-    this.selectionChange.emit(this.selectedRows);
-  }
 
   onSearchInput(searchValue: string) {
+
     this.onSearch.emit(searchValue);
-  }
 
-  clear(dt: Table) {
-    this.searchValue = '';
-    this.onSearch.emit('');
-    dt.reset();
-  }
-
-  getSeverity(status: string): any {
-    switch (status?.toLowerCase()) {
-      case 'active':
-      case 'approved':
-      case 'success':
-      case 'qualified':
-        return 'success';
-      case 'inactive':
-      case 'pending':
-      case 'warn':
-      case 'warning':
-        return 'warn';
-      case 'error':
-      case 'failed':
-      case 'danger':
-      case 'unqualified':
-        return 'danger';
-      case 'info':
-      case 'new':
-        return 'info';
-      default:
-        return 'secondary';
+    if (this.table) {
+      this.table.filterGlobal(searchValue, 'contains');
     }
+
+  }
+
+  clear() {
+
+    this.searchValue = '';
+
+    if (this.table) {
+      this.table.reset();
+    }
+
   }
 
   onRowSelect(event: any) {
-    this.rowSelect.emit(event.data);
+
+    const row = event.data;
+
+    this.rowSelect.emit(row);
+
   }
 
   onRowClick(row: any) {
+
+    this.selectedRow = row;
+
     this.rowSelect.emit(row);
+
   }
 
-  /**
-   * Export table data to Excel
-   * Uses the filtered/current table data
-   */
   exportToExcel() {
-    try {
-      // Dynamically import xlsx to reduce bundle size
-      // @ts-ignore - xlsx is an optional dependency
-      import('xlsx').then(({ utils, writeFile }) => {
-        const filteredData = this.getFilteredTableData();
-        const worksheet = utils.json_to_sheet(filteredData);
-        const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-        writeFile(workbook, `${this.exportFileName}-${this.getTimestamp()}.xlsx`);
-      }).catch(() => {
-        console.error('Failed to export to Excel. Fallback to CSV.');
-        this.exportToCSV();
-      });
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      this.exportToCSV();
-    }
-  }
 
-  /**
-   * Fallback: Export to CSV if xlsx is not available
-   */
-  private exportToCSV() {
-    const filteredData = this.getFilteredTableData();
-    const headers = this.columns.map(col => col.header).join(',');
-    const rows = filteredData.map(row =>
-      this.columns.map(col => {
-        let value = row[col.field] || '';
-        // Escape quotes and wrap in quotes if contains comma
-        if (typeof value === 'string' && value.includes(',')) {
-          value = `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      }).join(',')
-    ).join('\n');
+    import('xlsx').then(({ utils, writeFile }) => {
 
-    const csv = `${headers}\n${rows}`;
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${this.exportFileName}-${this.getTimestamp()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+      const data = this.table?.filteredValue || this.value;
 
-  /**
-   * Print the currently filtered table
-   * Works in both web browser and Tauri desktop app
-   */
-  printTable() {
-    try {
-      const filteredData = this.getFilteredTableData();
-      const html = this.generatePrintHTML(filteredData);
-      
-      // Try window.open() first (for web browsers)
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const printWindow = window.open(url, '_blank');
-      
-      if (printWindow) {
-        // window.open() succeeded - set up callbacks for web browsers
-        printWindow.onload = () => {
-          printWindow.print();
-        };
-        
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.print();
-          }
-        }, 500);
-        
-        printWindow.onafterprint = () => {
-          URL.revokeObjectURL(url);
-          printWindow.close();
-        };
-        return;
-      }
-      
-      // Fallback for Tauri: Use hidden iframe approach
-      this.printTableViaIframe(html);
-    } catch (error) {
-      console.error('Error printing table:', error);
-      alert('An error occurred while printing the table.');
-    }
-  }
+      const worksheet = utils.json_to_sheet(data);
 
-  /**
-   * Print using hidden iframe (works in Tauri desktop)
-   */
-  private printTableViaIframe(html: string) {
-    try {
-      // Create a hidden iframe
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.style.visibility = 'hidden';
-      iframe.style.height = '0';
-      iframe.style.width = '0';
-      iframe.style.border = 'none';
-      
-      document.body.appendChild(iframe);
-      
-      // Wait for iframe to be ready
-      if (iframe.contentDocument) {
-        iframe.contentDocument.open();
-        iframe.contentDocument.write(html);
-        iframe.contentDocument.close();
-        
-        // Wait for content to render before printing
-        setTimeout(() => {
-          iframe.contentWindow?.print();
-          
-          // Clean up after printing
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-          }, 100);
-        }, 250);
-      } else {
-        console.error('Unable to write to iframe document');
-        alert('Unable to open print dialog. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error in iframe print:', error);
-      alert('An error occurred while printing the table.');
-    }
-  }
+      const workbook = utils.book_new();
 
-  /**
-   * Get the currently filtered table data from PrimeNG table
-   */
-  private getFilteredTableData(): any[] {
-    // Get the value from the table (which is the filtered data)
-    return this.table.value || this.value;
-  }
+      utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-  /**
-   * Generate HTML for printing
-   */
-  private generatePrintHTML(data: any[]): string {
-    const columnHeaders = this.columns
-      .map(col => `<th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">${col.header}</th>`)
-      .join('');
+      writeFile(workbook, `${this.exportFileName}-${Date.now()}.xlsx`);
 
-    const rows = data
-      .map(row => {
-        const cells = this.columns
-          .map(col => {
-            let cellValue = row[col.field] || '';
-            
-            // Format based on template type
-            if (col.template === 'date' && cellValue) {
-              cellValue = new Date(cellValue).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-              });
-            } else if (col.template === 'currency' && cellValue) {
-              cellValue = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(cellValue);
-            }
-            
-            return `<td style="border: 1px solid #ddd; padding: 8px;">${cellValue}</td>`;
-          })
-          .join('');
-        
-        return `<tr>${cells}</tr>`;
-      })
-      .join('');
-
-return `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>${this.printTitle}</title>
-    <style>
-      /* ===== PAGE SETUP ===== */
-      @page {
-        margin: 24px;
-      }
-
-      body {
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-        color: #1f2937;
-      }
-
-      /* ===== TABLE ===== */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 16px;
-      }
-
-      caption {
-        caption-side: top;
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 16px;
-        color: #111827;
-      }
-
-      thead {
-        display: table-header-group;
-      }
-
-      th {
-        border: 1px solid #d1d5db;
-        padding: 8px;
-        background-color: #f3f4f6;
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-align: left;
-      }
-
-      td {
-        border: 1px solid #e5e7eb;
-        padding: 8px;
-        font-size: 0.875rem;
-      }
-
-      tr:nth-child(even) td {
-        background-color: #f9fafb;
-      }
-
-      /* ===== FOOTER / PAGE NUMBER ===== */
-      .footer {
-        position: fixed;
-        bottom: 12px;
-        right: 24px;
-        font-size: 0.75rem;
-        color: #6b7280;
-      }
-
-      .pageNumber::after {
-        content: counter(page);
-      }
-
-      .totalPages::after {
-        content: counter(pages);
-      }
-
-      @media print {
-        body {
-          margin: 0;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <table>
-      <caption>${this.printTitle}</caption>
-
-      <thead>
-        <tr>${columnHeaders}</tr>
-      </thead>
-
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-
-    <div class="footer">
-      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-    </div>
-  </body>
-</html>
-`;
+    });
 
   }
+printTable() {
 
-  /**
-   * Get current timestamp for file naming
-   */
-  private getTimestamp(): string {
-    const now = new Date();
-    return now.toISOString().split('T')[0] + '_' + now.getTime();
-  }
+  const source = this.table?.filteredValue || this.value;
+
+  const start = this.table?.first ?? 0;
+  const rows = this.table?.rows ?? this.rows;
+
+  const visibleData = source.slice(start, start + rows);
+
+  const headers = this.columns
+    .map(c => `<th>${c.header}</th>`)
+    .join('');
+
+  const bodyRows = visibleData
+    .map(row =>
+      `<tr>${this.columns
+        .map(c => `<td>${row[c.field] ?? ''}</td>`)
+        .join('')}</tr>`
+    )
+    .join('');
+
+  const html = `
+  <html>
+    <head>
+      <title>${this.printTitle}</title>
+      <style>
+        body{font-family:Arial}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #ccc;padding:6px;text-align:left}
+        th{background:#f3f4f6}
+      </style>
+    </head>
+    <body>
+
+      <h2>${this.printTitle}</h2>
+
+      <table>
+        <thead>
+          <tr>${headers}</tr>
+        </thead>
+        <tbody>
+          ${bodyRows}
+        </tbody>
+      </table>
+
+    </body>
+  </html>
+  `;
+
+  const win = window.open('', '_blank');
+
+  if (!win) return;
+
+  win.document.write(html);
+  win.document.close();
+
+  setTimeout(() => {
+    win.print();
+    win.close();
+  }, 300);
+
+}
 }

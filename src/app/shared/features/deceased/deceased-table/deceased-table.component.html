@@ -1,23 +1,23 @@
-
 <div class="deceased-table-container">
+
   <app-table-helper
     [value]="deceasedList"
     [columns]="columns"
     [loading]="loading"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 50, 100]"
+    [rows]="50"
+    [rowsPerPageOptions]="[10,20,50]"
     [showRowHover]="true"
-    [selectionMode]="'multiple'"
     [dataKey]="'id'"
-    [globalFilterFields]="['contract_no', 'first_name', 'middle_name', 'last_name', 'religion', 'office']"
+    [globalFilterFields]="['firstName','middleName','lastName']"
     [showGlobalFilter]="true"
     [showClearButton]="true"
     [showPrintButton]="true"
     [showExportButton]="true"
-    [exportFileName]="'deceased-list'"
-    [printTitle]="'Deceased Records'"
-    (selectionChange)="onDeceasedSelected($event)"
+    [exportFileName]="'funeral-contracts'"
+    [printTitle]="'Funeral Contracts'"
     (rowSelect)="onRowSelected($event)"
     (onSearch)="onSearch($event)"
-  ></app-table-helper>
+  >
+  </app-table-helper>
+
 </div>

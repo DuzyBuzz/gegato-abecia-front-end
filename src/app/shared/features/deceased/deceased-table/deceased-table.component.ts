@@ -1,43 +1,46 @@
-import { Component, OnInit, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableHelperComponent } from '../../../components/table-helper/table-helper.component';
 import { TableHelperColumn } from '../../../components/table-helper/table-helper-column.model';
-import { Deceased, FuneralContract } from '../../../../models/funeral-contract.model';
+import { FuneralService } from '../../../../models/funeral-service.model';
+import { FuneralServiceService } from '../../../../services/funeral-service.service';
 import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
-import { FUNERAL_CONTRACTS_MOCK } from '../../../../../assets/mock/funeral-contract.mock';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-deceased-table',
   standalone: true,
-  imports: [CommonModule, TableHelperComponent, ButtonModule, ToolbarModule],
-  templateUrl: './deceased-table.component.html',
+  imports: [
+    CommonModule,
+    TableHelperComponent,
+    ButtonModule,
+    ToolbarModule
+  ],
+    templateUrl: './deceased-table.component.html',
   styleUrl: './deceased-table.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeceasedTableComponent implements OnInit {
-  
-  // Store full funeral contracts for complete data access
-  funeralContracts: FuneralContract[] = FUNERAL_CONTRACTS_MOCK;
-  
-  // Deceased data from mock funeral contracts (for table display)
-  deceasedList: Deceased[] = FUNERAL_CONTRACTS_MOCK.map(contract => contract.deceased);
 
-  @Output() contractSelected = new EventEmitter<FuneralContract>();
+  deceasedList: FuneralService[] = [];
 
+  loading = false;
 
-  // Table columns configuration
+  selectedDeceased?: FuneralService;
+
+  @Output() contractSelected = new EventEmitter<FuneralService>();
+
   columns: TableHelperColumn[] = [
     {
-      field: 'contract_no',
+      field: 'contractNo',
       header: 'Contract #',
       sortable: true,
       filterable: true,
       filterType: 'text',
-      width: '12rem',
+      width: '12rem'
     },
     {
-      field: 'first_name',
+      field: 'firstName',
       header: 'First Name',
       sortable: true,
       filterable: true,
@@ -45,7 +48,7 @@ export class DeceasedTableComponent implements OnInit {
       width: '12rem'
     },
     {
-      field: 'middle_name',
+      field: 'middleName',
       header: 'Middle Name',
       sortable: true,
       filterable: true,
@@ -53,20 +56,11 @@ export class DeceasedTableComponent implements OnInit {
       width: '12rem'
     },
     {
-      field: 'last_name',
+      field: 'lastName',
       header: 'Last Name',
       sortable: true,
       filterable: true,
       filterType: 'text',
-      width: '12rem'
-    },
-    {
-      field: 'date_of_death',
-      header: 'Date of Death',
-      sortable: true,
-      filterable: true,
-      filterType: 'date',
-      template: 'date',
       width: '12rem'
     },
     {
@@ -78,77 +72,85 @@ export class DeceasedTableComponent implements OnInit {
       width: '10rem'
     },
     {
-      field: 'type_of_service',
+      field: 'municipality',
+      header: 'Municipality',
+      sortable: true,
+      filterable: true,
+      filterType: 'text',
+      width: '12rem'
+    },
+    {
+      field: 'type',
       header: 'Service Type',
       sortable: true,
       filterable: true,
-      filterType: 'select',
-      width: '12rem'
-    },
-    {
-      field: 'casket',
-      header: 'Casket',
-      sortable: true,
-      filterable: true,
-      filterType: 'text',
-      width: '10rem'
-    },
-    {
-      field: 'office',
-      header: 'Office',
-      sortable: true,
-      filterable: true,
       filterType: 'text',
       width: '12rem'
     },
     {
-      field: 'deliviered_by',
-      header: 'Delivered By',
+      field: 'startOfTransaction',
+      header: 'Start Date',
       sortable: true,
       filterable: true,
-      filterType: 'text',
+      filterType: 'date',
+      template: 'date',
       width: '12rem'
     }
   ];
 
-  selectedDeceased: Deceased[] = [];
-  loading = false;
+  constructor(
+    private funeralService: FuneralServiceService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-
-  ngOnInit() {
-    // Load deceased data from service
-    // In a real application, you would call a service here
-  }
-  onRowClicked(row: Deceased) {
-    console.log('Row clicked:', row.id);
+  ngOnInit(): void {
+    this.loadContracts();
   }
 
-  /**
-   * Handle deceased double-click selection
-   */
-  onDeceasedSelected(deceased: Deceased[]) {
-    this.selectedDeceased = deceased;
-    console.log('Selected deceased:', this.selectedDeceased);
+  loadContracts(): void {
+
+    this.loading = true;
+
+    this.funeralService.getFuneralServices(1, 50).subscribe({
+
+      next: (res) => {
+
+        console.log('API RESPONSE:', res);
+
+        this.deceasedList = res;
+
+        this.loading = false;
+
+        this.cdr.detectChanges();
+
+      },
+
+      error: (err) => {
+
+        console.error('API ERROR:', err);
+
+        this.loading = false;
+
+      }
+
+    });
+
   }
 
-  /**
-   * Handle row double-click selection
-   */
-  onRowSelected(deceased: Deceased) {
-    console.log('Row double-clicked:', deceased.id);
-    // Find the full funeral contract for this deceased
-    const contract = this.funeralContracts.find(c => c.deceased.id === deceased.id);
-    if (contract) {
-      this.contractSelected.emit(contract);
-    }
+  onRowSelected(row: FuneralService): void {
+
+    this.selectedDeceased = row;
+
+    console.log('Selected contract:', row);
+
+    this.contractSelected.emit(row);
+
   }
 
-  /**
-   * Search handler
-   */
-  onSearch(searchValue: string) {
+  onSearch(searchValue: string): void {
+
     console.log('Search value:', searchValue);
-    // Filter data based on search value
-    // In a real application, this would call a service
+
   }
+
 }
