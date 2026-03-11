@@ -89,12 +89,6 @@ export class FuneralContractEntry implements OnInit {
       transferTime: [''],
       transferLocation: [''],
       transferNotes: [''],
-      transferDateRetrieved: [''],
-      transferDriver: [''],
-      transferCaller: [''],
-      transferHelper: [''],
-      transferCheckedBy: [''],
-      transferEmbalmedBy: [''],
 
       // Burial/Cremation Schedule
       burialDate: [''],

@@ -112,7 +112,7 @@ export class DeceasedTableComponent implements OnInit {
 
     this.loading = true;
 
-    this.funeralService.getFuneralServices(1, 10).subscribe({
+    this.funeralService.getFuneralServices(1, 100).subscribe({
 
       next: (res) => {
 

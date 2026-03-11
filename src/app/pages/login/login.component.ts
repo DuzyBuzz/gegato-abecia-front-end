@@ -17,7 +17,7 @@ interface MockUser {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
