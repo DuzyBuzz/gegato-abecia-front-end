@@ -12,6 +12,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { CascadeSelectModule } from 'primeng/cascadeselect';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR
@@ -21,7 +23,7 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
 @Component({
   selector: 'app-select-helper',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule],
+  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, CascadeSelectModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -32,43 +34,44 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
   ],
   template: `
 
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-2 w-full" #selectElement tabindex="0" (focus)="onSelectFocus()" (click)="onSelectClick()">
+  <p-cascadeselect
+    [(ngModel)]="selectedCascade"
+    [options]="cascadeOptions"
+    optionLabel="cname"
+    styleClass="w-full"
+    placeholder="Select an item"
+    (ngModelChange)="onCascadeChange($event)"
+    [disabled]="isLoading">
 
-<select
-#selectElement
-class="border rounded px-2 py-1 w-full"
-[disabled]="isLoading"
-[(ngModel)]="value"
-(ngModelChange)="select($event)"
-(focus)="onSelectFocus()"
-(click)="onSelectClick()"
->
-<option value="">{{ isLoading ? 'Loading...' : (options.length === 0 ? 'No items' : '-- Select --') }}</option>
-<option *ngFor="let o of options" [value]="o">{{ o }}</option>
-</select>
+    <ng-template #footer>
+      <div class="px-3 py-1">
+        <p-button label="Add New" fluid severity="secondary" text size="small" icon="pi pi-plus" (onClick)="open()"></p-button>
+      </div>
+    </ng-template>
 
-  <button type="button" (click)="open()" aria-placeholder="Edit List" class="border px-2 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">
-   ⋮✏️
-  </button>
-
+  </p-cascadeselect>
 </div>
 
 <p-dialog [(visible)]="modalOpen" modal="true" appendTo="body" [style]="{width: '420px'}" (onHide)="onDialogHide()" [dismissableMask]="true">
+
   <ng-template pTemplate="header">
     <div class="font-semibold">Edit List Items</div>
   </ng-template>
 
   <div class="p-4">
     <label class="text-xs text-gray-700">Type each item on a separate line:</label>
+
     <textarea
-      name="editorText"
       rows="8"
       [(ngModel)]="editorText"
-      class="w-full border mt-2 p-2 text-sm font-mono"></textarea>
+      class="w-full border mt-2 p-2 text-sm font-mono">
+    </textarea>
 
     <div class="mt-3">
       <label class="text-xs text-gray-700">Default Value</label>
-      <select name="editorDefault" [(ngModel)]="editorDefault" class="w-full border p-1 mt-1 text-sm">
+
+      <select [(ngModel)]="editorDefault" class="w-full border p-1 mt-1 text-sm">
         <option *ngFor="let o of editorOptions" [value]="o">{{ o }}</option>
       </select>
     </div>
@@ -76,8 +79,19 @@ class="border rounded px-2 py-1 w-full"
 
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <button class="px-3 py-1 border" (click)="cancel()">Cancel</button>
-      <button class="px-3 py-1 bg-blue-600 text-white" (click)="save()">OK</button>
+
+      <p-button
+        label="Cancel"
+        (onClick)="cancel()"
+        styleClass="px-3 py-1 p-button-danger p-button-outlined">
+      </p-button>
+
+      <p-button
+        label="OK"
+        (onClick)="save()"
+        styleClass="px-3 py-1 p-button-success">
+      </p-button>
+
     </div>
   </ng-template>
 
@@ -86,46 +100,59 @@ class="border rounded px-2 py-1 w-full"
 })
 export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDestroy {
 
-  @ViewChild('selectElement') selectElement?: ElementRef<HTMLSelectElement>;
-
+  @ViewChild('selectElement', { read: ElementRef }) selectElement?: ElementRef<HTMLElement>;
+@Input() allowDefaultSelection = false;
   private _comboboxName = '';
   private _hasLoaded = false;
   private _isLoading = false;
   private _modalJustClosed = false;
+
   isLoading = false;
 
   options: string[] = [];
   value: string | null = null;
 
-  // modal editor state
+  selectedCascade: any = null;
+
+  private cascadeOptionsList: Array<{ cname: string; code: string }> = [];
+
+  get cascadeOptions(): any[] {
+    return this.cascadeOptionsList;
+  }
+
   modalOpen = false;
   editorText = '';
   editorDefault = '';
 
-  // keep latest default for the component's initial editor default
-  defaultValue = '';
+  // editor-only stored default
+  private storedDefault = '';
 
   private unsub?: () => void;
 
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
 
+  constructor(
+    private combo: ComboboxFirestoreService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
   @Input() set comboboxName(name: string) {
     if (name && name !== this._comboboxName) {
+
       this._comboboxName = name;
       this._hasLoaded = false;
       this._isLoading = false;
-      // Unsubscribe from previous watcher when combobox name changes
+
       if (this.unsub) {
-        try { this.unsub(); } catch (e) { /* ignore */ }
+        this.unsub();
         this.unsub = undefined;
       }
-      // Reset when combobox name changes
+
       this.options = [];
-      this.isLoading = false;
-      this.cdr.markForCheck();
-      
-      // Immediately try to load if parent preloaded
+      this.cascadeOptionsList = [];
+      this.selectedCascade = null;
+
       this.tryLoadImmediately();
     }
   }
@@ -134,244 +161,218 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
     return this._comboboxName;
   }
 
-  constructor(
-    private combo: ComboboxFirestoreService,
-    private cdr: ChangeDetectorRef
-  ) {}
-
   ngOnInit(): void {
-    // Try to load immediately if combobox name is already set
     if (this._comboboxName && !this._hasLoaded) {
       this.tryLoadImmediately();
     }
   }
 
-  // Try to load data immediately (will be fast if parent preloaded)
   private tryLoadImmediately(): void {
     if (!this._comboboxName || this._hasLoaded || this._isLoading) return;
-    
     this.loadCombobox();
   }
 
-  // Load data when select is focused
   onSelectFocus(): void {
     if (this._modalJustClosed) {
       this._modalJustClosed = false;
       return;
     }
-    
-    if (this._isLoading) return;
-    if (!this._hasLoaded && this._comboboxName) {
+
+    if (!this._hasLoaded) {
       this.loadCombobox();
     }
   }
 
-  // Load data when select is clicked
   onSelectClick(): void {
     if (this._modalJustClosed) {
       this._modalJustClosed = false;
       return;
     }
-    
-    if (this._isLoading) return;
-    if (!this._hasLoaded && this._comboboxName) {
+
+    if (!this._hasLoaded) {
       this.loadCombobox();
     }
   }
 
   private async loadCombobox(): Promise<void> {
+
     if (this._isLoading || this._hasLoaded) return;
 
     this._isLoading = true;
     this.isLoading = true;
     this._hasLoaded = true;
-    this.cdr.markForCheck();
-
-    if (!this._comboboxName) {
-      this._isLoading = false;
-      this.isLoading = false;
-      this.cdr.markForCheck();
-      return;
-    }
 
     try {
-      // Get from cache or Firestore (cached if parent preloaded)
+
       const data = await this.combo.getCombobox(this._comboboxName);
-      
+
       this.options = data.items || [];
-      this.defaultValue = data.default || '';
+      this.storedDefault = data.default || '';
 
-      // ensure value is valid after options load
-      if (!this.value && this.defaultValue) {
-        this.value = this.defaultValue;
-        this.onChange(this.value);
-      }
+      this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
+if (this.value) {
+  this.selectedCascade = this.cascadeOptionsList.find(x => x.cname === this.value) || null;
+}
+else if (this.allowDefaultSelection && this.storedDefault) {
+  this.value = this.storedDefault;
+  this.selectedCascade = this.cascadeOptionsList.find(x => x.cname === this.storedDefault) || null;
+  this.onChange(this.value);
+}
+else {
+  this.selectedCascade = null;
+}
 
-      this._isLoading = false;
-      this.isLoading = false;
-      this.cdr.markForCheck();
     } catch (err) {
+
       console.error(`[SelectHelper] Failed to load: ${this._comboboxName}`, err);
       this.options = [];
-      this._isLoading = false;
-      this.isLoading = false;
-      this.cdr.markForCheck();
+
     }
 
-    // subscribe to realtime updates (async in background)
+    this._isLoading = false;
+    this.isLoading = false;
+
+    this.cdr.markForCheck();
+
     try {
+
       this.unsub = this.combo.watchCombobox(
         this._comboboxName,
         (d: { items: string[]; default: string }) => {
-          this.options = d.items || [];
-          this.defaultValue = d.default || '';
 
-          // keep selection valid
-          if (!this.value && this.defaultValue) {
-            this.value = this.defaultValue;
-            this.onChange(this.value);
+          this.options = d.items || [];
+          this.storedDefault = d.default || '';
+
+          this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
+
+          if (this.value && !this.options.includes(this.value)) {
+            this.value = null;
+            this.selectedCascade = null;
+            this.onChange(null);
           }
 
-          // if current selected value is no longer available, adjust it
-          if (this.value && !this.options.includes(this.value)) {
-            this.value = this.options[0] ?? null;
-            this.onChange(this.value);
+          if (this.value) {
+            this.selectedCascade =
+              this.cascadeOptionsList.find(x => x.cname === this.value) || null;
+          } else {
+            this.selectedCascade = null;
           }
 
           this.cdr.markForCheck();
         }
       );
+
     } catch (err) {
+
       console.error(`[SelectHelper] Failed to watch: ${this._comboboxName}`, err);
+
     }
   }
 
   ngOnDestroy(): void {
-    if (this.unsub) {
-      try { this.unsub(); } catch (e) { /* ignore */ }
-      this.unsub = undefined;
-    }
+    if (this.unsub) this.unsub();
   }
 
-  // ControlValueAccessor
   writeValue(obj: any): void {
+
     this.value = obj;
+
+    if (this.value) {
+      this.selectedCascade =
+        this.cascadeOptionsList.find(x => x.cname === this.value) || null;
+    } else {
+      this.selectedCascade = null;
+    }
+
   }
+
   registerOnChange(fn: any): void { this.onChange = fn; }
   registerOnTouched(fn: any): void { this.onTouched = fn; }
-  setDisabledState?(isDisabled: boolean): void {
-    // not implemented; add disabled handling if required
-  }
 
-  // user selects from dropdown
-  select(v: string): void {
-    this.value = v;
-    this.onChange(v);
+  onCascadeChange(selection: any): void {
+
+    if (!selection) {
+      this.value = null;
+    } else {
+      this.value = selection.cname;
+    }
+
+    this.onChange(this.value);
     this.onTouched();
-    this.cdr.markForCheck();
   }
 
-  // modal controls
   open(): void {
-    // prefill editor from current options
+
     this.editorText = this.options.join('\n');
-    this.editorDefault = this.defaultValue || (this.options[0] ?? '');
+    this.editorDefault = this.storedDefault || '';
+
     this.modalOpen = true;
-    this.cdr.markForCheck();
+
   }
 
   close(): void {
     this.modalOpen = false;
-    this.cdr.markForCheck();
-  }
-
-  onDialogHide(): void {
-    this._modalJustClosed = true;
-    this.cdr.markForCheck();
-    // Return focus to select after dialog fully hides
-    setTimeout(() => {
-      this.selectElement?.nativeElement?.focus();
-    }, 0);
-  }
-
-  closeIfBackdrop(event: MouseEvent): void {
-    // Only close if clicking on the backdrop, not the modal content
-    if (event.target === event.currentTarget) {
-      this.close();
-    }
   }
 
   cancel(): void {
     this.close();
   }
 
+  onDialogHide(): void {
+
+    this._modalJustClosed = true;
+
+    setTimeout(() => {
+      this.selectElement?.nativeElement?.focus();
+    });
+
+  }
+
   get editorOptions(): string[] {
-    // derive options live from editorText (cleaned & deduped)
+
     return Array.from(new Set(
       (this.editorText || '')
         .split(/\r?\n/)
         .map(v => v.trim())
         .filter(v => v.length > 0)
     ));
+
   }
 
   async save(): Promise<void> {
+
     if (!this._comboboxName) return;
 
     try {
-      await this.combo.updateCombobox(this._comboboxName, this.editorText, this.editorDefault);
-      // Immediately update local UI so the change feels instant
-      const items = this.editorOptions;
-      const def = this.editorDefault || items[0] || '';
-      this.options = items;
-      this.defaultValue = def;
 
-      // keep selection valid
-      if (!this.value && this.defaultValue) {
-        this.value = this.defaultValue;
-        this.onChange(this.value);
-      }
+      await this.combo.updateCombobox(
+        this._comboboxName,
+        this.editorText,
+        this.editorDefault
+      );
 
-      if (this.value && !this.options.includes(this.value)) {
-        this.value = this.options[0] ?? null;
-        this.onChange(this.value);
-      }
+      this.options = this.editorOptions;
+      this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
+
+      // store default only for editor reference
+      this.storedDefault = this.editorDefault || '';
+
+      // force no automatic selection
+      this.value = null;
+      this.selectedCascade = null;
+      this.onChange(null);
 
       this.cdr.markForCheck();
 
-      // Ensure a realtime watcher is active to receive subsequent updates
-      if (!this.unsub) {
-        try {
-          this.unsub = this.combo.watchCombobox(
-            this._comboboxName,
-            (d: { items: string[]; default: string }) => {
-              this.options = d.items || [];
-              this.defaultValue = d.default || '';
-
-              if (!this.value && this.defaultValue) {
-                this.value = this.defaultValue;
-                this.onChange(this.value);
-              }
-
-              if (this.value && !this.options.includes(this.value)) {
-                this.value = this.options[0] ?? null;
-                this.onChange(this.value);
-              }
-
-              this.cdr.markForCheck();
-            }
-          );
-        } catch (e) {
-          console.error(`[SelectHelper] Failed to start watcher after save: ${this._comboboxName}`, e);
-        }
-      }
-
-      // close modal
       this.close();
+
     } catch (err) {
+
       console.error('Failed saving combobox:', err);
-      // quick user feedback — replace with your toast/UX
       alert((err && (err as Error).message) || 'Save failed');
+
     }
+
   }
+
 }
