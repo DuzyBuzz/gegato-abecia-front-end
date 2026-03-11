@@ -18,6 +18,7 @@ export class FuneralContractEntry implements OnInit {
 
   form: FormGroup;
   deceasedName = '';
+  comboboxesReady = false;
 
   constructor(
     private router: Router,
@@ -89,6 +90,11 @@ export class FuneralContractEntry implements OnInit {
       transferTime: [''],
       transferLocation: [''],
       transferNotes: [''],
+      transferDriver: [''],
+      transferCaller: [''],
+      transferHelper: [''],
+      transferCheckedBy: [''],
+      transferEmbalmedBy: [''],
 
       // Burial/Cremation Schedule
       burialDate: [''],
@@ -131,18 +137,21 @@ export class FuneralContractEntry implements OnInit {
       comboboxNames.map(name => this.comboboxService.getCombobox(name))
     ).then(() => {
       console.log('[FuneralContractEntry] Comboboxes preloaded');
+      this.comboboxesReady = true;
       // Set up real-time watchers
       comboboxNames.forEach(name => {
         this.comboboxService.watchCombobox(name, () => {});
       });
     }).catch(err => {
       console.error('[FuneralContractEntry] Preload failed:', err);
+      // Set ready flag even on error to allow form to render
+      this.comboboxesReady = true;
     });
   }
 
   ngOnInit(): void {
-    // Preload SelectHelper collections
-    this.preloadComboboxes();
+    // Comboboxes are already preloading in constructor
+    // No need to call again
   }
 
   goToBilling(): void {
