@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { FuneralService } from '../models/funeral-service.model'
+import { environment } from '../../environments/environment'
 
 @Injectable({
   providedIn: 'root'
 })
 export class FuneralServiceService {
 
-  private api = 'https://gegato-abecia-fh.appspot.com/funeralservice'
+  private api = `${environment.api}/funeralservice`
 
   constructor(private http: HttpClient) {}
 
@@ -18,6 +19,10 @@ export class FuneralServiceService {
 
   getFuneralService(id:number): Observable<FuneralService> {
     return this.http.get<FuneralService>(`${this.api}/find_record/${id}`)
+  }
+
+  searchFuneralServices(filter:string): Observable<FuneralService[]> {
+    return this.http.get<FuneralService[]>(`${this.api}/find_record/${filter}`)
   }
 
   save(service:FuneralService) {

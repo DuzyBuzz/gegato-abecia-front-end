@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  api: '/api',
+  production: true,
+  api: 'https://gegato-abecia-fh.appspot.com',
   firebase: {
     apiKey: "AIzaSyA7IVT-YX1V-5-_36hasCSzUH--cP0eago",
     authDomain: "gegato-abecia-management-sys.firebaseapp.com",

@@ -9,35 +9,32 @@
   "projects": {
     "gegato-abecia": {
       "projectType": "application",
-  "schematics": {
-    "@schematics/angular:component": {
-      "style": "scss",
-      "type": "component",
-
-      "standalone": true,
-      "skipTests": false
-    },
-    "@schematics/angular:service": {
-      "type": "service",
-      "skipTests": false
-    },
-
-    "@schematics/angular:guard": {
-      "skipTests": false
-    },
-    "@schematics/angular:pipe": {
-      "type": "pipe",
-      "skipTests": false
-    },
-    "@schematics/angular:directive": {
-      "type": "directive",
-      "skipTests": false
-    },
-    "@schematics/angular:resolver": {
-      "type": "resolver",
-      "skipTests": false
-    }
-  },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss",
+          "type": "component",
+          "standalone": true,
+          "skipTests": false
+        },
+        "@schematics/angular:service": {
+          "type": "service",
+          "skipTests": false
+        },
+        "@schematics/angular:guard": {
+          "skipTests": false
+        },
+        "@schematics/angular:pipe": {
+          "type": "pipe",
+          "skipTests": false
+        },
+        "@schematics/angular:directive": {
+          "type": "directive",
+          "skipTests": false
+        },
+        "@schematics/angular:resolver": {
+          "skipTests": false
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -49,7 +46,6 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "outputPath": "dist/gegato-abecia",
-
             "assets": [
               {
                 "glob": "**/*",
@@ -64,6 +60,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.production.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -82,6 +84,7 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+
             }
           },
           "defaultConfiguration": "production"
@@ -96,7 +99,10 @@
               "buildTarget": "gegato-abecia:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"

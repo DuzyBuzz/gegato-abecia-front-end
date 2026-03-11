@@ -61,25 +61,36 @@ export class TableHelperComponent {
 
   searchValue = '';
 
-  onSearchInput(searchValue: string) {
+triggerSearch() {
+  console.log("SEARCH TRIGGERED", this.searchValue);
+  const value = this.searchValue?.trim() || '';
 
-    this.onSearch.emit(searchValue);
+  this.onSearch.emit(value);
 
-    if (this.table) {
-      this.table.filterGlobal(searchValue, 'contains');
-    }
+}
+onEnterSearch() {
 
+  const value = (this.searchValue ?? '').trim();
+
+  if (!value) return;
+
+  this.triggerSearch();
+
+}
+
+clear() {
+
+  this.searchValue = '';
+
+  if (this.table) {
+    this.table.reset();
   }
 
-  clear() {
+  // trigger reload
+  this.onSearch.emit('');
 
-    this.searchValue = '';
+}
 
-    if (this.table) {
-      this.table.reset();
-    }
-
-  }
 
   onRowSelect(event: any) {
 
@@ -97,23 +108,83 @@ export class TableHelperComponent {
 
   }
 
-  exportToExcel() {
+exportToExcel() {
 
-    import('xlsx').then(({ utils, writeFile }) => {
+  import('xlsx').then(({ utils, writeFile }) => {
 
-      const data = this.table?.filteredValue || this.value;
+    const source = this.table?.filteredValue || this.value;
 
-      const worksheet = utils.json_to_sheet(data);
+    const exportData = source.map(row => {
 
-      const workbook = utils.book_new();
+      const obj: any = {};
 
-      utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      this.columns.forEach(col => {
 
-      writeFile(workbook, `${this.exportFileName}-${Date.now()}.xlsx`);
+        let value = row[col.field];
+
+        value = this.normalizeExcelValue(value);
+
+        obj[col.header] = value;
+
+      });
+
+      return obj;
 
     });
 
+    const worksheet = utils.json_to_sheet(exportData);
+
+    const workbook = utils.book_new();
+
+    utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    writeFile(workbook, `${this.exportFileName}-${Date.now()}.xlsx`);
+
+  });
+
+}
+normalizeExcelValue(value: any): any {
+
+  if (value === null || value === undefined) {
+    return '';
   }
+
+  // Date object
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+
+  // timestamp (ms)
+  if (typeof value === 'number' && value > 100000000000) {
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString();
+    }
+  }
+
+  // boolean
+  if (typeof value === 'boolean') {
+    return value ? 'Yes' : 'No';
+  }
+
+  // array
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+
+  // object
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  // prevent scientific notation
+  if (typeof value === 'number') {
+    return value.toString();
+  }
+
+  return value;
+
+}
 printTable() {
 
   const source = this.table?.filteredValue || this.value;

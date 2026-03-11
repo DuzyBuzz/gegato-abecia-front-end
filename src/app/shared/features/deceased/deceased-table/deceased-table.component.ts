@@ -40,6 +40,15 @@ export class DeceasedTableComponent implements OnInit {
       width: '12rem'
     },
     {
+      field: 'lastName',
+      header: 'Last Name',
+      sortable: true,
+      filterable: true,
+      filterType: 'text',
+      width: '12rem'
+    },
+
+        {
       field: 'firstName',
       header: 'First Name',
       sortable: true,
@@ -50,14 +59,6 @@ export class DeceasedTableComponent implements OnInit {
     {
       field: 'middleName',
       header: 'Middle Name',
-      sortable: true,
-      filterable: true,
-      filterType: 'text',
-      width: '12rem'
-    },
-    {
-      field: 'lastName',
-      header: 'Last Name',
       sortable: true,
       filterable: true,
       filterType: 'text',
@@ -111,7 +112,7 @@ export class DeceasedTableComponent implements OnInit {
 
     this.loading = true;
 
-    this.funeralService.getFuneralServices(1, 50).subscribe({
+    this.funeralService.getFuneralServices(1, 10).subscribe({
 
       next: (res) => {
 
@@ -146,11 +147,32 @@ export class DeceasedTableComponent implements OnInit {
     this.contractSelected.emit(row);
 
   }
+onSearch(searchValue: string): void {
 
-  onSearch(searchValue: string): void {
-
-    console.log('Search value:', searchValue);
-
+  if (!searchValue?.trim()) {
+    this.loadContracts();
+    return;
   }
 
+  this.loading = true;
+
+  this.funeralService.searchFuneralServices(searchValue)
+    .subscribe({
+      next: (res) => {
+
+        // schedule on next macrotask to avoid ExpressionChangedAfterItHasBeenCheckedError
+        setTimeout(() => {
+          this.deceasedList = res;
+          this.loading = false;
+          this.cdr.markForCheck?.();
+        }, 0);
+
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+
 }
+}
+

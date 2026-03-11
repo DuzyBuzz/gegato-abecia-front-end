@@ -32,15 +32,21 @@
             pInputText
             type="text"
             [(ngModel)]="searchValue"
-            (input)="onSearchInput($event.target.value)"
             placeholder="Search..."
             class="w-full"
+             (keydown.enter)="triggerSearch()"
           />
 
         </p-iconField>
 
         <div class="flex gap-2">
-
+        <p-button
+          icon="pi pi-search"
+          label="Search"
+          severity="primary"
+          [disabled]="!searchValue"
+          (click)="triggerSearch()">
+        </p-button>
           <p-button
             *ngIf="showClearButton"
             severity="danger"

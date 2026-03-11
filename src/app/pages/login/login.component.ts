@@ -4,6 +4,7 @@ import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angula
 import { AuthService } from '../../services/auth.service';
 import { MockDataGeneratorService } from '../../services/mock-data-generator.service';
 import { Router } from '@angular/router';
+import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
 
 interface MockUser {
   username: string;
@@ -16,7 +17,7 @@ interface MockUser {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
@@ -44,6 +45,7 @@ showPassword = false;
   ngOnInit() {
     // Load available mock users
     this.mockUsers = this.auth.getMockUsers();
+    
   }
 
   /**
