@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR
@@ -20,7 +21,7 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
 @Component({
   selector: 'app-select-helper',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DialogModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -52,38 +53,35 @@ class="border rounded px-2 py-1 w-full"
 
 </div>
 
-<!-- Modal -->
-<div *ngIf="modalOpen" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" (click)="closeIfBackdrop($event)">
-  <div class="bg-white rounded shadow w-[420px]" (click)="$event.stopPropagation()">
+<p-dialog [(visible)]="modalOpen" modal="true" appendTo="body" [style]="{width: '420px'}" (onHide)="onDialogHide()" [dismissableMask]="true">
+  <ng-template pTemplate="header">
+    <div class="font-semibold">Edit List Items</div>
+  </ng-template>
 
-    <div class="border-b px-4 py-2 flex justify-between items-center">
-      <div class="font-semibold">Edit List Items</div>
-      <button (click)="close()" class="text-gray-600">✕</button>
+  <div class="p-4">
+    <label class="text-xs text-gray-700">Type each item on a separate line:</label>
+    <textarea
+      name="editorText"
+      rows="8"
+      [(ngModel)]="editorText"
+      class="w-full border mt-2 p-2 text-sm font-mono"></textarea>
+
+    <div class="mt-3">
+      <label class="text-xs text-gray-700">Default Value</label>
+      <select name="editorDefault" [(ngModel)]="editorDefault" class="w-full border p-1 mt-1 text-sm">
+        <option *ngFor="let o of editorOptions" [value]="o">{{ o }}</option>
+      </select>
     </div>
+  </div>
 
-    <div class="p-4">
-      <label class="text-xs text-gray-700">Type each item on a separate line:</label>
-      <textarea
-        name="editorText"
-        rows="8"
-        [(ngModel)]="editorText"
-        class="w-full border mt-2 p-2 text-sm font-mono"></textarea>
-
-      <div class="mt-3">
-        <label class="text-xs text-gray-700">Default Value</label>
-        <select name="editorDefault" [(ngModel)]="editorDefault" class="w-full border p-1 mt-1 text-sm">
-          <option *ngFor="let o of editorOptions" [value]="o">{{ o }}</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="border-t px-4 py-3 flex justify-end gap-2">
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
       <button class="px-3 py-1 border" (click)="cancel()">Cancel</button>
       <button class="px-3 py-1 bg-blue-600 text-white" (click)="save()">OK</button>
     </div>
+  </ng-template>
 
-  </div>
-</div>
+</p-dialog>
 `
 })
 export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDestroy {
@@ -117,6 +115,11 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
       this._comboboxName = name;
       this._hasLoaded = false;
       this._isLoading = false;
+      // Unsubscribe from previous watcher when combobox name changes
+      if (this.unsub) {
+        try { this.unsub(); } catch (e) { /* ignore */ }
+        this.unsub = undefined;
+      }
       // Reset when combobox name changes
       this.options = [];
       this.isLoading = false;
@@ -244,7 +247,10 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   }
 
   ngOnDestroy(): void {
-    if (this.unsub) this.unsub();
+    if (this.unsub) {
+      try { this.unsub(); } catch (e) { /* ignore */ }
+      this.unsub = undefined;
+    }
   }
 
   // ControlValueAccessor
@@ -276,10 +282,13 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
 
   close(): void {
     this.modalOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onDialogHide(): void {
     this._modalJustClosed = true;
     this.cdr.markForCheck();
-    
-    // Return focus to select after modal closes
+    // Return focus to select after dialog fully hides
     setTimeout(() => {
       this.selectElement?.nativeElement?.focus();
     }, 0);
@@ -311,7 +320,53 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
 
     try {
       await this.combo.updateCombobox(this._comboboxName, this.editorText, this.editorDefault);
-      // close modal (watcher will update options/default)
+      // Immediately update local UI so the change feels instant
+      const items = this.editorOptions;
+      const def = this.editorDefault || items[0] || '';
+      this.options = items;
+      this.defaultValue = def;
+
+      // keep selection valid
+      if (!this.value && this.defaultValue) {
+        this.value = this.defaultValue;
+        this.onChange(this.value);
+      }
+
+      if (this.value && !this.options.includes(this.value)) {
+        this.value = this.options[0] ?? null;
+        this.onChange(this.value);
+      }
+
+      this.cdr.markForCheck();
+
+      // Ensure a realtime watcher is active to receive subsequent updates
+      if (!this.unsub) {
+        try {
+          this.unsub = this.combo.watchCombobox(
+            this._comboboxName,
+            (d: { items: string[]; default: string }) => {
+              this.options = d.items || [];
+              this.defaultValue = d.default || '';
+
+              if (!this.value && this.defaultValue) {
+                this.value = this.defaultValue;
+                this.onChange(this.value);
+              }
+
+              if (this.value && !this.options.includes(this.value)) {
+                this.value = this.options[0] ?? null;
+                this.onChange(this.value);
+              }
+
+              this.cdr.markForCheck();
+            }
+          );
+        } catch (e) {
+          console.error(`[SelectHelper] Failed to start watcher after save: ${this._comboboxName}`, e);
+        }
+      }
+
+      // close modal
       this.close();
     } catch (err) {
       console.error('Failed saving combobox:', err);
