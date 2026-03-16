@@ -1,0 +1,125 @@
+Funeral Service {
+    private long id;
+
+    // ========== SECTION 1: CONTRACT INFORMATION ==========
+    private String contractNo;
+    private String type;
+    private Date contractDate;
+    private double price;
+    private double discount;
+    private Date dueDate;
+    private String checkedBy;
+    private String financialAssitance;
+
+    // ========== SECTION 2: DECEASED INFORMATION ==========
+    private String firstName;
+    private String middleName;
+    private String lastName;
+    private Date dateOfBirth;
+    private String gender;
+    private String civilStatus;
+    private Date dateOfDeath;
+    private String timeOfDeath;
+    private String placeOfDeath;
+    private String placeOfBirth;
+    private String religion;
+    private String addressLine1;
+    private String parentFather;
+    private String parentMother;
+    private String nameOfInformant;
+
+    // ========== SECTION 3: CONTRACTEE INFORMATION ==========
+    private String contractee;
+    private String contracteeAge;
+    private String contracteeGender;
+    private String contracteeCivilStatus;
+    private String contactNo;
+    private String baranggay;
+    private String district;
+    private String municipality;
+    private String province;
+    private String plan;
+    private String planNumber;
+
+    // ========== SECTION 4: CASKET/URN & SERVICES ==========
+    private String casket;
+    private String casketAvailable;
+    private String uniform;
+    private String urnType;
+    private String urnDescription;
+
+    // ========== SECTION 5: DELIVERY ==========
+    private String deliverySerialNumber;
+    private String deliveryHelper;
+    private String deliveryRemarks;
+    private String deliveryStatus;
+
+    // ========== SECTION 6: TRANSFER & BURIAL/CREMATION SCHEDULE ==========
+    private Date dateOfTransfer;
+    private String transferAddress;
+    private String transferTime;
+    private Date dateReceived;
+    private Date dateOfBurial;
+    private String takeOff;
+    private String massTime;
+    private String burialDriver;
+    private String burialHelper;
+    private String familyCar;
+    private String familyCarDriver;
+    private String flowerCar;
+    private String flowerCarDriver;
+    private String carRental;
+    private String carRentalDriver;
+    private String cremationTime;
+    private String cremationOperator;
+    private String burialBenefit;
+    private String setupCrew;
+    private String pallBearrer;
+    private String funeralDirector;
+
+    // ========== SECTION 7: EMBALMING & MAKEUP ==========
+    private Date dateEmblamed;
+    private String timeFinished;
+    private String makeupDressUp;
+    private String makeUprequest;
+    private String bodySpecialInstruction;
+    private String nails;
+    private String lips;
+    private String emblamers;
+    private String finishedBy;
+    private String embalmedBy;
+
+    // ========== SECTION 8: MEDICAL ==========
+    private String autopsy;
+    private Date autopsyDate;
+    private String autopsyBy;
+
+    // ========== SECTION 9: IDENTIFICATION DOCUMENTS ==========
+    private String idType;
+    private String claimIdNumber;
+    private String seniorId;
+    private String issuedAt;
+    private String issuedOn;
+
+    // ========== SECTION 10: GOVERNMENT/SIGNATURES/REMARKS ==========
+    private String baranggayIndigent;
+    private String baranggayCaptain;
+    private boolean cityDocsCompletion;
+    private String supSigBurial;
+    private String omSigDelivery;
+    private String omSigBurial;
+    private String chapelRental;
+    private boolean familyWillConvo;
+    private boolean cleared;
+    private boolean collectorRemarks;
+    private String remarks;
+    private String billingRemarks;
+
+    // ========== ADMINISTRATIVE/TIMESTAMPS ==========
+    private Date startOfTransaction;
+    private Date dateSubmitted;
+    private Date timeEncoded;
+    private Date dateAshReleased;
+    private String releasedBy;
+    private String receivedBy;
+}

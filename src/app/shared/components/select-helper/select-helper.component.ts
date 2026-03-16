@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { CascadeSelectModule } from 'primeng/cascadeselect';
+import { SelectModule } from 'primeng/select';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR
@@ -23,7 +23,7 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
 @Component({
   selector: 'app-select-helper',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, CascadeSelectModule],
+  imports: [CommonModule, FormsModule, DialogModule, ButtonModule, SelectModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -33,16 +33,22 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
     }
   ],
   template: `
-
-<div class="flex items-center gap-2 w-full" #selectElement tabindex="0" (focus)="onSelectFocus()" (click)="onSelectClick()">
-  <p-cascadeselect
-    [(ngModel)]="selectedCascade"
-    [options]="cascadeOptions"
-    optionLabel="cname"
+<div class="flex items-center gap-2 w-full" #selectElement tabindex="0">
+  <p-select
+    [(ngModel)]="selectedValue"
+    [options]="dropdownOptions"
+    optionLabel="label"
+    optionValue="value"
     styleClass="w-full"
     placeholder="Select an item"
-    (ngModelChange)="onCascadeChange($event)"
-    [disabled]="isLoading">
+    [filter]="searchable"
+    filterBy="label"
+    filterPlaceholder="Search items..."
+    resetFilterOnHide="true"
+    (ngModelChange)="onSelectionChange($event)"
+    [disabled]="isLoading"
+    [virtualScroll]="dropdownOptions.length > 100"
+    [virtualScrollItemSize]="40">
 
     <ng-template #footer>
       <div class="px-3 py-1">
@@ -50,7 +56,7 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
       </div>
     </ng-template>
 
-  </p-cascadeselect>
+  </p-select>
 </div>
 
 <p-dialog [(visible)]="modalOpen" modal="true" appendTo="body" [style]="{width: '420px'}" (onHide)="onDialogHide()" [dismissableMask]="true">
@@ -101,7 +107,8 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
 export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDestroy {
 
   @ViewChild('selectElement', { read: ElementRef }) selectElement?: ElementRef<HTMLElement>;
-@Input() allowDefaultSelection = false;
+  @Input() allowDefaultSelection = false;
+  @Input() searchable = true;
   private _comboboxName = '';
   private _hasLoaded = false;
   private _isLoading = false;
@@ -110,15 +117,9 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   isLoading = false;
 
   options: string[] = [];
-  value: string | null = null;
+  selectedValue: string | null = null;
 
-  selectedCascade: any = null;
-
-  private cascadeOptionsList: Array<{ cname: string; code: string }> = [];
-
-  get cascadeOptions(): any[] {
-    return this.cascadeOptionsList;
-  }
+  dropdownOptions: Array<{ label: string; value: string }> = [];
 
   modalOpen = false;
   editorText = '';
@@ -150,8 +151,8 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
       }
 
       this.options = [];
-      this.cascadeOptionsList = [];
-      this.selectedCascade = null;
+      this.dropdownOptions = [];
+      this.selectedValue = null;
 
       this.tryLoadImmediately();
     }
@@ -172,28 +173,6 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
     this.loadCombobox();
   }
 
-  onSelectFocus(): void {
-    if (this._modalJustClosed) {
-      this._modalJustClosed = false;
-      return;
-    }
-
-    if (!this._hasLoaded) {
-      this.loadCombobox();
-    }
-  }
-
-  onSelectClick(): void {
-    if (this._modalJustClosed) {
-      this._modalJustClosed = false;
-      return;
-    }
-
-    if (!this._hasLoaded) {
-      this.loadCombobox();
-    }
-  }
-
   private async loadCombobox(): Promise<void> {
 
     if (this._isLoading || this._hasLoaded) return;
@@ -209,23 +188,22 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
       this.options = data.items || [];
       this.storedDefault = data.default || '';
 
-      this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
-if (this.value) {
-  this.selectedCascade = this.cascadeOptionsList.find(x => x.cname === this.value) || null;
-}
-else if (this.allowDefaultSelection && this.storedDefault) {
-  this.value = this.storedDefault;
-  this.selectedCascade = this.cascadeOptionsList.find(x => x.cname === this.storedDefault) || null;
-  this.onChange(this.value);
-}
-else {
-  this.selectedCascade = null;
-}
+      this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
+
+      if (this.selectedValue) {
+        // Keep current selection
+      } else if (this.allowDefaultSelection && this.storedDefault) {
+        this.selectedValue = this.storedDefault;
+        this.onChange(this.selectedValue);
+      } else {
+        this.selectedValue = null;
+      }
 
     } catch (err) {
 
       console.error(`[SelectHelper] Failed to load: ${this._comboboxName}`, err);
       this.options = [];
+      this.dropdownOptions = [];
 
     }
 
@@ -243,19 +221,11 @@ else {
           this.options = d.items || [];
           this.storedDefault = d.default || '';
 
-          this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
+          this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
 
-          if (this.value && !this.options.includes(this.value)) {
-            this.value = null;
-            this.selectedCascade = null;
+          if (this.selectedValue && !this.options.includes(this.selectedValue)) {
+            this.selectedValue = null;
             this.onChange(null);
-          }
-
-          if (this.value) {
-            this.selectedCascade =
-              this.cascadeOptionsList.find(x => x.cname === this.value) || null;
-          } else {
-            this.selectedCascade = null;
           }
 
           this.cdr.markForCheck();
@@ -274,30 +244,15 @@ else {
   }
 
   writeValue(obj: any): void {
-
-    this.value = obj;
-
-    if (this.value) {
-      this.selectedCascade =
-        this.cascadeOptionsList.find(x => x.cname === this.value) || null;
-    } else {
-      this.selectedCascade = null;
-    }
-
+    this.selectedValue = obj;
   }
 
   registerOnChange(fn: any): void { this.onChange = fn; }
   registerOnTouched(fn: any): void { this.onTouched = fn; }
 
-  onCascadeChange(selection: any): void {
-
-    if (!selection) {
-      this.value = null;
-    } else {
-      this.value = selection.cname;
-    }
-
-    this.onChange(this.value);
+  onSelectionChange(selection: any): void {
+    this.selectedValue = selection;
+    this.onChange(this.selectedValue);
     this.onTouched();
   }
 
@@ -352,14 +307,13 @@ else {
       );
 
       this.options = this.editorOptions;
-      this.cascadeOptionsList = this.options.map(o => ({ cname: o, code: o }));
+      this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
 
       // store default only for editor reference
       this.storedDefault = this.editorDefault || '';
 
       // force no automatic selection
-      this.value = null;
-      this.selectedCascade = null;
+      this.selectedValue = null;
       this.onChange(null);
 
       this.cdr.markForCheck();
@@ -376,3 +330,4 @@ else {
   }
 
 }
+

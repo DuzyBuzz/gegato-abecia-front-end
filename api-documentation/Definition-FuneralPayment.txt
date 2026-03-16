@@ -1,0 +1,12 @@
+FuneralPayment {
+    private long id;
+    private String controlNumber;
+    private Date dateIssued;
+    private Date checkDatel;
+    private String issuedBy;
+    private String bank;
+    private String accountNumber;
+    private double amount;
+	private long serviced;
+
+}
