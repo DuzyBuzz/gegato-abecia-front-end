@@ -5,8 +5,8 @@
   "identifier": "com.gegato.abecia.desktop",
 
   "build": {
-    "devUrl": "http://localhost:4200",
-    "frontendDist": null
+    "devUrl": "https://gegato-abecia-management-sys.web.app",
+    "frontendDist": "https://gegato-abecia-management-sys.web.app"
   },
 
   "app": {
@@ -15,7 +15,9 @@
         "title": "Gegato-Abecia Funeral Management System",
         "width": 1280,
         "height": 800,
-        "resizable": true
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": true
       }
     ],
     "security": {
@@ -27,7 +29,7 @@
     "active": true,
     "targets": ["nsis"],
     "icon": [
-      "icons/icon.ico"
+      "icons/gegato-logo.ico"
     ]
   }
 }

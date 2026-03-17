@@ -1,1 +1,22 @@
-<p>deceased-table works!</p>
+<div class="deceased-table-container">
+
+  <app-table-helper
+    [value]="deceasedList"
+    [columns]="columns"
+    [loading]="loading"
+    [rows]="10"
+    [rowsPerPageOptions]="[10,20,50]"
+    [showRowHover]="true"
+    [dataKey]="'id'"
+    [showGlobalFilter]="true"
+    [showClearButton]="true"
+    [showPrintButton]="true"
+    [showExportButton]="true"
+    [exportFileName]="'funeral-contracts'"
+    [printTitle]="'Funeral Contracts'"
+    (rowSelect)="onRowSelected($event)"
+    (onSearch)="onSearch($event)"
+  >
+  </app-table-helper>
+
+</div>

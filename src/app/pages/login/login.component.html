@@ -18,28 +18,6 @@
   <!-- Heading (responsive text size) -->
   <h1 class="text-center text-gray-800 mb-6 sm:mb-8 text-2xl sm:text-3xl md:text-4xl font-bold">Login</h1>
 
-  <!-- Error message -->
-  <div *ngIf="errorMessage" class="bg-red-100 text-red-800 px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6 text-xs sm:text-sm border-l-4 border-red-800 w-full">
-  </div>
-
-  <!-- Role Selection Section
-  <div class="w-full mb-8 sm:mb-10">
-    <label class="block mb-4 text-gray-700 font-semibold text-sm sm:text-base">Select Your Role:</label>
-    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-      <button *ngFor="let role of roles"
-              type="button"
-              (click)="selectRole(role.value)"
-              [class.ring-2]="selectedRole === role.value"
-              [class.ring-purple-600]="selectedRole === role.value"
-              [class.bg-purple-50]="selectedRole === role.value"
-              class="p-3 sm:p-4 border-2 border-gray-200 rounded-lg transition-all text-left hover:border-purple-400 focus:outline-none text-xs sm:text-sm"
-              [class.border-purple-600]="selectedRole === role.value">
-        <div class="font-semibold text-gray-800">{{ role.label }}</div>
-        <div class="text-xs sm:text-sm text-gray-600 mt-1">{{ role.description }}</div>
-      </button>
-    </div>
-  </div> -->
-
   <!-- Login form -->
 <form class="w-full" (ngSubmit)="submit()" [formGroup]="form">
 
@@ -58,32 +36,70 @@
   />
 
   <!-- PASSWORD -->
+<div class="relative w-full mt-4">
   <input
-    type="password"
+    [type]="showPassword ? 'text' : 'password'"
     formControlName="password"
     placeholder="Password"
-    class="w-full px-4 py-3 border rounded mt-4"
+    class="w-full px-4 py-3 border rounded pr-12"
   />
+
+  <button
+    type="button"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+    (click)="showPassword = !showPassword"
+  >
+    {{ showPassword ? 'Hide' : 'Show' }}
+  </button>
+</div>
 
   <!-- SUBMIT -->
   <button
     type="submit"
-    class="w-full mt-6 py-3 bg-purple-800 text-white rounded"
+    class="w-full mt-6 py-3 bg-purple-800 text-white rounded hover:bg-purple-900 transition-colors"
   >
     Login
   </button>
 
+
+
+  <!-- <button (click)="GenerateMockData()"
+    class="w-full mt-6 py-3 bg-purple-800 text-white rounded hover:bg-purple-900 transition-colors"
+  >
+    mock data
+  </button> -->
 </form>
 
-<button
-    type="button" routerLink="/admin"
-    class="mt-6 text-purple-600 hover:underline text-sm sm:text-base"
-  >
-    Don't have an account? Register here.
-  </button>
-<a href="/downloads/MyAppSetup.exe" download>
+
+<!-- Mock Users Quick Access (Development/Testing) -->
+<!-- <div *ngIf="mockUsers.length > 0" class="w-full mt-8 pt-8 border-t border-gray-300">
+  <p class="text-center text-gray-600 text-sm font-semibold mb-4">Test Accounts</p>
+  <div class="space-y-2">
+    <div *ngFor="let mockUser of mockUsers" 
+         class="p-3 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
+      <button
+        type="button"
+        (click)="quickLogin(mockUser.username, 'password123')"
+        class="w-full text-left"
+      >
+        <div class="font-semibold text-gray-800 text-sm">{{ mockUser.firstName }} {{ mockUser.lastName }}</div>
+        <div class="text-xs text-gray-600">{{ mockUser.username }}</div>
+        <div class="text-xs text-purple-600 font-medium">{{ mockUser.role }}</div>
+      </button>
+    </div>
+  </div>
+  <p class="text-center text-xs text-gray-500 mt-3">Password: password123</p>
+</div> -->
+
+
+<a
+  href="assets\downloads\Gegato Abecia_1.0.0_x64-setup.zip"
+  download
+ class="absolute top-4 left-4 text-white text-sm sm:text-base hover:underline"
+>
   Download Desktop App
 </a>
+
 
 </div>
 

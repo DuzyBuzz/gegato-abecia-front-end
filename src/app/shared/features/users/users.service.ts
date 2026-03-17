@@ -19,7 +19,7 @@ export class UserService {
           userId: u.userId,
           firstName: u.firstName,
           lastName: u.lastName,
-          username: u.userName, // 🔥 mapping
+          username: u.userName, 
           role: u.role,
           position: u.position,
           createdAt: u.createdAt
@@ -33,7 +33,7 @@ export class UserService {
     return this.http.post(this.api, {
       firstName: user.firstName,
       lastName: user.lastName,
-      userName: user.username, // 🔥 backend expects userName
+      userName: user.username, 
       password: user.password,
       position: user.position,
       role: user.role

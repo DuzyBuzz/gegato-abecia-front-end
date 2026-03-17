@@ -7,6 +7,9 @@ import { AuthorityToCremateRemainsPrinting } from './documents/printing-forms/au
 import { StatementOfAccount } from './documents/printing-forms/statement-of-account/statement-of-account';
 import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
 import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
+import { authGuard, roleGuard } from './guards/auth/auth-guard';
+import { DeceasedComponent } from './pages/deceased/deceased.component';
+import { BillingLayoutComponent } from './layout/billing-layout/billing-layout.component';
 
 export const routes: Routes = [
 
@@ -23,56 +26,133 @@ export const routes: Routes = [
     component: LoginComponent
   },
 
-  {
-    path: 'printing',
-    children: [
-      {
-        path: 'authority-to-cremate-remains',
-        component: AuthorityToCremateRemainsPrinting
-      },
-            {
-        path: 'statement-of-account',
-        component: StatementOfAccount
-      }
-    ]
-  },
-    {
-    path: 'entry-forms',
-    children: [
-      {
-        path: 'statements-of-account',
-        component: BillingEntry
-      },
-            {
-        path: '',
-        component: StatementOfAccount
-      }
-    ]
-  },
-  // ADMIN AREA
+  // 🔐 ADMIN (AUTHENTICATED USERS WITH ADMIN ROLE)
   {
     path: 'admin',
     component: MainLayout,
+    canActivate: [roleGuard],
+    data: { roles: ['Admin'], redirectTo: '/admin/dashboard' },
     children: [
 
-      // /admin → redirect to dashboard
       {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },
 
-      // /admin/dashboard
       {
         path: 'dashboard',
         component: DashboardComponent
       },
 
-      // /admin/users
       {
         path: 'users',
-        component: UsersComponent
+        component: UsersComponent,
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] }
+      },
+
+      {
+        path: 'deceased',
+        component: DeceasedComponent
+      },
+
+      // DOCUMENT ENTRY FORMS
+      {
+        path: 'documents',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral/:contractId',
+                component: FuneralContractEntry
+              }
+            ]
+          },
+          {
+            path: 'billing/:contractId',
+            component: BillingEntry
+          }
+        ]
+      },
+
+      // DOCUMENT PRINTING
+      {
+        path: 'print',
+        children: [
+          {
+            path: 'authority-to-cremate-remains/:contractId',
+            component: AuthorityToCremateRemainsPrinting
+          },
+          {
+            path: 'statement-of-account/:contractId',
+            component: StatementOfAccount
+          }
+        ]
       }
     ]
+  },
+
+  // 🔐 BILLER (AUTHENTICATED USERS WITH BILLER ROLE)
+  {
+    path: 'billing',
+    component: BillingLayoutComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Biller'], redirectTo: '/billing/deceased' },
+    children: [
+
+      {
+        path: '',
+        redirectTo: 'deceased',
+        pathMatch: 'full'
+      },
+      {
+        path: 'deceased',
+        component: DeceasedComponent
+      },
+
+      // DOCUMENT ENTRY FORMS
+      {
+        path: 'documents',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral/:contractId',
+                component: FuneralContractEntry
+              }
+            ]
+          },
+          {
+            path: 'billing/:contractId',
+            component: BillingEntry
+          }
+        ]
+      },
+
+    ]
+  },
+
+      // DOCUMENT PRINTING
+      {
+        path: 'print',
+        children: [
+          {
+            path: 'authority-to-cremate-remains/:contractId',
+            component: AuthorityToCremateRemainsPrinting
+          },
+          {
+            path: 'statement-of-account/:contractId',
+            component: StatementOfAccount
+          },
+          
+        ]
+      },
+  // FALLBACK
+  {
+    path: '**',
+    redirectTo: 'login'
   }
 ];

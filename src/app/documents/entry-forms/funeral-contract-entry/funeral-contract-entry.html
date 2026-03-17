@@ -1,390 +1,688 @@
 
-  <h1 class="text-center  text-5xl mb-6 mt-6">
-    FUNERAL SERVICE CONTRACT
-  </h1>
-    <h2 class="text-left  text-4xl font-bold mb-6 mt-6">
-    DECEASED NAME
-  </h2>
+  <div class="flex">
 
-    <!-- ========== CONTRACT HEADER SECTION ========== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 border-b pb-2 pt-3 sm:pt-4 text-xs sm:text-sm">
-      <div>
-        <label class="block font-medium text-xs sm:text-sm">Contract Date</label>
-        <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
+  <!-- LEFT SIDEBAR NAVIGATION -->
+  <div class="w-64 h-screen sticky top-0 bg-white border-r border-gray-200 shadow-sm p-4 overflow-y-auto">
+
+    <div class="flex flex-col gap-2">
+      <button
+        *ngFor="let section of sections"
+        type="button"
+        (click)="scrollToSection(section.id)"
+        [class.bg-blue-100]="currentSection === section.id"
+        [class.text-blue-700]="currentSection === section.id"
+        [class.bg-gray-100]="currentSection !== section.id"
+        [class.text-gray-600]="currentSection !== section.id"
+        class="text-left px-3 py-2 rounded-md text-sm font-medium transition hover:bg-gray-200"
+      >
+        {{ section.id }}. {{ section.name }}
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 bg-gray-50 min-h-screen pb-10">
+<form [formGroup]="form" class="bg-gray-50 min-h-screen pb-10 ">
+
+  <!-- Toast Notifications -->
+  <p-toast position="top-right"></p-toast>
+
+
+
+
+  <!-- Form Content -->
+  <div class="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- SECTION 1: CONTRACT INFORMATION -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="1">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">1</span>
+        <span>Contract Information</span>
+      </h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Number <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="contractNo" [class.border-red-500]="isFieldInvalid('contractNo')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('contractNo')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractNo') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Date <span class="text-red-500">*</span></label>
+          <input type="date" formControlName="contractDate" [class.border-red-500]="isFieldInvalid('contractDate')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('contractDate')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractDate') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Type of Service <span class="text-red-500">*</span></label>
+          <app-select-helper formControlName="type" comboboxName="type" [searchable]="true"></app-select-helper>
+          <small *ngIf="isFieldInvalid('type')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('type') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Financial Assistance</label>
+          <app-select-helper formControlName="financialAssitance" comboboxName="financialAssitance" [searchable]="true"></app-select-helper>
+        </div>
       </div>
-      <div>
-        <label class="block font-medium text-xs sm:text-sm">Contract No.</label>
-        <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-      </div>
-      <div>
-        <label class="block font-medium text-xs sm:text-sm">Type of Service</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
-      </div>
-      <div>
-        <label class="block font-medium text-xs sm:text-sm">Type of Cremation</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
-      </div>
-      <div>
-        <label class="block font-medium text-xs sm:text-sm">Financial Assistance</label>
-        <select class="border w-full px-2 py-1 text-xs sm:text-sm"></select>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Price </label>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-700 font-semibold">₱</span>
+            <input type="number" formControlName="price" [class.border-red-500]="isFieldInvalid('price')" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01" placeholder="e.g., 45000.00">
+          </div>
+          <small *ngIf="isFieldInvalid('price')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('price') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Discount</label>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-700 font-semibold">₱</span>
+            <input type="number" formControlName="discount" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01" >
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Due Date</label>
+          <input type="date" formControlName="dueDate" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Checked By</label>
+          <input type="text" formControlName="checkedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Admin User">
+        </div>
       </div>
     </div>
 
-    <!-- ========== MAIN 3 COLUMN LAYOUT ========== -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mt-3 sm:mt-4">
+    <!-- SECTION 2: DECEASED INFORMATION -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="2">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">2</span>
+        <span>Deceased Information</span>
+      </h2>
 
-      <!-- LEFT COLUMN -->
-      <div>
-        <fieldset class="border p-2 sm:p-3">
-          <legend class="text-xs sm:text-sm font-bold">Information of the Deceased</legend>
-
-          <!-- Date Retrieved & Informant -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Date Retrieved</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Informant</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <!-- First Name + Suffix (Flexible Layout) -->
-          <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">First Name</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Suffix</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value=""></option>
-                <option value="Jr">Jr.</option>
-                <option value="Sr">Sr.</option>
-                <option value="II">II</option>
-                <option value="III">III</option>
-                <option value="IV">IV</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label class="block font-medium text-xs sm:text-sm">Middle Name</label>
-            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
-          </div>
-
-          <div>
-            <label class="block font-medium text-xs sm:text-sm">Last Name</label>
-            <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm mb-2">
-          </div>
-
-          <!-- Personal Information (2 Columns, 2 Rows) -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-
-            <!-- ROW 1 -->
-            <div >
-              <label class="block text-xs sm:text-sm font-medium">Date of Birth</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-
-            <div>
-              <label class="block text-xs sm:text-sm font-medium">Age</label>
-              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm" min="0">
-            </div>
-
-            <!-- ROW 2 -->
-            <div>
-              <label class="block text-xs sm:text-sm font-medium">Sex</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value="">-- Select --</option>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs sm:text-sm font-medium">Civil Status</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value="">-- Select --</option>
-                <option>Single</option>
-                <option>Married</option>
-                <option>Widowed</option>
-                <option>Widower</option>
-                <option>Divorced</option>
-              </select>
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Date of Death</label>
-          <input type="date" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Address of Deceased</label>
-          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Place of Death</label>
-          <input  class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-        </fieldset>
-
-        <fieldset class="border p-2 sm:p-3 mt-3 sm:mt-4">
-          <legend class="text-xs sm:text-sm font-bold">Information of the Contractee</legend>
-
-          <!-- First Name + Suffix (Flexible Layout) -->
-          <div class="grid grid-cols-[1fr,80px] sm:grid-cols-[1fr,90px] gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Contractee</label>
-              <input type="text" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Age</label>
-              <input type="number" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Occupation</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Address 1</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Barangay</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">District</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">City/Municipality</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Relationship</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Contact No</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Email Address</label>
-          <input type="email" class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Plan</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">No.</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Referred by</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-        </fieldset>
-      </div>
-
-      <!-- MIDDLE COLUMN -->
-      <div class="space-y-3 sm:space-y-4">
-
-        <fieldset class="border p-2 sm:p-3">
-          <legend class="font-bold text-xs sm:text-sm">Casket / Urn Information</legend>
-
-          <div class="border p-2 bg-yellow-100 rounded mb-2">
-            <legend class="text-xs sm:text-sm font-semibold mb-1">Contract Price</legend>
-
-            <div class="flex items-center gap-2">
-              <span class="text-lg sm:text-xl">₱</span>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm" type="number" value="0.00">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Casket</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value="">-- Select Casket --</option>
-                <option value="none">None</option>
-                <option value="wooden-basic">Wooden Basic</option>
-                <option value="wooden-deluxe">Wooden Deluxe</option>
-                <option value="wooden-premium">Wooden Premium</option>
-                <option value="metal-standard">Metal Standard</option>
-                <option value="metal-deluxe">Metal Deluxe</option>
-                <option value="stainless-premium">Stainless Premium</option>
-                <option value="bronze-premium">Bronze Premium</option>
-                <option value="gold-series">Gold Series</option>
-                <option value="imported-europe-series">Imported Europe Series</option>
-                <option value="cremation-box">Cremation Box</option>
-              </select>
-            </div>
-            <label class="block font-medium text-xs sm:text-sm">Description</label>
-            <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Urn Type</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option value="">-- Select Urn Type --</option>
-                <option value="none">None</option>
-                <option value="basic-ceramic">Basic Ceramic</option>
-                <option value="classic-ceramic">Classic Ceramic (White / Ivory)</option>
-                <option value="wood-classic">Wood Classic (Mahogany / Narra)</option>
-                <option value="wood-deluxe">Wood Deluxe (Carved / Premium Finish)</option>
-                <option value="metal-polished">Metal Polished (Silver / Chrome)</option>
-                <option value="metal-gold">Metal Gold Plated (Premium)</option>
-                <option value="glass-crystal">Glass Crystal (Memorial Crystal)</option>
-                <option value="marble-standard">Marble Standard</option>
-                <option value="marble-premium">Marble Premium (Imported)</option>
-                <option value="jade-imported">Jade Imported (Asian Memorial Style)</option>
-                <option value="custom-engraved">Custom Engraved (Name & Dates)</option>
-              </select>
-            </div>
-          </div>
-          <label class="block font-medium text-xs sm:text-sm">Description</label>
-          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
-
-          <label class="block font-medium text-xs sm:text-sm">Casket other details</label>
-          <textarea class="border w-full h-10 px-2 py-1 text-xs sm:text-sm"></textarea>
-        </fieldset>
-
-        <fieldset class="border p-2 sm:p-3">
-          <legend class="font-bold text-xs sm:text-sm">Delivery Information</legend>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Date</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Location</label>
-          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Driver</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Helper</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset class="border p-2 sm:p-3">
-          <legend class="font-bold text-xs sm:text-sm">Transfer Information</legend>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Date</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Location</label>
-          <input class="border w-full px-2 py-1 mb-2 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Deliveries / Transfer Notes</label>
-          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm"></textarea>
-        </fieldset>
-
-        <fieldset class="border p-2 sm:p-3">
-          <legend class="font-bold text-xs sm:text-sm">Burial / Cremation Schedule</legend>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Burial</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Take Off</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Mass</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Holding Area</label>
-              <select class="border w-full px-2 py-1 text-xs sm:text-sm">
-                <option>NONE</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Cremation</label>
-              <input type="date" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Time</label>
-              <input type="time" class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-
-          <label class="block font-medium text-xs sm:text-sm">Church</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Cemetery</label>
-          <input class="border w-full mb-2 px-2 py-1 text-xs sm:text-sm">
-
-          <label class="block font-medium text-xs sm:text-sm">Burial Notes</label>
-          <textarea class="border w-full h-16 px-2 py-1 text-xs sm:text-sm mb-2"></textarea>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Driver</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Helper</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-            <div>
-              <label class="block font-medium text-xs sm:text-sm">Vehicle</label>
-              <input class="border w-full px-2 py-1 text-xs sm:text-sm">
-            </div>
-          </div>
-        </fieldset>
-
-      </div>
-
-      <!-- RIGHT COLUMN -->
-      <div class="space-y-3 sm:space-y-4">
-        <label class="block font-medium text-xs sm:text-sm">Contract Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
-
-        <label class="block font-medium text-xs sm:text-sm">Operations Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
-
-        <label class="block font-medium text-xs sm:text-sm">Morgue Remarks</label>
-        <textarea class="border w-full h-20 sm:h-40 px-2 py-1 text-xs sm:text-sm"></textarea>
-
-        <div class="flex flex-col gap-2 pt-2">
-          <button class="bg-blue-600 text-white py-2 rounded text-xs sm:text-sm font-medium">Submit Contract</button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="firstName" [class.border-red-500]="isFieldInvalid('firstName')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('firstName')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('firstName') }}</small>
         </div>
-                        <select
-                  class="border w-full px-2 py-1 text-xs sm:text-sm"
-                  (change)="onPrintSelect($event)"
-                >
-                  <option value="">Select to Print</option>
-                  <option value="funeral-contract">Funeral Service Contract</option>
-                  <option value="cremation-certificate">Cremation Certificate</option>
-                  <option value="authority-cremate">Authority to Cremate Remains</option>
-                  <option value="statement-account">Statement of Accounts</option>
-                </select>
+        <div class="sm:col-span-1 lg:col-span-1">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Middle Name</label>
+          <input type="text" formControlName="middleName" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="lastName" [class.border-red-500]="isFieldInvalid('lastName')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('lastName')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('lastName') }}</small>
+        </div>
+
       </div>
 
-    </div><!-- END 3 COLUMNS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
+          <input type="date" formControlName="dateOfBirth" [class.border-red-500]="isFieldInvalid('dateOfBirth')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('dateOfBirth')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('dateOfBirth') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+          <input type="number" formControlName="age" [class.border-red-500]="isFieldInvalid('age')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="150" readonly>
+          <small class="text-gray-500 text-xs mt-1 block">Auto-calculated</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+          <app-select-helper formControlName="gender" comboboxName="gender" [searchable]="false"></app-select-helper>
+          <small *ngIf="isFieldInvalid('gender')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('gender') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Civil Status <span class="text-red-500">*</span></label>
+          <app-select-helper formControlName="civilStatus" comboboxName="civilStatus" [searchable]="false"></app-select-helper>
+          <small *ngIf="isFieldInvalid('civilStatus')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('civilStatus') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Religion</label>
+          <input type="text" formControlName="religion" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Place of Birth</label>
+          <input type="text" formControlName="placeOfBirth" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date of Death <span class="text-red-500">*</span></label>
+          <input type="date" formControlName="dateOfDeath" [class.border-red-500]="isFieldInvalid('dateOfDeath')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('dateOfDeath')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('dateOfDeath') }}</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Time of Death</label>
+          <input type="time" formControlName="timeOfDeath" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Place of Death <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="placeOfDeath" [class.border-red-500]="isFieldInvalid('placeOfDeath')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('placeOfDeath')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('placeOfDeath') }}</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="addressLine1" [class.border-red-500]="isFieldInvalid('addressLine1')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('addressLine1')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('addressLine1') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Father's Name</label>
+          <input type="text" formControlName="parentFather" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Mother's Name</label>
+          <input type="text" formControlName="parentMother" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Informant</label>
+          <input type="text" formControlName="nameOfInformant" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: CONTRACTEE INFORMATION -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="3">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-green-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">3</span>
+        <span>Contractee Information</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contractee Name <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="contractee" [class.border-red-500]="isFieldInvalid('contractee')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('contractee')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractee') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+          <input type="number" formControlName="contracteeAge" [class.border-red-500]="isFieldInvalid('contracteeAge')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="150">
+          <small *ngIf="isFieldInvalid('contracteeAge')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contracteeAge') }}</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Gender</label>
+          <app-select-helper formControlName="contracteeGender" comboboxName="gender" [searchable]="false"></app-select-helper>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Civil Status</label>
+          <app-select-helper formControlName="contracteeCivilStatus" comboboxName="civilStatus" [searchable]="false"></app-select-helper>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="contactNo" [class.border-red-500]="isFieldInvalid('contactNo')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('contactNo')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contactNo') }}</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="baranggay" [class.border-red-500]="isFieldInvalid('baranggay')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('baranggay')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('baranggay') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="district" [class.border-red-500]="isFieldInvalid('district')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('district')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('district') }}</small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">City/Municipality <span class="text-red-500">*</span></label>
+          <input type="text" formControlName="municipality" [class.border-red-500]="isFieldInvalid('municipality')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('municipality')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('municipality') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Province</label>
+          <input type="text" formControlName="province" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Plan</label>
+          <input type="text" formControlName="plan" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Plan Number</label>
+          <input type="text" formControlName="planNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CASKET/URN & SERVICES -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="4">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">4</span>
+        <span>Casket/Urn & Services</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Casket Type <span class="text-red-500">*</span></label>
+          <app-select-helper formControlName="casket" comboboxName="casket" [searchable]="true"></app-select-helper>
+          <small *ngIf="isFieldInvalid('casket')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('casket') }}</small>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Casket Available</label>
+          <input type="text" formControlName="casketAvailable" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Uniform</label>
+          <input type="text" formControlName="uniform" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Urn Type</label>  
+          <app-select-helper formControlName="urnType" comboboxName="urnType" [searchable]="true"></app-select-helper>
+        </div>
+        <div class="sm:col-span-1 lg:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Urn Description</label>
+          <input type="text" formControlName="urnDescription" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: DELIVERY -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="5">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-purple-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">5</span>
+        <span>Delivery</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Serial Number</label>
+          <input type="text" formControlName="deliverySerialNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Helper</label>
+          <input type="text" formControlName="deliveryHelper" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Status</label>
+          <app-select-helper formControlName="deliveryStatus" comboboxName="deliveryStatus" [searchable]="true"></app-select-helper>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Remarks</label>
+          <textarea formControlName="deliveryRemarks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: TRANSFER & BURIAL/CREMATION SCHEDULE -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="6">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-indigo-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">6</span>
+        <span>Transfer & Burial/Cremation Schedule</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Transfer Date</label>
+          <input type="date" formControlName="dateOfTransfer" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Transfer Time</label>
+          <input type="time" formControlName="transferTime" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="sm:col-span-1 lg:col-span-1">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Transfer Address</label>
+          <input type="text" formControlName="transferAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date Received</label>
+          <input type="date" formControlName="dateReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Burial Date</label>
+          <input type="date" formControlName="dateOfBurial" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Mass Time</label>
+          <input type="time" formControlName="massTime" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Take Off Time</label>
+          <input type="time" formControlName="takeOff" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Burial Driver</label>
+          <input type="text" formControlName="burialDriver" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Burial Helper</label>
+          <input type="text" formControlName="burialHelper" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Family Car</label>
+          <input type="text" formControlName="familyCar" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Family Car Driver</label>
+          <input type="text" formControlName="familyCarDriver" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Flower Car</label>
+          <input type="text" formControlName="flowerCar" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Flower Car Driver</label>
+          <input type="text" formControlName="flowerCarDriver" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Car Rental</label>
+          <input type="text" formControlName="carRental" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Car Rental Driver</label>
+          <input type="text" formControlName="carRentalDriver" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Cremation Time</label>
+          <input type="time" formControlName="cremationTime" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Cremation Operator</label>
+          <input type="text" formControlName="cremationOperator" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Burial Benefit</label>
+          <input type="text" formControlName="burialBenefit" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Setup Crew</label>
+          <input type="text" formControlName="setupCrew" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Pall Bearers</label>
+          <input type="text" formControlName="pallBearrer" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Funeral Director</label>
+          <input type="text" formControlName="funeralDirector" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 7: EMBALMING & MAKEUP -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="7">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-red-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">7</span>
+        <span>Embalming & Makeup</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date Embalmed</label>
+          <input type="date" formControlName="dateEmblamed" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Time Finished</label>
+          <input type="time" formControlName="timeFinished" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Makeup & Dress Up</label>
+          <input type="text" formControlName="makeupDressUp" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Makeup Request</label>
+          <input type="text" formControlName="makeUprequest" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Nails</label>
+          <input type="text" formControlName="nails" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Lips</label>
+          <input type="text" formControlName="lips" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Embalmers</label>
+          <input type="text" formControlName="emblamers" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Finished By</label>
+          <input type="text" formControlName="finishedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Embalmed By</label>
+          <input type="text" formControlName="embalmedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Body Special Instructions</label>
+          <textarea formControlName="bodySpecialInstruction" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 8: MEDICAL -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="8">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-orange-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">8</span>
+        <span>Medical</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Autopsy</label>
+          <app-select-helper formControlName="autopsy" comboboxName="autopsy" [searchable]="false"></app-select-helper>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Autopsy Date</label>
+          <input type="date" formControlName="autopsyDate" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Autopsy By</label>
+          <input type="text" formControlName="autopsyBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 9: IDENTIFICATION DOCUMENTS -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="9">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-cyan-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">9</span>
+        <span>Identification Documents</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">ID Type</label>
+          <app-select-helper formControlName="idType" comboboxName="idType" [searchable]="true"></app-select-helper>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Claim ID Number</label>
+          <input type="text" formControlName="claimIdNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Senior ID</label>
+          <input type="text" formControlName="seniorId" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Issued At</label>
+          <input type="text" formControlName="issuedAt" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Issued On</label>
+          <input type="text" formControlName="issuedOn" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 10: GOVERNMENT/SIGNATURES/REMARKS -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="10">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-slate-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">10</span>
+        <span>Government/Signatures/Remarks</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay Indigent</label>
+          <input type="text" formControlName="baranggayIndigent" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay Captain</label>
+          <input type="text" formControlName="baranggayCaptain" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Chapel Rental</label>
+          <input type="text" formControlName="chapelRental" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Supervisor Burial Signature</label>
+          <input type="text" formControlName="supSigBurial" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">OM Delivery Signature</label>
+          <input type="text" formControlName="omSigDelivery" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">OM Burial Signature</label>
+          <input type="text" formControlName="omSigBurial" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="cityDocsCompletion" class="w-4 h-4 rounded">
+          <label class="text-xs sm:text-sm font-semibold text-gray-700">City Docs Completion</label>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="familyWillConvo" class="w-4 h-4 rounded">
+          <label class="text-xs sm:text-sm font-semibold text-gray-700">Family Will Have Conversation</label>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="cleared" class="w-4 h-4 rounded">
+          <label class="text-xs sm:text-sm font-semibold text-gray-700">Cleared</label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 mt-4">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="collectorRemarks" class="w-4 h-4 rounded">
+          <label class="text-xs sm:text-sm font-semibold text-gray-700">Collector Remarks</label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Remarks</label>
+          <textarea formControlName="remarks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Billing Remarks</label>
+          <textarea formControlName="billingRemarks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 11: ADMINISTRATIVE/TIMESTAMPS -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6" data-section="11">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="bg-teal-600 text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center text-sm font-bold">11</span>
+        <span>Administrative/Timestamps</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Start of Transaction</label>
+          <input type="datetime-local" formControlName="startOfTransaction" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date Submitted</label>
+          <input type="date" formControlName="dateSubmitted" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Time Encoded (Date)</label>
+          <input type="date" formControlName="timeEncoded" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Date Ash Released</label>
+          <input type="date" formControlName="dateAshReleased" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Released By</label>
+          <input type="text" formControlName="releasedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Received By</label>
+          <input type="text" formControlName="receivedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row gap-3 justify-center sm:justify-end">
+        <button type="button" (click)="submitContract()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Save Contract</button>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+
+  </div>
+
+</div>

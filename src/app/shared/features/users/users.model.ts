@@ -1,9 +1,9 @@
 // users.model.ts
 export interface User {
-  userId: number;      // optional for CREATE
+  userId: number;      
   firstName: string;
   lastName: string;
-  username: string;     // maps to userName in backend
+  username: string;
   password?: string;
   position?: string;
   role: string;

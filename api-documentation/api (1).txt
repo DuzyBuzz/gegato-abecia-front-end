@@ -1,0 +1,22 @@
+https://gegato-abecia-fh.appspot.com
+
+Funeral Service:
+/funeralservice
+
+(default alphabetical)
+/find/{pageNo}/{recordsPerPage}
+/find_record/{id:number}
+/find_record/{filter:string (name)}
+/save (send FuneralService definition as body)
+/delete/{id:number}
+
+Payments
+/payments
+
+/find/{pageNo}/{recordsPerPage}
+/find_record/{id:number}
+/find_record/{filter:string (name)}
+/find_record_date/{start:date}/{end:date} (format is yyyy-mm-dd)
+/save (send FuneralService definition as body)
+/delete/{id:number}
+
