@@ -40,7 +40,8 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
     optionLabel="label"
     optionValue="value"
     styleClass="w-full"
-    placeholder="Select an item"
+    [ngClass]="{'ng-invalid ng-touched': isInvalid}"
+    placeholder="Select"
     [filter]="searchable"
     filterBy="label"
     filterPlaceholder="Search items..."
@@ -109,10 +110,12 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   @ViewChild('selectElement', { read: ElementRef }) selectElement?: ElementRef<HTMLElement>;
   @Input() allowDefaultSelection = false;
   @Input() searchable = true;
+  @Input() isInvalid = false;
   private _comboboxName = '';
   private _hasLoaded = false;
   private _isLoading = false;
   private _modalJustClosed = false;
+  private _pendingValue: any = null;
 
   isLoading = false;
 
@@ -190,7 +193,12 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
 
       this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
 
-      if (this.selectedValue) {
+      // Apply pending value if it exists
+      if (this._pendingValue !== null && this._pendingValue !== undefined) {
+        this.selectedValue = this._pendingValue;
+        this._pendingValue = null;
+        this.onChange(this.selectedValue);
+      } else if (this.selectedValue) {
         // Keep current selection
       } else if (this.allowDefaultSelection && this.storedDefault) {
         this.selectedValue = this.storedDefault;
@@ -244,7 +252,14 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   }
 
   writeValue(obj: any): void {
-    this.selectedValue = obj;
+    // If options not loaded yet, store the value to apply after loading
+    if (!this._hasLoaded) {
+      this._pendingValue = obj;
+    } else {
+      // If options are already loaded, set the value immediately
+      this.selectedValue = obj;
+    }
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: any): void { this.onChange = fn; }

@@ -1,0 +1,259 @@
+<div class=" p-2 text-[11px] font-sans text-black">
+
+  <p-toast></p-toast>
+
+  <h1 class="text-center text-5xl mb-6 mt-6">
+    FUNERAL PAYMENT RECORD
+  </h1>
+  
+  <!-- ================= HEADER FORM ================= -->
+  <div class="border border-gray-500 bg-[#f2f2f2] p-2 grid grid-cols-12 gap-1">
+
+    <!-- LEFT BLOCK -->
+    <div class="col-span-4 space-y-1">
+      <div class="flex gap-1">
+        <label class="w-24">Cont. No.</label>
+        <input class="border border-gray-400 px-2 py-1 w-32" [(ngModel)]="contractNo" readonly>
+        <label class="w-28 ml-2">Service Type</label>
+        <input class="border border-gray-400 px-2 py-1 w-28" [(ngModel)]="serviceType" readonly>
+      </div>
+
+      <div class="flex gap-1">
+        <label class="w-24">Deceased</label>
+        <input class="border border-gray-400 px-2 py-1 flex-1" [(ngModel)]="deceased" readonly>
+      </div>
+
+      <div class="flex gap-1">
+        <label class="w-24">Contractee</label>
+        <input class="border border-gray-400 px-2 py-1 flex-1" [(ngModel)]="contractee" readonly>
+      </div>
+
+      <div class="flex gap-1">
+        <label class="w-24">Address</label>
+        <input class="border border-gray-400 px-2 py-1 flex-1" [(ngModel)]="address" readonly>
+      </div>
+    </div>
+
+    <!-- MIDDLE BLOCK -->
+    <div class="col-span-5 border border-gray-400 bg-[#ededed] p-1">
+      <div class="font-bold text-center text-red-500 mb-1">
+        Bill & Payment Summary
+      </div>
+
+      <div class="grid grid-cols-2 border-b border-gray-400 gap-1 pb-1">
+        <!-- COLUMN 1: BILL INFO -->
+        <div class="space-y-1">
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs">Bill Amount</label>
+            <input type="text" class="border border-gray-400 px-2 py-1 flex-1 text-right" [value]="billAmount | number:'1.2-2'" readonly>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs">Discount</label>
+            <input type="text" class="border border-gray-400 px-2 py-1 flex-1 text-right" [value]="discount | number:'1.2-2'" readonly>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs font-bold">Net Amount</label>
+            <input type="text" class="border border-gray-400 px-2 py-1 flex-1 text-right font-bold bg-yellow-50" [value]="(billAmount - (discount || 0)) | number:'1.2-2'" readonly>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: PAYMENT INFO -->
+        <div class="space-y-1">
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs">Total Paid</label>
+            <input type="text" class="border border-gray-400 px-2 py-1 flex-1 text-right text-green-600 font-bold" [value]="totalPaid | number:'1.2-2'" readonly>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs">Records</label>
+            <input type="number" class="border border-gray-400 px-2 py-1 flex-1 text-right" [value]="rows.length || 0" readonly>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <label class="w-24 text-xs font-bold">Balance Due</label>
+            <input type="text" class="border border-gray-400 px-2 py-1 flex-1 text-right font-bold" [value]="balanceRemaining | number:'1.2-2'" readonly [ngClass]="{'bg-red-50': balanceRemaining > 0, 'bg-green-50': balanceRemaining <= 0}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT BLOCK -->
+    <div class="col-span-3 space-y-1">
+      <div class="flex justify-between items-center">
+        <div class="font-bold">Notes</div>
+      </div>
+      <textarea class=" w-full h-28" readonly></textarea>
+    </div>
+  </div>
+
+  <!-- ================= PAYMENT TABLE ================= -->
+  <div class="mt-2 border border-gray-600 bg-white overflow-x-auto">
+
+    <table class="w-full border-collapse text-xs">
+      <thead class="bg-[#1f4e79] text-white">
+        <tr>
+          <th class="border border-gray-300 px-2 py-1 text-left">Control No.</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Date Issued</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Check Date</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Issued By</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Bank</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Account No.</th>
+          <th class="border border-gray-300 px-2 py-1 text-right">Amount</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Description</th>
+          <th class="border border-gray-300 px-2 py-1 text-left">Remarks</th>
+          <th class="border border-gray-300 px-2 py-1 text-center">Cleared</th>
+          <th class="border border-gray-300 px-2 py-1 text-left w-24">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let row of rows; let i = index" class="odd:bg-[#f3f3f3]">
+
+          <!-- Control Number -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.controlNumber" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing" class="text-red-600">{{ row.controlNumber }}</span>
+          </td>
+
+          <!-- Date Issued -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.dateIssued" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing">{{ row.dateIssued }}</span>
+          </td>
+
+          <!-- Check Date -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.checkDate" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing">{{ row.checkDate }}</span>
+          </td>
+
+          <!-- Issued By -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.issuedBy" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing">{{ row.issuedBy }}</span>
+          </td>
+
+          <!-- Bank -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.bank" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing">{{ row.bank }}</span>
+          </td>
+
+          <!-- Account Number -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.accountNumber" class="border border-gray-300 px-1 py-0.5 w-full">
+            <span *ngIf="!row.isEditing">{{ row.accountNumber }}</span>
+          </td>
+
+          <!-- Amount -->
+          <td class="border border-gray-400 px-2 py-1 text-right">
+            <input *ngIf="row.isEditing" type="number" [(ngModel)]="row.amount" class="border border-gray-300 px-1 py-0.5 w-full text-right" step="0.01" min="0">
+            <span *ngIf="!row.isEditing" class="font-semibold">{{ row.amount | number:'1.2-2' }}</span>
+          </td>
+
+          <!-- Description -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.description" class="border border-gray-300 px-1 py-0.5 w-full text-xs">
+            <span *ngIf="!row.isEditing" class="text-xs">{{ row.description }}</span>
+          </td>
+
+          <!-- Remarks -->
+          <td class="border border-gray-400 px-2 py-1">
+            <input *ngIf="row.isEditing" [(ngModel)]="row.remarks" class="border border-gray-300 px-1 py-0.5 w-full text-xs">
+            <span *ngIf="!row.isEditing" class="text-xs">{{ row.remarks }}</span>
+          </td>
+
+          <!-- Check Cleared -->
+          <td class="border border-gray-400 px-2 py-1 text-center">
+            <input *ngIf="row.isEditing" type="checkbox" [(ngModel)]="row.checkCleared" class="cursor-pointer">
+            <span *ngIf="!row.isEditing" class="text-sm">{{ row.checkCleared ? '✓' : '' }}</span>
+          </td>
+
+          <!-- ACTIONS -->
+          <td class="border border-gray-400 px-2 py-1 text-center">
+            <div class="flex justify-center gap-1 whitespace-nowrap">
+
+              <button *ngIf="!row.isEditing"
+                      class="border border-gray-400 px-2 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer text-xs"
+                      (click)="editRow(row)">
+                Edit
+              </button>
+
+              <button *ngIf="row.isEditing"
+                      class="border border-gray-400 px-2 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer text-xs"
+                      (click)="saveRow(row)"
+                      [disabled]="loading">
+                Save
+              </button>
+
+              <button class="border border-gray-400 px-2 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer text-xs text-red-600"
+                      (click)="deleteRow(i)">
+                Delete
+              </button>
+
+            </div>
+          </td>
+
+        </tr>
+
+        <!-- ADD ROW -->
+        <tr>
+          <td colspan="11"
+              class="border border-gray-400 text-center text-blue-600 cursor-pointer py-2"
+              (click)="addRow()">
+            + Add Row
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="mt-2 border border-gray-600 bg-[#f2f2f2] p-2 space-y-2">
+
+    <!-- BILLING SUMMARY ROW -->
+    <div class="grid grid-cols-12 gap-1 items-end text-xs font-bold mb-2">
+
+      <div class="col-span-2">
+        <label>Bill Amount</label>
+        <input type="text" class="border border-gray-400 px-2 py-1 w-full text-right" [value]="billAmount | number:'1.2-2'" readonly>
+      </div>
+
+      <div class="col-span-2">
+        <label>Discount</label>
+        <input type="text" class="border border-gray-400 px-2 py-1 w-full text-right" [value]="discount | number:'1.2-2'" readonly>
+      </div>
+
+      <div class="col-span-2">
+        <label class="text-yellow-600">Net Amount</label>
+        <input type="text" class="border border-gray-400 px-2 py-1 w-full text-right bg-yellow-50 text-yellow-700" [value]="(billAmount - (discount || 0)) | number:'1.2-2'" readonly>
+      </div>
+
+      <div class="col-span-2">
+        <label class="text-green-600">Total Paid</label>
+        <input type="text" class="border border-gray-400 px-2 py-1 w-full text-right text-green-600" [value]="totalPaid | number:'1.2-2'" readonly>
+      </div>
+
+      <div class="col-span-2">
+        <label class="text-red-600">Balance Due</label>
+        <input type="text" class="border border-gray-400 px-2 py-1 w-full text-right bg-red-50 text-red-600 font-bold" [value]="balanceRemaining | number:'1.2-2'" readonly>
+      </div>
+
+      <div class="col-span-2">
+        <label>Records</label>
+        <input class="border border-gray-400 px-2 py-1 w-full text-right" [value]="rows.length" readonly>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="mt-1 flex justify-between items-center">
+    <div class="text-red-600 font-bold">PAYMENT RECORDS</div>
+  </div>
+
+</div>

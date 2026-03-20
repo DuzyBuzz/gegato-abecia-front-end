@@ -40,6 +40,7 @@ export interface FuneralService {
   nameOfInformant?: string;
   plan?: string;
   planNumber?: string;
+  relationshipToDeceased?: string;
 
   // Casket/Urn
   casket?: string;
@@ -53,6 +54,8 @@ export interface FuneralService {
   deliveryHelper?: string;
   deliveryRemarks?: string;
   deliveryStatus?: string;
+  deliveryDate?: Date | string;
+
 
   // Transfer
   transferAddress?: string;
@@ -89,6 +92,7 @@ export interface FuneralService {
   lips?: string;
   embalmers?: string;
   finishedBy?: string;
+  embalmedBy?: string;
 
   // Medical
   autopsy?: string;

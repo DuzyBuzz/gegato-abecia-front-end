@@ -6,8 +6,9 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { AuthService } from '../../services/auth.service';
 import { Dialog } from "primeng/dialog";
-import { FuneralContractEntry } from '../../documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
+import { FuneralContractEntry } from '../../forms/funeral-contract-entry/funeral-contract-entry';
 import { TagModule } from 'primeng/tag';
+import { FuneralService } from '../../models/funeral-service.model';
 
 @Component({
   selector: 'app-deceased',
@@ -17,13 +18,22 @@ import { TagModule } from 'primeng/tag';
 })
 export class DeceasedComponent {
   dialogVisible = false;
-
+  dialogMaximized = true;
+  selectedContract: FuneralService | null = null;
+  
   constructor(
     private router: Router,
     private auth: AuthService
   ) {}
 
   openNewFuneralContract(): void {
+    this.selectedContract = null; // Clear selection for new contract
+    this.dialogVisible = true;
+  }
+
+  onContractSelected(contract: FuneralService): void {
+    console.log('[DeceasedComponent] Contract selected:', contract);
+    this.selectedContract = contract;
     this.dialogVisible = true;
   }
 

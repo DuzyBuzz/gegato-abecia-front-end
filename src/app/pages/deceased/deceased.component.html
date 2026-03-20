@@ -9,7 +9,7 @@
   <!-- RIGHT -->
   <ng-template #end>
     <p-button
-      label="Funeral Contract"
+      label="New Funeral Contract"
       icon="pi pi-user-plus"
       severity="success"
       (onClick)="openNewFuneralContract()"
@@ -17,11 +17,11 @@
   </ng-template>
 </p-toolbar>
 
-<app-deceased-table></app-deceased-table>
+<app-deceased-table (contractSelected)="onContractSelected($event)"></app-deceased-table>
 <p-dialog
   [(visible)]="dialogVisible"
   [modal]="true"
-  [style]="{ width: '99vw' }"
+  [style]="{ width: '100vw', height: '100vh' }"
   [maximizable]="true"
   [closable]="true"
   [draggable]="true"
@@ -34,7 +34,7 @@
       <!-- Left -->
       <div class="flex flex-col">
         <span class="text-2xl font-bold">
-          Funeral Service Contract
+          {{ selectedContract ? 'Edit' : 'Create' }} Funeral Service Contract
         </span>
         <span class="text-sm text-gray-300">
           Complete all required fields to proceed
@@ -46,6 +46,6 @@
     </div>
   </ng-template>
 
-  <app-funeral-contract-entry></app-funeral-contract-entry>
+  <app-funeral-contract-entry [selectedContract]="selectedContract"></app-funeral-contract-entry>
 
 </p-dialog>

@@ -25,6 +25,7 @@ export class FuneralServiceService {
     return this.http.get<FuneralService[]>(`${this.api}/find_record/${filter}`)
   }
 
+  //upsert method if there is an id, it will update the record, if there is no id, it will create a new record
   save(service:FuneralService) {
     return this.http.post(`${this.api}/save`, service)
   }

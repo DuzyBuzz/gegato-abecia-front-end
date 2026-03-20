@@ -40,7 +40,8 @@ Funeral Service {
     private String province;
     private String plan;
     private String planNumber;
-
+    private Sting relationshipToDeceased;
+    
     // ========== SECTION 4: CASKET/URN & SERVICES ==========
     private String casket;
     private String casketAvailable;
@@ -53,6 +54,7 @@ Funeral Service {
     private String deliveryHelper;
     private String deliveryRemarks;
     private String deliveryStatus;
+    private Date deliceryDate;
 
     // ========== SECTION 6: TRANSFER & BURIAL/CREMATION SCHEDULE ==========
     private Date dateOfTransfer;

@@ -11,12 +11,21 @@ Funeral Service:
 /delete/{id:number}
 
 Payments
-/payments
+https://gegato-abecia-fh.appspot.com/payments
 
 /find/{pageNo}/{recordsPerPage}
+/find_record_service/{id:funeral_service_id}
 /find_record/{id:number}
 /find_record/{filter:string (name)}
 /find_record_date/{start:date}/{end:date} (format is yyyy-mm-dd)
 /save (send FuneralService definition as body)
 /delete/{id:number}
+
+
+Users
+/save (send Account definition as body)
+/find_record/{id:number}
+/find_record/{filter:string (username)}
+/find find all accounts
+{encrypt the passwords before sending}
 

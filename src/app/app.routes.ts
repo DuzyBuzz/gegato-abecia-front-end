@@ -1,15 +1,15 @@
 import { Routes } from '@angular/router';
-import { MainLayout } from './layout/main-layout/main-layout.component';
+import { MainLayout } from './shared/layout/main-layout/main-layout.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UsersComponent } from './pages/users/users.component';
 import { AuthorityToCremateRemainsPrinting } from './documents/printing-forms/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
 import { StatementOfAccount } from './documents/printing-forms/statement-of-account/statement-of-account';
-import { FuneralContractEntry } from './documents/entry-forms/funeral-contract-entry/funeral-contract-entry';
+import { FuneralContractEntry } from './forms/funeral-contract-entry/funeral-contract-entry';
 import { BillingEntry } from './documents/entry-forms/billing-entry/billing-entry';
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
-import { BillingLayoutComponent } from './layout/billing-layout/billing-layout.component';
+import { BillingLayoutComponent } from './shared/layout/billing-layout/billing-layout.component';
 
 export const routes: Routes = [
 
