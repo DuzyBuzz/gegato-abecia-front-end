@@ -1,10 +1,11 @@
 {
   "/api": {
     "target": "https://gegato-abecia-fh.appspot.com",
-    "secure": true,
+    "secure": false,
     "changeOrigin": true,
     "pathRewrite": {
       "^/api": ""
-    }
+    },
+    "logLevel": "debug"
   }
 }

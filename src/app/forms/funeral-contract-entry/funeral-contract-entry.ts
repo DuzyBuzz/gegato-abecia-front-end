@@ -1,37 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
-import { PrintDataService } from '../../services/print-data.service';
 import { ComboboxFirestoreService } from '../../services/combobox-firestore.service';
-import { FuneralServiceService } from '../../services/funeral-service.service';
+import { FuneralContractService } from '../../services/funeral-contract.service';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
-import { InputNumber } from 'primeng/inputnumber';
-import { DialogModule } from "primeng/dialog";
-import { FuneralPaymentComponent } from '../funeral-payment/funeral-payment.component';
-import { FuneralPayment } from '../../models/funeral-payment.model';
-import { BillingEntry } from "../../documents/entry-forms/billing-entry/billing-entry";
 
 @Component({
   selector: 'app-funeral-contract-entry',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, ToastModule, DialogModule, FuneralPaymentComponent, BillingEntry],
+  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, ToastModule],
   templateUrl: './funeral-contract-entry.html',
   styleUrl: './funeral-contract-entry.scss',
   providers: [MessageService]
 })
 export class FuneralContractEntry implements OnInit, OnDestroy {
   dialogVisible = false;
-  paymentDialogVisible = false;
-  funeralPaymentData: FuneralPayment | null = null;
   form: FormGroup;
   deceasedName = '';
   comboboxesReady = false;
-  messageService: MessageService;
-  contractId: string | null = null;
+  contractId: number | null = null;
   currentSection = 1;
   private intersectionObserver: IntersectionObserver | null = null;
   
@@ -44,33 +35,6 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       this.form.reset();
       this.deceasedName = '';
     }
-  }
-  openBillingRecord(): void {
-    if (!this.contractId) {
-      console.warn('[FuneralContractEntry] openBillingRecord - No contractId');
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Create Contract First',
-        detail: 'Please save the contract first before adding payment information',
-        life: 3000,
-      });
-      return;
-    }
-
-    console.log('[FuneralContractEntry] openBillingRecord called', {
-      contractId: this.contractId,
-      numericContractId: +this.contractId,
-      funeralService: {
-        id: this.form.value.id,
-        contractNo: this.form.value.contractNo,
-        firstName: this.form.value.firstName,
-        lastName: this.form.value.lastName,
-        price: this.form.value.price,
-        discount: this.form.value.discount
-      }
-    });
-
-    this.paymentDialogVisible = true;
   }
   sections = [
     { id: 1, name: 'Contract Information' },
@@ -86,17 +50,32 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     { id: 11, name: 'Administrative/Timestamps' }
   ];
 
+  openBillingRecord(): void {
+    if (!this.contractId) {
+      console.warn('[FuneralContractEntry] openBillingRecord - No contractId');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Create Contract First',
+        detail: 'Please save the contract first before adding payment information',
+        life: 3000,
+      });
+      return;
+    }
+
+    const role = this.auth.getRole();
+    const base = role === 'Admin' ? '/admin' : '/billing';
+    this.router.navigate([`${base}/documents/billing/${this.contractId}`]);
+  }
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private auth: AuthService,
-    private printDataService: PrintDataService,
     private comboboxService: ComboboxFirestoreService,
-    private funeralServiceService: FuneralServiceService,
-    messageService: MessageService
+    private funeralContractService: FuneralContractService,
+    @Inject(MessageService) private messageService: MessageService
   ) {
-    this.messageService = messageService;
     this.form = this.fb.group({
       // ========== SECTION 1: CONTRACT INFORMATION ==========
       contractNo: ['', [Validators.required, Validators.minLength(3)]],
@@ -104,7 +83,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       contractDate: ['', Validators.required],
       price: ['', [Validators.required, Validators.min(0)]],
       discount: [0],
-      dueDate: [''],
+      dueDate: ['', Validators.required],
       checkedBy: [''],
       financialAssitance: [''],
 
@@ -113,7 +92,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       middleName: [''],
       lastName: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
-      age: ['', [Validators.required, Validators.min(0), Validators.max(150)]],
+      age: ['', [Validators.required]],
       gender: ['', Validators.required],
       civilStatus: ['', Validators.required],
       dateOfDeath: ['', Validators.required],
@@ -121,7 +100,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       placeOfDeath: ['', Validators.required],
       placeOfBirth: [''],
       religion: [''],
-      addressLine1: ['', Validators.required],
+      addressLine1: [''],
       parentFather: [''],
       parentMother: [''],
       nameOfInformant: [''],
@@ -131,13 +110,14 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       contracteeAge: ['', [Validators.required, Validators.min(0), Validators.max(150)]],
       contracteeGender: [''],
       contracteeCivilStatus: [''],
-      contactNo: ['', [Validators.required, Validators.pattern(/^[0-9\s\-\+\(\)]{7,}$/)]],
+      contactNo: ['', [Validators.required]],
       baranggay: ['', Validators.required],
       district: ['', Validators.required],
       municipality: ['', Validators.required],
-      province: [''],
+      province: [''], 
       plan: [''],
       planNumber: [''],
+      relationshipToDeceased: [''],
 
       // ========== SECTION 4: CASKET/URN & SERVICES ==========
       casket: ['', Validators.required],
@@ -148,6 +128,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
 
       // ========== SECTION 5: DELIVERY ==========
       deliverySerialNumber: [''],
+      deliveryDate: [''],
       deliveryHelper: [''],
       deliveryRemarks: [''],
       deliveryStatus: [''],
@@ -260,7 +241,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     // Capture contractId from route parameters if in edit mode
     this.activatedRoute.params.subscribe(params => {
       if (params['contractId']) {
-        this.contractId = params['contractId'];
+        this.contractId = Number(params['contractId']);
         this.loadContractData(params['contractId']);
       }
     });
@@ -273,22 +254,28 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       }
     });
 
-    // Format price and discount to 2 decimals on input
-    ['price', 'discount'].forEach(field => {
-      this.form.get(field)?.valueChanges.subscribe(value => {
-        if (value && !isNaN(value)) {
-          const formatted = parseFloat(value).toFixed(2);
-          this.form.get(field)?.setValue(formatted, { emitEvent: false });
-        }
-      });
-    });
 
     // Set up IntersectionObserver to track current section on scroll
     setTimeout(() => {
       this.setupIntersectionObserver();
     }, 100);
   }
+formatNumber(field: string): void {
+  const control = this.form.get(field);
 
+  if (!control) return;
+
+  let value = control.value;
+
+  if (value === null || value === '' || isNaN(value)) {
+    control.setValue('0.00', { emitEvent: false });
+    return;
+  }
+
+  const formatted = parseFloat(value).toFixed(2);
+
+  control.setValue(formatted, { emitEvent: false });
+}
   ngOnDestroy(): void {
     // Clean up IntersectionObserver
     if (this.intersectionObserver) {
@@ -323,7 +310,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
   }
 
   private loadContractData(contractId: string | number): void {
-    this.funeralServiceService.getFuneralService(Number(contractId)).subscribe({
+    this.funeralContractService.getFuneralService(Number(contractId)).subscribe({
       next: (data: any) => {
         console.log('[FuneralContractEntry] Contract data loaded:', data);
         // Use setTimeout to ensure select-helper comboboxes are initialized
@@ -381,31 +368,6 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     return normalized;
   }
 
-  onPaymentSaved(payment: FuneralPayment): void {
-    this.funeralPaymentData = payment;
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Payment record saved successfully',
-      life: 3000,
-    });
-  }
-
-  onPaymentDialogClose(): void {
-    this.paymentDialogVisible = false;
-  }
-
-  get currentFuneralService() {
-    return this.form.value as any;
-  }
-
-  scrollToSection(sectionId: number): void {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
   private calculateAge(birthDate: Date): number {
     const today = new Date(); 
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -418,31 +380,32 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     return Math.max(0, age);
   }
 
-  goToBilling(): void {
-    // Validate form before navigation
-    if (this.form.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Unable to Proceed',
-        detail: 'Please complete all required fields before proceeding. Check highlighted fields for more information.',
-        life: 5000
-      });
-      return;
-    }
-
-    const userRole = this.auth.getRole();
-    const billingPath = userRole === 'Admin' ? '/admin/documents/billing' : '/billing/documents/billing';
-    
-    // If we have a contractId, pass it to billing form
-    if (this.contractId) {
-      this.router.navigate([billingPath.replace('documents/billing', `documents/billing/${this.contractId}`)]);
-    } else {
-      // Generate a temporary contractId based on form data
-      const tempId = this.generateContractId();
-      this.contractId = tempId;
-      this.router.navigate([`${billingPath}/${tempId}`]);
+  scrollToSection(sectionId: number): void {
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
+
+  get currentFuneralService() {
+    return this.form.value as any;
+  }
+
+  goToBilling(): void {
+  if (!this.contractId) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Save First',
+      detail: 'Please save contract before proceeding to billing'
+    });
+    return;
+  }
+
+  const role = this.auth.getRole();
+  const base = role === 'Admin' ? '/admin' : '/billing';
+
+  this.router.navigate([`${base}/documents/billing/${this.contractId}`]);
+}
 
   private generateContractId(): string {
     // Generate a contract ID based on timestamp and form data
@@ -502,197 +465,60 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     (event.target as HTMLSelectElement).value = '';
   }
 
-  submitContract(): void {
-    if (!this.form.valid) {
+submitContract(): void {
+  if (this.form.invalid) {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Invalid Form',
+      detail: 'Please complete required fields.',
+      life: 4000
+    });
+    return;
+  }
+
+  const isUpdating = !!this.contractId;
+  const payload = {
+    ...this.form.value,
+    price: parseFloat(this.form.value.price) || 0,
+    discount: parseFloat(this.form.value.discount) || 0,
+    age: parseInt(this.form.value.age) || 0,
+    contracteeAge: parseInt(this.form.value.contracteeAge) || 0
+  };
+
+  // ✅ ONLY include ID if updating
+  if (this.contractId) {
+    payload.id = this.contractId;
+  }
+
+  console.log('UPSERT PAYLOAD:', payload);
+
+  this.funeralContractService.save(payload).subscribe({
+    next: (res: any) => {
+
+      // ✅ backend is source of truth
+      if (res?.id) {
+        this.contractId = res.id;
+      }
+
+      this.messageService.add({
+        severity: 'success',
+        summary: isUpdating ? 'Updated' : 'Created',
+        detail: 'Contract saved successfully',
+        life: 3000
+      });
+
+    },
+    error: (err) => {
+      console.error(err);
       this.messageService.add({
         severity: 'error',
-        summary: 'Unable to Save',
-        detail: 'Please complete all required fields before proceeding. Check highlighted fields for more information.',
-        sticky: true,
-        life: 8000
+        summary: 'Error',
+        detail: 'Save failed',
+        life: 4000
       });
-      return;
     }
-
-    const formValue = this.form.value;
-
-    // Map form values directly to FuneralService model (field names already match)
-    const funeralService = {
-      id: this.contractId ? Number(this.contractId) : undefined, // Include ID if updating
-      // Contract Info
-      contractNo: formValue.contractNo,
-      type: formValue.type,
-      contractDate: formValue.contractDate,
-      price: parseFloat(formValue.price) || 0,
-      discount: parseFloat(formValue.discount) || 0,
-      dueDate: formValue.dueDate,
-      checkedBy: formValue.checkedBy,
-      financialAssitance: formValue.financialAssitance,
-
-      // Deceased Information
-      firstName: formValue.firstName,
-      middleName: formValue.middleName,
-      lastName: formValue.lastName,
-      dateOfBirth: formValue.dateOfBirth,
-      age: parseInt(formValue.age) || 0,
-      gender: formValue.gender,
-      civilStatus: formValue.civilStatus,
-      dateOfDeath: formValue.dateOfDeath,
-      timeOfDeath: formValue.timeOfDeath,
-      placeOfDeath: formValue.placeOfDeath,
-      placeOfBirth: formValue.placeOfBirth,
-      religion: formValue.religion,
-      addressLine1: formValue.addressLine1,
-      parentFather: formValue.parentFather,
-      parentMother: formValue.parentMother,
-      nameOfInformant: formValue.nameOfInformant,
-
-      // Contractee Information
-      contractee: formValue.contractee,
-      contracteeAge: parseInt(formValue.contracteeAge) || 0,
-      contracteeGender: formValue.contracteeGender,
-      contracteeCivilStatus: formValue.contracteeCivilStatus,
-      contactNo: formValue.contactNo,
-      baranggay: formValue.baranggay,
-      district: formValue.district,
-      municipality: formValue.municipality,
-      province: formValue.province,
-      plan: formValue.plan,
-      planNumber: formValue.planNumber,
-
-      // Casket/Urn
-      casket: formValue.casket,
-      casketAvailable: formValue.casketAvailable,
-      uniform: formValue.uniform,
-      urnType: formValue.urnType,
-      urnDescription: formValue.urnDescription,
-
-      // Delivery
-      deliverySerialNumber: formValue.deliverySerialNumber,
-      deliveryHelper: formValue.deliveryHelper,
-      deliveryRemarks: formValue.deliveryRemarks,
-      deliveryStatus: formValue.deliveryStatus,
-
-      // Transfer & Burial/Cremation
-      dateOfTransfer: formValue.dateOfTransfer,
-      transferAddress: formValue.transferAddress,
-      transferTime: formValue.transferTime,
-      dateReceived: formValue.dateReceived,
-      dateOfBurial: formValue.dateOfBurial,
-      takeOff: formValue.takeOff,
-      massTime: formValue.massTime,
-      burialDriver: formValue.burialDriver,
-      burialHelper: formValue.burialHelper,
-      familyCar: formValue.familyCar,
-      familyCarDriver: formValue.familyCarDriver,
-      flowerCar: formValue.flowerCar,
-      flowerCarDriver: formValue.flowerCarDriver,
-      carRental: formValue.carRental,
-      carRentalDriver: formValue.carRentalDriver,
-      cremationTime: formValue.cremationTime,
-      cremationOperator: formValue.cremationOperator,
-      burialBenefit: formValue.burialBenefit,
-      setupCrew: formValue.setupCrew,
-      pallBearrer: formValue.pallBearrer,
-      funeralDirector: formValue.funeralDirector,
-
-      // Embalming & Makeup
-      dateEmblamed: formValue.dateEmblamed,
-      timeFinished: formValue.timeFinished,
-      makeupDressUp: formValue.makeupDressUp,
-      makeUprequest: formValue.makeUprequest,
-      bodySpecialInstruction: formValue.bodySpecialInstruction,
-      nails: formValue.nails,
-      lips: formValue.lips,
-      emblamers: formValue.emblamers,
-      finishedBy: formValue.finishedBy,
-      embalmedBy: formValue.embalmedBy,
-
-      // Medical
-      autopsy: formValue.autopsy,
-      autopsyDate: formValue.autopsyDate,
-      autopsyBy: formValue.autopsyBy,
-
-      // Identification Documents
-      idType: formValue.idType,
-      claimIdNumber: formValue.claimIdNumber,
-      seniorId: formValue.seniorId,
-      issuedAt: formValue.issuedAt,
-      issuedOn: formValue.issuedOn,
-
-      // Government/Signatures/Remarks
-      baranggayIndigent: formValue.baranggayIndigent,
-      baranggayCaptain: formValue.baranggayCaptain,
-      cityDocsCompletion: formValue.cityDocsCompletion,
-      supSigBurial: formValue.supSigBurial,
-      omSigDelivery: formValue.omSigDelivery,
-      omSigBurial: formValue.omSigBurial,
-      chapelRental: formValue.chapelRental,
-      familyWillConvo: formValue.familyWillConvo,
-      cleared: formValue.cleared,
-      collectorRemarks: formValue.collectorRemarks,
-      remarks: formValue.remarks,
-      billingRemarks: formValue.billingRemarks,
-
-      // Timestamps
-      startOfTransaction: formValue.startOfTransaction,
-      dateSubmitted: formValue.dateSubmitted,
-      timeEncoded: formValue.timeEncoded,
-      dateAshReleased: formValue.dateAshReleased,
-      releasedBy: formValue.releasedBy,
-      receivedBy: formValue.receivedBy
-    };
-
-    const isUpdate = !!this.contractId;
-    const operationType = isUpdate ? 'updated' : 'created';
-    
-    // Include ID if updating
-    if (isUpdate) {
-      funeralService.id = Number(this.contractId);
-    }
-
-    console.log(`[FuneralContractEntry] Submitting funeral contract (${isUpdate ? 'UPDATE' : 'CREATE'}):`, funeralService);
-
-    // Show loading message
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Processing',
-      detail: isUpdate ? 'Updating contract in database...' : 'Creating contract in database...',
-      life: 3000
-    });
-
-    this.funeralServiceService.save(funeralService).subscribe({
-      next: (response: any) => {
-        console.log(`[FuneralContractEntry] Contract ${operationType} successfully:`, response);
-        
-        // Set contract ID from response if available
-        if (response && response.id) {
-          this.contractId = response.id.toString();
-        }
-
-        this.messageService.add({
-          severity: 'success',
-          summary: isUpdate ? 'Contract Updated Successfully' : 'Contract Created Successfully',
-          detail: `Funeral contract for ${funeralService.firstName} ${funeralService.lastName} has been ${operationType}. Contract ID: ${this.contractId || 'pending'}`,
-          life: 4000
-        });
-        
-        // Navigate back after delay
-        setTimeout(() => this.goBack(), 2000);
-      },
-      error: (err: any) => {
-        console.error(`[FuneralContractEntry] Failed to ${isUpdate ? 'update' : 'create'} contract:`, err);
-        
-        this.messageService.add({
-          severity: 'error',
-          summary: isUpdate ? 'Update Failed' : 'Creation Failed',
-          detail: 'An error occurred while processing your request. Please try again later or contact support if the problem persists.',
-          sticky: true,
-          life: 6000
-        });
-      }
-    });
-  }
+  });
+}
 
   // Field name to display name mapping
   private fieldDisplayNames: { [key: string]: string } = {
@@ -731,12 +557,14 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     province: 'Province',
     plan: 'Plan',
     planNumber: 'Plan Number',
+    relationshipToDeceased: 'Relationship to Deceased',
     casket: 'Casket Type',
     casketAvailable: 'Casket Available',
     uniform: 'Uniform',
     urnType: 'Urn Type',
     urnDescription: 'Urn Description',
     deliverySerialNumber: 'Delivery Serial Number',
+    deliveryDate: 'Delivery Date',
     deliveryHelper: 'Delivery Helper',
     deliveryRemarks: 'Delivery Remarks',
     deliveryStatus: 'Delivery Status',

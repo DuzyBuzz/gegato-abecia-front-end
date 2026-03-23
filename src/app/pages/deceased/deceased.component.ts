@@ -8,7 +8,6 @@ import { AuthService } from '../../services/auth.service';
 import { Dialog } from "primeng/dialog";
 import { FuneralContractEntry } from '../../forms/funeral-contract-entry/funeral-contract-entry';
 import { TagModule } from 'primeng/tag';
-import { FuneralService } from '../../models/funeral-service.model';
 
 @Component({
   selector: 'app-deceased',
@@ -19,7 +18,7 @@ import { FuneralService } from '../../models/funeral-service.model';
 export class DeceasedComponent {
   dialogVisible = false;
   dialogMaximized = true;
-  selectedContract: FuneralService | null = null;
+  selectedContract: FuneralContract | null = null;
   
   constructor(
     private router: Router,
@@ -31,7 +30,7 @@ export class DeceasedComponent {
     this.dialogVisible = true;
   }
 
-  onContractSelected(contract: FuneralService): void {
+  onContractSelected(contract: FuneralContract): void {
     console.log('[DeceasedComponent] Contract selected:', contract);
     this.selectedContract = contract;
     this.dialogVisible = true;
@@ -40,8 +39,8 @@ export class DeceasedComponent {
   onContractRowSelected(contract: FuneralContract): void {
     const userRole = this.auth.getRole();
     const path = userRole === 'Admin'
-      ? `/admin/documents/contracts/funeral/${contract.contract_id}`
-      : `/billing/documents/contracts/funeral/${contract.contract_id}`;
+      ? `/admin/documents/contracts/funeral/${contract.id}`
+      : `/billing/documents/contracts/funeral/${contract.id}`;
     this.router.navigateByUrl(path);
   }
 }

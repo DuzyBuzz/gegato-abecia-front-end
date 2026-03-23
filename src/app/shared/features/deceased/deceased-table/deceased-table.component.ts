@@ -2,10 +2,8 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableHelperComponent } from '../../../components/table-helper/table-helper.component';
 import { TableHelperColumn } from '../../../components/table-helper/table-helper-column.model';
-import { FuneralService } from '../../../../models/funeral-service.model';
-import { FuneralServiceService } from '../../../../services/funeral-service.service';
-import { ButtonModule } from 'primeng/button';
-import { ToolbarModule } from 'primeng/toolbar';
+import { FuneralContract } from '../../../../models/funeral-contract.model';
+import { FuneralContractService } from '../../../../services/funeral-contract.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
@@ -14,21 +12,19 @@ import { ChangeDetectorRef } from '@angular/core';
   imports: [
     CommonModule,
     TableHelperComponent,
-    ButtonModule,
-    ToolbarModule
   ],
     templateUrl: './deceased-table.component.html',
   styleUrl: './deceased-table.component.scss',
 })
 export class DeceasedTableComponent implements OnInit {
 
-  deceasedList: FuneralService[] = [];
+  deceasedList: FuneralContract[] = [];
 
   loading = false;
 
-  selectedDeceased?: FuneralService;
+  selectedDeceased?: FuneralContract;
 
-  @Output() contractSelected = new EventEmitter<FuneralService>();
+  @Output() contractSelected = new EventEmitter<FuneralContract>();
 
   columns: TableHelperColumn[] = [
     {
@@ -100,7 +96,7 @@ export class DeceasedTableComponent implements OnInit {
   ];
 
   constructor(
-    private funeralService: FuneralServiceService,
+    private funeralService: FuneralContractService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -138,15 +134,10 @@ export class DeceasedTableComponent implements OnInit {
 
   }
 
-  onRowSelected(row: FuneralService): void {
-
-    this.selectedDeceased = row;
-
-    console.log('Selected contract:', row);
-
-    this.contractSelected.emit(row);
-
-  }
+onRowSelected(row: FuneralContract): void {
+  this.selectedDeceased = row;
+  this.contractSelected.emit(row);
+}
 onSearch(searchValue: string): void {
 
   if (!searchValue?.trim()) {

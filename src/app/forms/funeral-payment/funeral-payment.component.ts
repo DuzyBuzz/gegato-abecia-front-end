@@ -5,10 +5,11 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { FuneralPayment } from '../../models/funeral-payment.model';
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
-import { FuneralService } from '../../models/funeral-service.model';
+import { FuneralContract } from '../../models/funeral-contract.model';
 
 export interface PaymentRow extends FuneralPayment {
   isEditing?: boolean;
+  FuneralContractId?: number;
 }
 
 @Component({
@@ -21,7 +22,7 @@ export interface PaymentRow extends FuneralPayment {
 })
 export class FuneralPaymentComponent implements OnInit, OnChanges {
   @Input() serviceId: number = 0;
-  @Input() funeralService: FuneralService | null = null;
+  @Input() FuneralContract: FuneralContract | null = null;
   @Output() paymentSaved = new EventEmitter<FuneralPayment>();
   @Output() closeDialog = new EventEmitter<void>();
 
@@ -45,20 +46,20 @@ export class FuneralPaymentComponent implements OnInit, OnChanges {
   totalAmount: number = 0;
   totalChecks: number = 0;
   totalCash: number = 0;
+  messageService: any;
 
   constructor(
     private funeralPaymentsService: FuneralPaymentsService,
-    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
-    console.log('[FuneralPayment] ngOnInit - serviceId:', this.serviceId, 'funeralService:', !!this.funeralService);
+    console.log('[FuneralPayment] ngOnInit - serviceId:', this.serviceId, 'FuneralContract:', !!this.FuneralContract);
     this.initializeComponent();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['serviceId'] || changes['funeralService']) {
-      console.log('[FuneralPayment] ngOnChanges - serviceId:', this.serviceId, 'funeralService:', !!this.funeralService);
+    if (changes['serviceId'] || changes['FuneralContract']) {
+      console.log('[FuneralPayment] ngOnChanges - serviceId:', this.serviceId, 'FuneralContract:', !!this.FuneralContract);
       this.initializeComponent();
     }
   }
@@ -69,30 +70,30 @@ export class FuneralPaymentComponent implements OnInit, OnChanges {
   }
 
   private populateHeaderFromService(): void {
-    console.log('[FuneralPayment] populateHeaderFromService - funeralService:', !!this.funeralService);
+    console.log('[FuneralPayment] populateHeaderFromService - FuneralContract:', !!this.FuneralContract);
 
-    if (this.funeralService) {
-      this.contractNo = this.funeralService.contractNo || '';
-      const deceased = `${this.funeralService.firstName || ''} ${this.funeralService.lastName || ''}`.trim();
+    if (this.FuneralContract) {
+      this.contractNo = this.FuneralContract.contractNo || '';
+      const deceased = `${this.FuneralContract.firstName || ''} ${this.FuneralContract.lastName || ''}`.trim();
       this.deceased = deceased;
-      this.contractee = this.funeralService.contractee || '';
-      this.address = this.funeralService.addressLine1 || '';
-      this.serviceType = this.funeralService.type || '';
+      this.contractee = this.FuneralContract.contractee || '';
+      this.address = this.FuneralContract.addressLine1 || '';
+      this.serviceType = this.FuneralContract.type || '';
 
       // Bill information
-      this.billAmount = Number(this.funeralService.price) || 0;
-      this.discount = Number(this.funeralService.discount) || 0;
+      this.billAmount = Number(this.FuneralContract.price) || 0;
+      this.discount = Number(this.FuneralContract.discount) || 0;
 
       console.log('[FuneralPayment] Header populated from service:', {
         contractNo: this.contractNo,
         deceased: this.deceased,
         billAmount: this.billAmount,
         discount: this.discount,
-        id: this.funeralService.id
+        id: this.FuneralContract.id
       });
       this.computeBalance();
     } else {
-      console.warn('[FuneralPayment] funeralService is null or undefined');
+      console.warn('[FuneralPayment] FuneralContract is null or undefined');
     }
   }
 
@@ -172,7 +173,7 @@ export class FuneralPaymentComponent implements OnInit, OnChanges {
       description: '',
       remarks: '',
       checkCleared: false,
-      funeralServiceId: this.serviceId,
+      FuneralContractId: this.serviceId,
       isEditing: true,
     };
     this.rows.push(newRow);
@@ -208,7 +209,6 @@ export class FuneralPaymentComponent implements OnInit, OnChanges {
       description: row.description,
       remarks: row.remarks,
       checkCleared: row.checkCleared,
-      funeralServiceId: this.serviceId,
     };
 
     console.log('[FuneralPayment] Saving row:', paymentData);

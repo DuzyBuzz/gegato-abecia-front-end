@@ -80,7 +80,7 @@
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Price <span class="text-red-500">*</span> </label>
           <div class="flex items-center gap-2">
             <span class="text-gray-700 font-semibold">₱</span>
-            <input type="number" formControlName="price" [class.border-red-500]="isFieldInvalid('price')" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01" title="Contract Price">
+            <input type="number" formControlName="price" [class.border-red-500]="isFieldInvalid('price')"  (blur)="formatNumber('price')" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01" title="Contract Price">
           </div>
           <small *ngIf="isFieldInvalid('price')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('price') }}</small>
         </div>
@@ -88,7 +88,7 @@
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Discount</label>
           <div class="flex items-center gap-2">
             <span class="text-gray-700 font-semibold">₱</span>
-            <input type="number" formControlName="discount" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01"  title="Discount">
+            <input type="number" formControlName="discount" (blur)="formatNumber('discount')" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01"  title="Discount">
           </div>
         </div>
         <div>
@@ -186,8 +186,21 @@
           </app-select-helper>
         </div>
 
+        <!-- Civil Status -->
+        <div class="sm:col-span-2">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+            Civil Status <span class="text-red-500">*</span>
+          </label>
+          <app-select-helper
+            formControlName="civilStatus"
+            comboboxName="civilStatus"
+            [searchable]="false"
+            [isInvalid]="isFieldInvalid('civilStatus')">
+          </app-select-helper>
+        </div>
+
         <!-- Religion -->
-        <div class="sm:col-span-6">
+        <div class="sm:col-span-4">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
             Religion <span class="text-red-500">*</span>
           </label>
@@ -199,6 +212,22 @@
           </app-select-helper>
         </div>
 
+      </div>
+
+      <!-- ROW 2B: ADDRESS -->
+      <div class="mt-4">
+        <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+          Address <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="text" 
+          title="Address"
+          formControlName="addressLine1"
+          [class.border-red-500]="isFieldInvalid('addressLine1')"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
+        <small *ngIf="isFieldInvalid('addressLine1')" class="text-red-500 text-xs mt-1 block">
+          {{ getErrorMessage('addressLine1') }}
+        </small>
       </div>
 
       <!-- ROW 3 : PARENTS -->
@@ -347,7 +376,7 @@
           <input type="text" formControlName="municipality" [class.border-red-500]="isFieldInvalid('municipality')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="City/Municipality">
           <small *ngIf="isFieldInvalid('municipality')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('municipality') }}</small>
         </div>
-        <div>--
+        <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Province</label>
           <input type="text" formControlName="province" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Province">
         </div>
@@ -827,63 +856,4 @@
   </div>
 
 </div>
-<p-dialog
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [style]="{ width: '100vw', height: '100vh' }"
-  [maximizable]="true"
-  [closable]="true"
-  [draggable]="true"
-  [resizable]="true"
->
 
-  <ng-template pTemplate="header">
-    <div class="flex items-center justify-between w-full   text-black px-5 py-4 rounded-t">
-
-      <!-- Left -->
-      <div class="flex flex-col">
-        <span class="text-2xl font-bold">
-          {{ selectedContract ? 'Edit' : 'Create' }} Funeral Service Contract
-        </span>
-        <span class="text-sm text-gray-300">
-          Complete all required fields to proceed
-        </span>
-      </div>
-
-
-
-    </div>
-  </ng-template>
-
-  <app-billing-entry></app-billing-entry>
-
-</p-dialog>
-
-<!-- FUNERAL PAYMENT DIALOG -->
-<p-dialog
-  [(visible)]="paymentDialogVisible"
-  [modal]="true"
-  [style]="{ width: '90vw', height: '90vh' }"
-  [maximizable]="true"
-  [closable]="true"
-  [draggable]="true"
-  [resizable]="true"
->
-  <ng-template pTemplate="header">
-    <div class="flex items-center justify-between w-full px-5 py-4 rounded-t">
-      <div class="flex flex-col">
-        <span class="text-2xl font-bold">Funeral Payment Record</span>
-        <span class="text-sm text-gray-600">Record payment information for funeral service Contract #{{ contractId }}</span>
-      </div>
-    </div>
-  </ng-template>
-
-  <div class="overflow-y-auto">
-    <app-funeral-payment
-      [serviceId]="contractId ? +contractId : 0"
-      [funeralService]="currentFuneralService"
-      (paymentSaved)="onPaymentSaved($event)"
-      (closeDialog)="onPaymentDialogClose()"
-    ></app-funeral-payment>
-  </div>
-</p-dialog>
