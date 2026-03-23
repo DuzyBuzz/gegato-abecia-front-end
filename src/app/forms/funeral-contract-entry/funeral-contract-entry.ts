@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, Input, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Inject, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
@@ -8,17 +8,18 @@ import { AuthService } from '../../services/auth.service';
 import { ComboboxFirestoreService } from '../../services/combobox-firestore.service';
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
+import { DialogModule } from "primeng/dialog";
 
 @Component({
   selector: 'app-funeral-contract-entry',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, ToastModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, ToastModule, DialogModule],
   templateUrl: './funeral-contract-entry.html',
   styleUrl: './funeral-contract-entry.scss',
   providers: [MessageService]
 })
-export class FuneralContractEntry implements OnInit, OnDestroy {
-  dialogVisible = false;
+export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
+  dialogVisible = true;
   form: FormGroup;
   deceasedName = '';
   comboboxesReady = false;
@@ -37,17 +38,17 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
     }
   }
   sections = [
-    { id: 1, name: 'Contract Information' },
-    { id: 2, name: 'Deceased Information' },
-    { id: 3, name: 'Contractee Information' },
-    { id: 4, name: 'Casket/Urn Information' },
+    { id: 1, name: 'Contract ' },
+    { id: 2, name: 'Deceased ' },
+    { id: 3, name: 'Contractee ' },
+    { id: 4, name: 'Casket/Urn ' },
     { id: 5, name: 'Delivery' },
     { id: 6, name: 'Transfer & Burial/Cremation' },
     { id: 7, name: 'Embalming & Makeup' },
     { id: 8, name: 'Medical' },
-    { id: 9, name: 'Identification Documents' },
-    { id: 10, name: 'Government/Signatures/Remarks' },
-    { id: 11, name: 'Administrative/Timestamps' }
+    { id: 9, name: 'Identification ' },
+    { id: 10, name: 'Government Signatures' },
+    { id: 11, name: 'Remarks' }
   ];
 
   openBillingRecord(): void {
@@ -236,8 +237,11 @@ export class FuneralContractEntry implements OnInit, OnDestroy {
       this.comboboxesReady = true;
     });
   }
-
+ngAfterViewInit() {
+  this.setupIntersectionObserver();
+}
   ngOnInit(): void {
+    
     // Capture contractId from route parameters if in edit mode
     this.activatedRoute.params.subscribe(params => {
       if (params['contractId']) {
@@ -284,31 +288,27 @@ formatNumber(field: string): void {
     }
   }
 
-  private setupIntersectionObserver(): void {
-    // Create observer options to detect when sections are in view
-    const options = {
-      root: null, // viewport
-      rootMargin: '-30% 0px -70% 0px', // trigger when section is in top 30% of viewport
-      threshold: 0
-    };
+private setupIntersectionObserver(): void {
+  const options = {
+    root: null,
+    rootMargin: '-40% 0px -50% 0px', // tighter focus
+    threshold: 0.25 // 👈 important
+  };
 
-    // Create the observer
-    this.intersectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const sectionId = parseInt(entry.target.getAttribute('data-section') || '1');
-          this.currentSection = sectionId;
-        }
-      });
-    }, options);
-
-    // Observe all section elements
-    const sections = document.querySelectorAll('[data-section]');
-    sections.forEach(section => {
-      this.intersectionObserver?.observe(section);
+  this.intersectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const sectionId = Number(entry.target.getAttribute('data-section'));
+        this.currentSection = sectionId;
+      }
     });
-  }
+  }, options);
 
+  const sections = document.querySelectorAll('[data-section]');
+  sections.forEach(section => {
+    this.intersectionObserver?.observe(section);
+  });
+}
   private loadContractData(contractId: string | number): void {
     this.funeralContractService.getFuneralService(Number(contractId)).subscribe({
       next: (data: any) => {
@@ -379,13 +379,16 @@ formatNumber(field: string): void {
     
     return Math.max(0, age);
   }
+scrollToSection(sectionId: number): void {
+  const element = document.querySelector(`[data-section="${sectionId}"]`);
 
-  scrollToSection(sectionId: number): void {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  if (element) {
+    const yOffset = -80; // adjust for header
+    const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+
+    window.scrollTo({ top: y, behavior: 'smooth' });
   }
+}
 
   get currentFuneralService() {
     return this.form.value as any;
@@ -427,11 +430,6 @@ formatNumber(field: string): void {
     return this.isEditMode ? 'Update Contract' : 'Create Contract';
   }
 
-  goBack(): void {
-    const userRole = this.auth.getRole();
-    const backPath = userRole === 'Admin' ? '/admin/deceased' : '/billing/deceased';
-    this.router.navigateByUrl(backPath);
-  }
 
   onPrintSelect(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;

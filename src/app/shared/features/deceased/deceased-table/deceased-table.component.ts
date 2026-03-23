@@ -5,6 +5,7 @@ import { TableHelperColumn } from '../../../components/table-helper/table-helper
 import { FuneralContract } from '../../../../models/funeral-contract.model';
 import { FuneralContractService } from '../../../../services/funeral-contract.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-deceased-table',
@@ -97,7 +98,8 @@ export class DeceasedTableComponent implements OnInit {
 
   constructor(
     private funeralService: FuneralContractService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -135,8 +137,15 @@ export class DeceasedTableComponent implements OnInit {
   }
 
 onRowSelected(row: FuneralContract): void {
-  this.selectedDeceased = row;
-  this.contractSelected.emit(row);
+  if (!row?.id) {
+    console.error('No contract ID found in row');
+    return;
+  }
+
+  this.router.navigate([
+    '/billing/forms/contracts/funeral-contract',
+    row.id
+  ]);
 }
 onSearch(searchValue: string): void {
 

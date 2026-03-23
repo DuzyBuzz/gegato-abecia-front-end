@@ -1,35 +1,48 @@
 
   <div class="flex">
 
-  <!-- LEFT SIDEBAR NAVIGATION -->
-  <div class="w-64 h-screen sticky top-0 bg-white border-r border-gray-200 shadow-sm p-4 overflow-y-auto">
+<aside class="w-64 h-[calc(100vh-80px)] sticky top-20 bg-white border-r border-gray-200 shadow-sm flex flex-col">
+
+  <!-- SCROLLABLE NAV -->
+  <div class="flex-1 overflow-y-auto p-4">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">
+      Navigate Sections
+    </h2>
 
     <div class="flex flex-col gap-2">
-     <h2 class="text-lg font-bold text-gray-800 mb-4">
-      Navigate  Sections      </h2>
       <button
         *ngFor="let section of sections"
         type="button"
         (click)="scrollToSection(section.id)"
-        [class.bg-blue-100]="currentSection === section.id"
-        [class.text-blue-700]="currentSection === section.id"
-        [class.bg-gray-100]="currentSection !== section.id"
-        [class.text-gray-600]="currentSection !== section.id"
-        class="text-left px-3 py-2 rounded-md text-sm font-medium transition hover:bg-gray-200"
-      >
-        {{ section.id }}. {{ section.name }}
-      </button>
+        class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition border-l-4"
 
+        [class.border-blue-600]="currentSection === section.id"
+        [class.bg-blue-50]="currentSection === section.id"
+        [class.text-blue-700]="currentSection === section.id"
+
+        [class.border-transparent]="currentSection !== section.id"
+        [class.text-gray-500]="currentSection !== section.id"
+      >
+        <span class=" text-left font-bold">
+          {{ section.id }}. {{ section.name }}
+        </span>
+      </button>
     </div>
-  <!-- FUNERAL PAYMENT BUTTON -->
-  <button
-    *ngIf="isEditMode"
-    type="button" (click)="openBillingRecord()"
-    class="w-full flex items-center justify-center mt-10 bottom-0 gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
-  >
-  Funeral Payment
-  </button>
   </div>
+
+  <!-- FIXED FOOTER BUTTON -->
+  <div class="p-4 border-t border-gray-200">
+    <button
+      *ngIf="isEditMode"
+      type="button"
+      (click)="openBillingRecord()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
+    >
+      Funeral Payment
+    </button>
+  </div>
+
+</aside>
 
 
   <!-- MAIN CONTENT -->
@@ -97,7 +110,7 @@
         </div>
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Checked By</label>
-          <app-select-helper formControlName="checkedBy" comboboxName="checkedBy" [searchable]="true" [isInvalid]="isFieldInvalid('checkedBy')"></app-select-helper>
+          <input type="text" formControlName="checkedBy" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Checked By"> 
         </div>
       </div>
     </div>

@@ -107,10 +107,14 @@ export const routes: Routes = [
           {
             path: 'contracts',
             children: [
-              {
-                path: 'funeral-contract/:contractId',
-                component: FuneralContractEntry
-              }
+                {
+                  path: 'funeral-contract/new',
+                  component: FuneralContractEntry
+                },
+                {
+                  path: 'funeral-contract/:contractId',
+                  component: FuneralContractEntry
+                }
             ]
           },
 
