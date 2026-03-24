@@ -9,6 +9,7 @@ import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
 import { BillingLayoutComponent } from './shared/layout/billing-layout/billing-layout.component';
 import { FuneralPaymentComponent } from './forms/funeral-payment/funeral-payment.component';
+import { StatementOfAccount } from './document/statement-of-account/statement-of-account';
 
 export const routes: Routes = [
 
@@ -126,6 +127,7 @@ export const routes: Routes = [
         ]
       },
 
+
     ]
   },
 
@@ -133,8 +135,12 @@ export const routes: Routes = [
       {
         path: 'print',
         children: [
+            {
+              path: 'statement-of-account/:contractId',
+              component: StatementOfAccount
+            },
 
-          
+
         ]
       },
   // FALLBACK

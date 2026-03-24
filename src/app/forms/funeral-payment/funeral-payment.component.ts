@@ -1,11 +1,23 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CheckboxModule } from 'primeng/checkbox';
+
 import { FuneralPayment } from '../../models/funeral-payment.model';
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
 import { FuneralContract } from '../../models/funeral-contract.model';
+import { FuneralContractService } from '../../services/funeral-contract.service';
 
 export interface PaymentRow extends FuneralPayment {
   isEditing?: boolean;
@@ -15,157 +27,110 @@ export interface PaymentRow extends FuneralPayment {
 @Component({
   selector: 'app-funeral-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ToastModule,
+    TableModule,
+    CardModule,
+    TagModule,
+    ButtonModule,
+    TooltipModule,
+    InputTextModule,
+    InputNumberModule,
+    CheckboxModule
+  ],
   providers: [MessageService],
   templateUrl: './funeral-payment.component.html',
-  styleUrl: './funeral-payment.component.scss',
 })
-export class FuneralPaymentComponent implements OnInit, OnChanges {
-  @Input() serviceId: number = 0;
-  @Input() FuneralContract: FuneralContract | null = null;
-  @Output() paymentSaved = new EventEmitter<FuneralPayment>();
-  @Output() closeDialog = new EventEmitter<void>();
+export class FuneralPaymentComponent implements OnInit {
+
+  serviceId: number = 0;
+  FuneralContract: FuneralContract | null = null;
+  editMode: boolean = false;
+  editedContract: Partial<FuneralContract> = {};
 
   rows: PaymentRow[] = [];
   loading = false;
 
-  // Header fields (readonly)
-  contractNo: string = '';
-  deceased: string = '';
-  contractee: string = '';
-  address: string = '';
-  serviceType: string = '';
+  // Computed values only (NO duplicated state)
+  totalPaid = 0;
+  balanceRemaining = 0;
 
-  // Bill information fields
-  billAmount: number = 0;
-  discount: number = 0;
-  totalPaid: number = 0;
-  balanceRemaining: number = 0;
 
-  // Payment summary fields
-  totalAmount: number = 0;
-  totalChecks: number = 0;
-  totalCash: number = 0;
-  messageService: any;
 
   constructor(
     private funeralPaymentsService: FuneralPaymentsService,
+    private funeralContractService: FuneralContractService,
+    private messageService: MessageService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
+  // ================= INIT =================
   ngOnInit(): void {
-    console.log('[FuneralPayment] ngOnInit - serviceId:', this.serviceId, 'FuneralContract:', !!this.FuneralContract);
-    this.initializeComponent();
-  }
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('contractId'));
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['serviceId'] || changes['FuneralContract']) {
-      console.log('[FuneralPayment] ngOnChanges - serviceId:', this.serviceId, 'FuneralContract:', !!this.FuneralContract);
-      this.initializeComponent();
-    }
-  }
+      if (!id || id <= 0) {
+        console.error('Invalid contractId');
+        return;
+      }
 
-  private initializeComponent(): void {
-    this.populateHeaderFromService();
-    this.loadPaymentData();
-  }
+      this.serviceId = id;
 
-  private populateHeaderFromService(): void {
-    console.log('[FuneralPayment] populateHeaderFromService - FuneralContract:', !!this.FuneralContract);
+      // 🔥 LOAD CONTRACT FIRST
+      this.funeralContractService.getFuneralService(id).subscribe({
+        next: (contract) => {
+          this.cdr.markForCheck(); // ✅ Trigger change detection
+          this.FuneralContract = contract;
 
-    if (this.FuneralContract) {
-      this.contractNo = this.FuneralContract.contractNo || '';
-      const deceased = `${this.FuneralContract.firstName || ''} ${this.FuneralContract.lastName || ''}`.trim();
-      this.deceased = deceased;
-      this.contractee = this.FuneralContract.contractee || '';
-      this.address = this.FuneralContract.addressLine1 || '';
-      this.serviceType = this.FuneralContract.type || '';
-
-      // Bill information
-      this.billAmount = Number(this.FuneralContract.price) || 0;
-      this.discount = Number(this.FuneralContract.discount) || 0;
-
-      console.log('[FuneralPayment] Header populated from service:', {
-        contractNo: this.contractNo,
-        deceased: this.deceased,
-        billAmount: this.billAmount,
-        discount: this.discount,
-        id: this.FuneralContract.id
+          // 🔥 LOAD PAYMENTS AFTER CONTRACT
+          this.loadPaymentData();
+        },
+        error: (err) => {
+          console.error('Failed to load contract', err);
+        }
       });
-      this.computeBalance();
-    } else {
-      console.warn('[FuneralPayment] FuneralContract is null or undefined');
-    }
+    });
   }
 
+  // ================= LOAD PAYMENTS =================
   private loadPaymentData(): void {
-    const numericServiceId = Number(this.serviceId);
-    
-    console.log('[FuneralPayment] loadPaymentData called', {
-      serviceId: this.serviceId,
-      numericServiceId: numericServiceId,
-      isValid: numericServiceId > 0
-    });
-
-    if (!numericServiceId || numericServiceId <= 0) {
-      console.warn('[FuneralPayment] Invalid serviceId:', numericServiceId);
+    if (!this.serviceId) {
       this.rows = [];
-      this.loading = false;
       return;
     }
 
-    console.log('[FuneralPayment] Loading payment records for serviceId:', numericServiceId);
     this.loading = true;
 
-    // Fetch existing payment(s) for this service from backend
-    this.funeralPaymentsService.getFuneralPaymentByServiceId(numericServiceId).subscribe({
-      next: (payment: FuneralPayment | FuneralPayment[] | null) => {
+    this.funeralPaymentsService.getFuneralPaymentByServiceId(this.serviceId).subscribe({
+      next: (res) => {
         this.loading = false;
-        
-        if (payment) {
-          // Handle array response
-          if (Array.isArray(payment)) {
-            console.log('[FuneralPayment] Loaded payments (array):', payment);
-            this.rows = payment.map(p => ({
-              ...p,
-              isEditing: false,
-            } as PaymentRow));
-          } else {
-            // Handle single object response
-            console.log('[FuneralPayment] Loaded payment (single):', payment);
-            this.rows = [
-              {
-                ...payment,
-                isEditing: false,
-              } as PaymentRow,
-            ];
-          }
-        } else {
-          console.log('[FuneralPayment] No payment found for serviceId:', numericServiceId);
-          this.rows = [];
-        }
 
+        this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
+          ...p,
+          FuneralContractId: this.serviceId,
+          isEditing: false
+        }));
+
+        this.cdr.markForCheck(); // ✅ Trigger change detection
         this.computeTotals();
-        this.computeBalance();
       },
-      error: (err: any) => {
+      error: () => {
         this.loading = false;
-        // No payment exists yet - initialize with empty rows (ready to add new payment)
-        console.warn('[FuneralPayment] Error loading payment for serviceId:', numericServiceId, {
-          status: err?.status,
-          message: err?.message,
-          error: err?.error
-        });
         this.rows = [];
-        this.computeBalance();
-      },
+      }
     });
   }
 
+  // ================= CRUD =================
   addRow(): void {
-    const newRow: PaymentRow = {
+    this.rows.push({
       controlNumber: '',
-      dateIssued: this.getTodayDate(),
-      checkDate: this.getTodayDate(),
+      dateIssued: this.getToday(),
+      checkDate: this.getToday(),
       issuedBy: '',
       bank: '',
       accountNumber: '',
@@ -174,135 +139,151 @@ export class FuneralPaymentComponent implements OnInit, OnChanges {
       remarks: '',
       checkCleared: false,
       FuneralContractId: this.serviceId,
-      isEditing: true,
-    };
-    this.rows.push(newRow);
-    console.log('[FuneralPayment] Added new row for editing');
+      isEditing: true
+    });
   }
 
   editRow(row: PaymentRow): void {
     row.isEditing = true;
-    console.log('[FuneralPayment] Editing row:', row.id);
   }
 
-  async saveRow(row: PaymentRow): Promise<void> {
+  saveRow(row: PaymentRow): void {
     if (!row.controlNumber || !row.bank || !row.amount) {
       this.messageService.add({
         severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill in control number, bank, and amount',
-        life: 3000,
+        summary: 'Validation',
+        detail: 'Control No, Bank, and Amount are required'
       });
       return;
     }
 
     this.loading = true;
-    const paymentData: FuneralPayment = {
-      id: row.id,
-      controlNumber: row.controlNumber,
-      dateIssued: row.dateIssued,
-      checkDate: row.checkDate,
-      issuedBy: row.issuedBy,
-      bank: row.bank,
-      accountNumber: row.accountNumber,
-      amount: row.amount,
-      description: row.description,
-      remarks: row.remarks,
-      checkCleared: row.checkCleared,
+
+    const payload: FuneralPayment = {
+      ...row,
+      funeralServiceId: this.serviceId
     };
 
-    console.log('[FuneralPayment] Saving row:', paymentData);
-
-    this.funeralPaymentsService.save(paymentData).subscribe({
-      next: (response: FuneralPayment) => {
+    this.funeralPaymentsService.save(payload).subscribe({
+      next: (res) => {
         this.loading = false;
-        row.id = response.id;
+
+        Object.assign(row, res);
         row.isEditing = false;
+
         this.messageService.add({
           severity: 'success',
           summary: 'Saved',
-          detail: 'Payment record saved successfully',
-          life: 2000,
+          detail: 'Payment saved'
         });
+
         this.computeTotals();
-        this.computeBalance();
-        this.paymentSaved.emit(response);
-        console.log('[FuneralPayment] Row saved successfully:', response);
       },
-      error: (err: any) => {
+      error: () => {
         this.loading = false;
-        const errorMessage = err?.error?.message || 'Failed to save payment record';
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: errorMessage,
-          life: 3000,
+          detail: 'Save failed'
         });
-        console.error('[FuneralPayment] Error saving row:', err);
-      },
+      }
     });
   }
 
   deleteRow(index: number): void {
     const row = this.rows[index];
+
     if (row.id) {
-      console.log('[FuneralPayment] Deleting payment record:', row.id);
-      this.funeralPaymentsService.delete(row.id).subscribe({
-        next: () => {
-          this.rows.splice(index, 1);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Deleted',
-            detail: 'Payment record deleted successfully',
-            life: 2000,
-          });
-          this.computeTotals();
-          this.computeBalance();
-          console.log('[FuneralPayment] Payment record deleted');
-        },
-        error: (err: any) => {
-          const errorMessage = err?.error?.message || 'Failed to delete payment record';
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: errorMessage,
-            life: 3000,
-          });
-          console.error('[FuneralPayment] Error deleting row:', err);
-        },
+      this.funeralPaymentsService.delete(row.id).subscribe(() => {
+        this.rows.splice(index, 1);
+        this.computeTotals();
       });
     } else {
-      // New row not yet saved, just remove from display
       this.rows.splice(index, 1);
       this.computeTotals();
-      this.computeBalance();
-      console.log('[FuneralPayment] Removed unsaved row');
     }
   }
-
+get netAmount(): number {
+  const price = Number(this.FuneralContract?.price) || 0;
+  const discount = Number(this.FuneralContract?.discount) || 0;
+  return price - discount;
+}
+  // ================= COMPUTATION =================
   private computeTotals(): void {
-    this.totalAmount = 0;
-    this.totalCash = 0;
-    this.totalChecks = 0;
-
-    this.rows.forEach(row => {
-      if (row.amount) {
-        const amount = Number(row.amount) || 0;
-        this.totalAmount += amount;
-      }
-    });
-
-    this.totalPaid = this.totalAmount;
+    this.totalPaid = this.rows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
     this.computeBalance();
   }
 
   private computeBalance(): void {
-    const net = this.billAmount - (this.discount || 0);
+    const price = Number(this.FuneralContract?.price) || 0;
+    const discount = Number(this.FuneralContract?.discount) || 0;
+
+    const net = price - discount;
     this.balanceRemaining = Math.max(0, net - this.totalPaid);
   }
 
-  private getTodayDate(): string {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  private getToday(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ================= PRINTING =================
+  printStatement(): void {
+    if (!this.serviceId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Contract ID not found'
+      });
+      return;
+    }
+
+    this.router.navigate(['/print/statement-of-account', this.serviceId]);
+  }
+
+  // ================= CONTRACT EDIT MODE =================
+  startEdit(): void {
+    this.editedContract = { ...this.FuneralContract };
+    this.editMode = true;
+  }
+
+  saveEdit(): void {
+    if (!this.editedContract) return;
+
+    this.loading = true;
+
+    const payload: FuneralContract = {
+      ...this.FuneralContract,
+      ...this.editedContract
+    };
+
+    this.funeralContractService.save(payload).subscribe({
+      next: (res: FuneralContract) => {
+        this.loading = false;
+        this.FuneralContract = res;
+        this.editMode = false;
+        this.editedContract = {};
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Updated',
+          detail: 'Contract updated successfully'
+        });
+
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update contract'
+        });
+      }
+    });
+  }
+
+  cancelEdit(): void {
+    this.editMode = false;
+    this.editedContract = {};
   }
 }
