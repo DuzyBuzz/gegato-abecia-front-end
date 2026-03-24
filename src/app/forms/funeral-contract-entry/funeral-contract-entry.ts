@@ -97,9 +97,13 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const role = this.auth.getRole();
-    const base = role === 'Admin' ? '/admin' : '/billing';
-    this.router.navigate([`${base}/documents/billing/${this.contractId}`]);
+const role = this.auth.getRole();
+
+if (role === 'Admin') {
+  this.router.navigate([`/admin/payments/${this.contractId}`]); // ⚠️ doesn't exist yet
+} else {
+  this.router.navigate([`/billing/forms/contracts/payments/${this.contractId}`]);
+}
   }
 
   constructor(

@@ -8,6 +8,7 @@ import { FuneralContractEntry } from './forms/funeral-contract-entry/funeral-con
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
 import { BillingLayoutComponent } from './shared/layout/billing-layout/billing-layout.component';
+import { FuneralPaymentComponent } from './forms/funeral-payment/funeral-payment.component';
 
 export const routes: Routes = [
 
@@ -114,6 +115,10 @@ export const routes: Routes = [
                 {
                   path: 'funeral-contract/:contractId',
                   component: FuneralContractEntry
+                },
+                {
+                  path: 'payments/:contractId',
+                  component: FuneralPaymentComponent
                 }
             ]
           },

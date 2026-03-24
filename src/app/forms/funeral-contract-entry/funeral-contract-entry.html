@@ -1,6 +1,41 @@
 
-  <div class="flex">
 
+<div class="bg-gray-50 min-h-screen">
+
+
+  <!-- 🔥 GLOBAL HEADER (THIS IS WHAT YOU WANT) -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">
+          Funeral Contract
+        </h1>
+        <p class="text-sm text-gray-500">
+        <span *ngIf="form.value.contractNo" class="font-semibold">
+          Contract #: {{ form.value.contractNo }}
+        </span>
+        </p>
+      </div>
+
+      <div class="text-sm text-gray-600">
+    <button
+      *ngIf="isEditMode"
+      type="button"
+      (click)="openBillingRecord()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
+    >
+      Funeral Payment
+    </button>
+
+    </div>
+      </div>
+
+
+  </div>
+
+  <div class="flex">
+    
 <aside class="w-64 h-[calc(100vh-80px)] sticky top-20 bg-white border-r border-gray-200 shadow-sm flex flex-col">
 
   <!-- SCROLLABLE NAV -->
@@ -30,17 +65,6 @@
     </div>
   </div>
 
-  <!-- FIXED FOOTER BUTTON -->
-  <div class="p-4 border-t border-gray-200">
-    <button
-      *ngIf="isEditMode"
-      type="button"
-      (click)="openBillingRecord()"
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
-    >
-      Funeral Payment
-    </button>
-  </div>
 
 </aside>
 
@@ -742,7 +766,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Pall Bearers</label>
           <input type="text" formControlName="pallBearrer" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Pall Bearers">
@@ -750,6 +774,10 @@
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Funeral Director</label>
           <input type="text" formControlName="funeralDirector" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Funeral Director">
+        </div>
+                <div>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Uniform</label>
+          <input type="text" formControlName="uniform" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Uniform">
         </div>
       </div>
     </div>
@@ -792,10 +820,7 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Embalmers</label>
-          <input type="text" formControlName="embalmers" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Embalmers">
-        </div>
+
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Finished By</label>
           <input type="text" formControlName="finishedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Finished By">
@@ -995,3 +1020,4 @@
 
 </div>
 
+</div>
