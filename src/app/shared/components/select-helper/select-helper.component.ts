@@ -193,18 +193,24 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
 
       this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
 
+      console.log(`[SelectHelper:${this._comboboxName}] ✅ Options loaded:`, this.options);
+
       // Apply pending value if it exists
       if (this._pendingValue !== null && this._pendingValue !== undefined) {
         this.selectedValue = this._pendingValue;
+        console.log(`[SelectHelper:${this._comboboxName}] ✅ Applied pending value:`, this._pendingValue);
         this._pendingValue = null;
         this.onChange(this.selectedValue);
       } else if (this.selectedValue) {
         // Keep current selection
+        console.log(`[SelectHelper:${this._comboboxName}] ✅ Kept current selection:`, this.selectedValue);
       } else if (this.allowDefaultSelection && this.storedDefault) {
         this.selectedValue = this.storedDefault;
+        console.log(`[SelectHelper:${this._comboboxName}] ✅ Applied default:`, this.storedDefault);
         this.onChange(this.selectedValue);
       } else {
         this.selectedValue = null;
+        console.log(`[SelectHelper:${this._comboboxName}] ✅ No value set (none pending, selected, or default)`);
       }
 
     } catch (err) {
@@ -255,9 +261,14 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
     // If options not loaded yet, store the value to apply after loading
     if (!this._hasLoaded) {
       this._pendingValue = obj;
+      console.log(`[SelectHelper:${this._comboboxName}] writeValue stored pending:`, obj);
     } else {
       // If options are already loaded, set the value immediately
+      if (obj != null && !this.options.includes(obj)) {
+        console.warn(`[SelectHelper:${this._comboboxName}] Value "${obj}" not in options:`, this.options);
+      }
       this.selectedValue = obj;
+      console.log(`[SelectHelper:${this._comboboxName}] writeValue set immediately:`, obj);
     }
     this.cdr.markForCheck();
   }

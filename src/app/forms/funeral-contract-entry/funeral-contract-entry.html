@@ -110,7 +110,7 @@
         </div>
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Checked By</label>
-          <input type="text" formControlName="checkedBy" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Checked By"> 
+          <input type="text" formControlName="checkedBy"  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Checked By"> 
         </div>
       </div>
     </div>
@@ -223,25 +223,14 @@
             [searchable]="true"
             [isInvalid]="isFieldInvalid('religion')">
           </app-select-helper>
+          <small *ngIf="isFieldInvalid('religion')" class="text-red-500 text-xs mt-1 block">
+            {{ getErrorMessage('religion') }}
+          </small>
         </div>
 
       </div>
 
-      <!-- ROW 2B: ADDRESS -->
-      <div class="mt-4">
-        <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-          Address <span class="text-red-500">*</span>
-        </label>
-        <input 
-          type="text" 
-          title="Address"
-          formControlName="addressLine1"
-          [class.border-red-500]="isFieldInvalid('addressLine1')"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
-        <small *ngIf="isFieldInvalid('addressLine1')" class="text-red-500 text-xs mt-1 block">
-          {{ getErrorMessage('addressLine1') }}
-        </small>
-      </div>
+
 
       <!-- ROW 3 : PARENTS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -283,12 +272,17 @@
       <div class="mt-4">
 
         <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-          Place of Death
+          Place of Death <span class="text-red-500">*</span>
         </label>
 
         <input type="text" title="Place of Death"
           formControlName="placeOfDeath"
+          [class.border-red-500]="isFieldInvalid('placeOfDeath')"
           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
+        
+        <small *ngIf="isFieldInvalid('placeOfDeath')" class="text-red-500 text-xs mt-1 block">
+          {{ getErrorMessage('placeOfDeath') }}
+        </small>
 
       </div>
 
@@ -298,13 +292,17 @@
         <!-- Date of Death -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Date of Death
+            Date of Death <span class="text-red-500">*</span>
           </label>
           <input
             type="date"
             title="Date of Death"
             formControlName="dateOfDeath"
+            [class.border-red-500]="isFieldInvalid('dateOfDeath')"
             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
+          <small *ngIf="isFieldInvalid('dateOfDeath')" class="text-red-500 text-xs mt-1 block">
+            {{ getErrorMessage('dateOfDeath') }}
+          </small>
         </div>
 
         <!-- Time of Death -->
@@ -319,17 +317,7 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <!-- Informant -->
-        <div class="sm:col-span-8">
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Informant
-          </label>
-          <input
-            type="text"
-            title="Name of Informant"
-            formControlName="nameOfInformant"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
-        </div>
+
 
       </div>
     </div>
@@ -354,22 +342,79 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Gender</label>
-          <app-select-helper formControlName="contracteeGender" comboboxName="gender" [searchable]="false" [isInvalid]="isFieldInvalid('contracteeGender')"></app-select-helper>
-        </div>
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Civil Status</label>
-          <app-select-helper formControlName="contracteeCivilStatus" comboboxName="civilStatus" [searchable]="false" [isInvalid]="isFieldInvalid('contracteeCivilStatus')"></app-select-helper>
-        </div>
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="contactNo" [class.border-red-500]="isFieldInvalid('contactNo')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Contact Number">
-          <small *ngIf="isFieldInvalid('contactNo')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contactNo') }}</small>
-        </div>
-      </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
 
+  <!-- Gender -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Gender
+    </label>
+    <app-select-helper
+      formControlName="contracteeGender"
+      comboboxName="gender"
+      [searchable]="false"
+      [isInvalid]="isFieldInvalid('contracteeGender')">
+    </app-select-helper>
+  </div>
+
+  <!-- Civil Status -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Civil Status
+    </label>
+    <app-select-helper
+      formControlName="contracteeCivilStatus"
+      comboboxName="civilStatus"
+      [searchable]="false"
+      [isInvalid]="isFieldInvalid('contracteeCivilStatus')">
+    </app-select-helper>
+  </div>
+  <!-- Relationship to Deceased -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Relationship to Deceased
+    </label>
+    <app-select-helper
+      formControlName="relationshipToDeceased"
+      comboboxName="relationshipToDeceased"
+      [searchable]="false"
+      [isInvalid]="isFieldInvalid('relationshipToDeceased')"></app-select-helper>
+  </div>
+  <!-- Contact Number -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Contact Number <span class="text-red-500">*</span>
+    </label>
+    <input
+      type="text"
+      formControlName="contactNo"
+      [class.border-red-500]="isFieldInvalid('contactNo')"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      title="Contact Number"
+    />
+    <small *ngIf="isFieldInvalid('contactNo')" class="text-red-500 text-xs mt-1 block">
+      {{ getErrorMessage('contactNo') }}
+    </small>
+  </div>
+
+
+
+</div>
+      <!-- ROW 2B: ADDRESS -->
+      <div class="mt-4">
+        <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+          Address <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="text" 
+          title="Address"
+          formControlName="addressLine1"
+          [class.border-red-500]="isFieldInvalid('addressLine1')"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
+        <small *ngIf="isFieldInvalid('addressLine1')" class="text-red-500 text-xs mt-1 block">
+          {{ getErrorMessage('addressLine1') }}
+        </small>
+      </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay <span class="text-red-500">*</span></label>
@@ -395,16 +440,40 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+      <!-- ROW 6 : DATE TIME INFORMANT -->
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mt-4">
+
+        <!-- Date of Death -->
+        <div class="sm:col-span-2">
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Plan</label>
           <input type="text" formControlName="plan" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Plan">
         </div>
+        </div>
+
+        <!-- Time of Death -->
+        <div class="sm:col-span-2">
+   
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Plan Number</label>
           <input type="text" formControlName="planNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Plan Number">
         </div>
+        </div>
+
+        <!-- Informant -->
+        <div class="sm:col-span-8">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+            Informant
+          </label>
+          <input
+            type="text"
+            title="Name of Informant"
+            formControlName="nameOfInformant"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
+        </div>
+
       </div>
+
     </div>
 
 <!-- SECTION 4: CASKET/URN & SERVICES -->
@@ -493,27 +562,83 @@
         <span>Delivery</span>
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Serial Number</label>
-          <input type="text" formControlName="deliverySerialNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Delivery Serial Number">
-        </div>
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Helper</label>
-          <input type="text" formControlName="deliveryHelper" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Delivery Helper">
-        </div>
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Status</label>
-          <app-select-helper formControlName="deliveryStatus" comboboxName="deliveryStatus" [searchable]="true"></app-select-helper>
-        </div>
-      </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-      <div class="grid grid-cols-1 mt-4">
-        <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Remarks</label>
-          <textarea formControlName="deliveryRemarks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Delivery Remarks"></textarea>
-        </div>
-      </div>
+  <!-- Delivery Serial Number -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Delivery Serial Number
+    </label>
+    <input
+      type="text"
+      formControlName="deliverySerialNumber"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      title="Delivery Serial Number"
+    />
+  </div>
+
+  <!-- Delivery Helper -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Delivery Helper
+    </label>
+    <input
+      type="text"
+      formControlName="deliveryHelper"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      title="Delivery Helper"
+    />
+  </div>
+
+  <!-- Delivery Driver -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Delivery Driver
+    </label>
+    <input
+      type="text"
+      formControlName="deliveryDriver"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      title="Delivery Driver"
+    />
+  </div>
+
+  <!-- Delivery Status -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Delivery Status
+    </label>
+    <app-select-helper
+      formControlName="deliveryStatus"
+      comboboxName="deliveryStatus"
+      [searchable]="true">
+    </app-select-helper>
+  </div>
+
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+
+  <!-- Delivery Date -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
+      Delivery Date
+    </label>
+    <input
+      type="date"
+      formControlName="deliveryDate"
+      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      title="Delivery Date"
+    />
+  </div>
+
+  <!-- Delivery Remarks -->
+  <div>
+    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Delivery Remarks</label>
+    <textarea formControlName="deliveryRemarks" rows="1" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Delivery Remarks"></textarea>
+  </div>
+
+</div>
     </div>
 
     <!-- SECTION 6: TRANSFER & BURIAL/CREMATION SCHEDULE -->
@@ -669,7 +794,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Embalmers</label>
-          <input type="text" formControlName="emblamers" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Embalmers">
+          <input type="text" formControlName="embalmers" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Embalmers">
         </div>
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Finished By</label>
@@ -737,11 +862,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Issued At</label>
-          <input type="text" formControlName="issuedAt" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Issued At">
+          <input type="date" formControlName="issuedAt" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Issued At">
         </div>
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Issued On</label>
-          <input type="text" formControlName="issuedOn" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Issued On">
+          <input type="date" formControlName="issuedOn" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Issued On">
         </div>
       </div>
     </div>
@@ -850,7 +975,7 @@
         </div>
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Received By</label>
-          <input type="text" formControlName="receivedBy" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Received By">
+          <input type="text" formControlName="receivedBy" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="Received By">
         </div>
       </div>
     </div>

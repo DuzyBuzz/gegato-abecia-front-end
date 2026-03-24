@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, Input, Inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Inject, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
@@ -9,6 +9,40 @@ import { ComboboxFirestoreService } from '../../services/combobox-firestore.serv
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
 import { DialogModule } from "primeng/dialog";
+import { FuneralContract } from '../../models/funeral-contract.model';
+
+// ========== FIELD LABEL MAP ==========
+const FIELD_LABELS: { [key: string]: string } = {
+  // Section 1: Contract Information
+  contractNo: 'Contract Number',
+  type: 'Type of Service',
+  contractDate: 'Contract Date',
+  price: 'Contract Price',
+  dueDate: 'Due Date',
+
+  // Section 2: Deceased Information
+  firstName: 'First Name',
+  lastName: 'Last Name',
+  dateOfBirth: 'Date of Birth',
+  age: 'Age',
+  gender: 'Gender',
+  civilStatus: 'Civil Status',
+  dateOfDeath: 'Date of Death',
+  placeOfDeath: 'Place of Death',
+  religion: 'Religion',
+  addressLine1: 'Address',
+
+  // Section 3: Contractee Information
+  contractee: 'Contractee Name',
+  contracteeAge: 'Contractee Age',
+  contactNo: 'Contact Number',
+  baranggay: 'Barangay',
+  district: 'District',
+  municipality: 'City/Municipality',
+
+  // Section 4: Casket/Urn
+  casket: 'Casket Type',
+};
 
 @Component({
   selector: 'app-funeral-contract-entry',
@@ -75,7 +109,8 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     private auth: AuthService,
     private comboboxService: ComboboxFirestoreService,
     private funeralContractService: FuneralContractService,
-    @Inject(MessageService) private messageService: MessageService
+    @Inject(MessageService) private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       // ========== SECTION 1: CONTRACT INFORMATION ==========
@@ -100,8 +135,8 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       timeOfDeath: [''],
       placeOfDeath: ['', Validators.required],
       placeOfBirth: [''],
-      religion: [''],
-      addressLine1: [''],
+      religion: ['', Validators.required],
+      addressLine1: ['', Validators.required],
       parentFather: [''],
       parentMother: [''],
       nameOfInformant: [''],
@@ -131,6 +166,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       deliverySerialNumber: [''],
       deliveryDate: [''],
       deliveryHelper: [''],
+      deliveryDriver: [''],
       deliveryRemarks: [''],
       deliveryStatus: [''],
 
@@ -165,7 +201,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       bodySpecialInstruction: [''],
       nails: [''],
       lips: [''],
-      emblamers: [''],
+      embalmers: [''],
       finishedBy: [''],
       embalmedBy: [''],
 
@@ -253,7 +289,13 @@ ngAfterViewInit() {
     // Auto-calculate age when dateOfBirth changes
     this.form.get('dateOfBirth')?.valueChanges.subscribe(dateOfBirth => {
       if (dateOfBirth) {
-        const calculatedAge = this.calculateAge(new Date(dateOfBirth));
+
+        const [year, month, day] = dateOfBirth.split('-').map(Number);
+
+        const localDate = new Date(year, month - 1, day); // ✅ LOCAL SAFE
+
+        const calculatedAge = this.calculateAge(localDate);
+
         this.form.get('age')?.setValue(calculatedAge, { emitEvent: false });
       }
     });
@@ -309,64 +351,185 @@ private setupIntersectionObserver(): void {
     this.intersectionObserver?.observe(section);
   });
 }
-  private loadContractData(contractId: string | number): void {
-    this.funeralContractService.getFuneralService(Number(contractId)).subscribe({
-      next: (data: any) => {
-        console.log('[FuneralContractEntry] Contract data loaded:', data);
-        // Use setTimeout to ensure select-helper comboboxes are initialized
-        setTimeout(() => {
-          this.form.patchValue(data, { emitEvent: false });
-          this.deceasedName = `${data.firstName} ${data.lastName}`;
-        }, 100);
+
+private async loadContractData(id: number): Promise<void> {
+  try {
+    this.funeralContractService.getFuneralService(id).subscribe({
+      next: async (response: any) => {
+        console.log('📥 COMPONENT: API response received (already mapped by service):', response);
+
+        // Service already extracted from array and mapped, response is now FuneralContract
+        const data = response;
+
+        if (!data || !data.id) {
+          console.error('❌ No valid contract data');
+          return;
+        }
+
+        console.log('✅ COMPONENT: Data received from service:', data);
+        console.log('📅 DATE FIELDS CHECK (from mapped response):');
+        console.log('  - contractDate:', data.contractDate, typeof data.contractDate);
+        console.log('  - dateOfBirth:', data.dateOfBirth, typeof data.dateOfBirth);
+        console.log('  - dateOfDeath:', data.dateOfDeath, typeof data.dateOfDeath);
+        console.log('  - dueDate:', data.dueDate, typeof data.dueDate);
+        console.log('  - dateOfBurial:', data.dateOfBurial, typeof data.dateOfBurial);
+
+        // 🔥 WAIT FOR COMBOBOXES BEFORE PATCHING
+        await this.waitForComboboxes();
+        console.log('✅ COMBOBOXES READY - Proceeding with patchValue');
+
+        this.contractId = data.id ?? null;
+
+        console.log('📝 FORM BEFORE PATCH (sample dates):');
+        console.log('  - contractDate:', this.form.get('contractDate')?.value);
+        console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
+
+        // 🔥 PATCH ALL DATA (service mapper already converted dates to yyyy-MM-dd strings)
+        this.form.patchValue(data, { emitEvent: false });
+
+        console.log('✅ FORM AFTER PATCH (verify dates populated):');
+        console.log('  - contractDate:', this.form.get('contractDate')?.value);
+        console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
+        console.log('  - dateOfDeath:', this.form.get('dateOfDeath')?.value);
+        console.log('  - dueDate:', this.form.get('dueDate')?.value);
+        console.log('  - dateOfBurial:', this.form.get('dateOfBurial')?.value);
+
+        // 🔥 TRIGGER CHANGE DETECTION TO RENDER IN UI
+        this.cdr.markForCheck();
+        
+        // 🔥 VERIFY ALL DATES ARE IN FORM
+        this.verifyFormDateValues('[AFTER PATCH]');
+
+        this.deceasedName = [
+          data.firstName,
+          data.middleName,
+          data.lastName
+        ].filter(Boolean).join(' ');
+
+        console.log('✅ Data loaded successfully');
       },
       error: (err) => {
-        console.error('[FuneralContractEntry] Failed to load contract data:', err);
+        console.error('❌ COMPONENT: Load contract error:', err);
         this.messageService.add({
           severity: 'error',
-          summary: 'Unable to Load',
-          detail: 'The contract data could not be loaded. Please try again or contact support if the problem persists.',
-          life: 5000
+          summary: 'Load Error',
+          detail: err.message || 'Failed to load contract',
+          life: 3000
         });
       }
     });
+  } catch (err) {
+    console.error('❌ Load contract exception:', err);
   }
+}
 
-  loadDataFromSelected(funeralService: any): void {
-    if (!funeralService) return;
+async loadDataFromSelected(funeralService: FuneralContract): Promise<void> {
+  if (!funeralService) return;
+
+  try {
+    // Data is already mapped FuneralContract object
+    const data = funeralService;
+
+    console.log('📥 COMPONENT: Selected data received (already mapped):', data);
+    console.log('📅 DATE FIELDS CHECK (from mapped data):');
+    console.log('  - contractDate:', data.contractDate, typeof data.contractDate);
+    console.log('  - dateOfBirth:', data.dateOfBirth, typeof data.dateOfBirth);
+    console.log('  - dateOfDeath:', data.dateOfDeath, typeof data.dateOfDeath);
+    console.log('  - dueDate:', data.dueDate, typeof data.dueDate);
+    console.log('  - dateOfBurial:', data.dateOfBurial, typeof data.dateOfBurial);
+
+    // 🔥 WAIT FOR COMBOBOXES BEFORE PATCHING
+    await this.waitForComboboxes();
+    console.log('✅ COMBOBOXES READY - Proceeding with patchValue');
+
+    this.contractId = data.id ?? null;
+
+    console.log('📝 FORM BEFORE PATCH (sample dates):');
+    console.log('  - contractDate:', this.form.get('contractDate')?.value);
+    console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
+
+    // 🔥 PATCH ALL DATA (mapper already converted dates to yyyy-MM-dd strings)
+    this.form.patchValue(data, { emitEvent: false });
+
+    console.log('✅ FORM AFTER PATCH (verify dates populated):');
+    console.log('  - contractDate:', this.form.get('contractDate')?.value);
+    console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
+    console.log('  - dateOfDeath:', this.form.get('dateOfDeath')?.value);
+    console.log('  - dueDate:', this.form.get('dueDate')?.value);
+    console.log('  - dateOfBurial:', this.form.get('dateOfBurial')?.value);
+
+    // 🔥 TRIGGER CHANGE DETECTION TO RENDER IN UI
+    this.cdr.markForCheck();
     
-    console.log('[FuneralContractEntry] Loading data from selected contract:', funeralService);
-    this.contractId = funeralService.id?.toString() || null;
-    
-    // Use setTimeout to ensure select-helper comboboxes are initialized
-    setTimeout(() => {
-      // Convert timestamps to yyyy-MM-dd format before patching
-      const normalizedData = this.normalizeTimestamps(funeralService);
-      this.form.patchValue(normalizedData, { emitEvent: false });
-      this.deceasedName = `${funeralService.firstName} ${funeralService.lastName}`;
-    }, 100);
-  }
+    // 🔥 VERIFY ALL DATES ARE IN FORM
+    this.verifyFormDateValues('[SELECTED AFTER PATCH]');
 
-  private normalizeTimestamps(data: any): any {
-    const normalized = { ...data };
-    const dateFields = [
-      'dateOfBirth', 'contractDate', 'dueDate', 'dateOfDeath',
-      'contractDate', 'dateDelivery', 'cremationDate', 'promissoryDate',
-      'dateBurial', 'ashReleased', 'timeOfDeath'
-    ];
+    this.deceasedName = [
+      data.firstName,
+      data.middleName,
+      data.lastName
+    ].filter(Boolean).join(' ');
 
-    dateFields.forEach(field => {
-      if (normalized[field] && typeof normalized[field] === 'number') {
-        // Convert timestamp to yyyy-MM-dd format
-        const date = new Date(normalized[field]);
-        normalized[field] = date.toISOString().split('T')[0];
-      } else if (normalized[field] && normalized[field] instanceof Date) {
-        // Convert Date object to yyyy-MM-dd format
-        normalized[field] = normalized[field].toISOString().split('T')[0];
+    console.log('✅ Selected data loaded successfully');
+} catch (err: unknown) {
+  console.error('❌ Load selected data error:', err);
+
+  const message = err instanceof Error
+    ? err.message
+    : 'Failed to load selected contract';
+
+  this.messageService.add({
+    severity: 'error',
+    summary: 'Load Error',
+    detail: message,
+    life: 3000
+  });
+}
+}
+
+private waitForComboboxes(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (this.comboboxesReady) {
+      resolve();
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 100; // 5 seconds at 50ms intervals
+
+    const checkReady = () => {
+      attempts++;
+
+      if (this.comboboxesReady) {
+        resolve();
+      } else if (attempts >= maxAttempts) {
+        console.warn('⚠️ Combobox timeout - proceeding anyway');
+        resolve();
+      } else {
+        setTimeout(checkReady, 50);
       }
-    });
+    };
 
-    return normalized;
-  }
+    checkReady();
+  });
+}
+
+private verifyFormDateValues(label: string = ''): void {
+  const dateFields = [
+    'contractDate', 'dueDate', 'dateOfBirth', 'dateOfDeath', 
+    'dateOfBurial', 'dateOfTransfer', 'dateReceived', 'deliveryDate',
+    'dateEmblamed', 'autopsyDate', 'issuedOn', 'issuedAt'
+  ];
+
+  console.log(`\n📋 VERIFY FORM DATES ${label}:`);
+  dateFields.forEach(field => {
+    const value = this.form.get(field)?.value;
+    if (value) {
+      console.log(`  ✅ ${field}: ${value} (type: ${typeof value})`);
+    }
+  });
+  console.log('');
+}
 
   private calculateAge(birthDate: Date): number {
     const today = new Date(); 
@@ -410,12 +573,6 @@ scrollToSection(sectionId: number): void {
   this.router.navigate([`${base}/documents/billing/${this.contractId}`]);
 }
 
-  private generateContractId(): string {
-    // Generate a contract ID based on timestamp and form data
-    const timestamp = new Date().getTime();
-    const deceasedName = this.form.get('firstName')?.value || 'Unknown';
-    return `contract_${deceasedName.substring(0, 3)}_${timestamp}`;
-  }
 
   get fullName(): string {
     const { firstName, middleName, lastName } = this.form.value;
@@ -465,23 +622,29 @@ scrollToSection(sectionId: number): void {
 
 submitContract(): void {
   if (this.form.invalid) {
+    const invalidFields = this.getInvalidFields();
+    const fieldLabels = invalidFields
+      .map(field => FIELD_LABELS[field] || field)
+      .sort();
+    
+    const detailMessage = fieldLabels.length > 0
+      ? `Please fill in the following required fields:\n${fieldLabels.map(label => `• ${label}`).join('\n')}`
+      : 'Please complete required fields.';
+
+    console.log('FORM VALUE:', this.form.value);
+    console.log('INVALID FIELDS:', invalidFields);
+    
     this.messageService.add({
       severity: 'error',
-      summary: 'Invalid Form',
-      detail: 'Please complete required fields.',
-      life: 4000
+      summary: 'Missing Required Fields',
+      detail: detailMessage,
+      life: 5000
     });
     return;
   }
 
   const isUpdating = !!this.contractId;
-  const payload = {
-    ...this.form.value,
-    price: parseFloat(this.form.value.price) || 0,
-    discount: parseFloat(this.form.value.discount) || 0,
-    age: parseInt(this.form.value.age) || 0,
-    contracteeAge: parseInt(this.form.value.contracteeAge) || 0
-  };
+  const payload = this.form.value as FuneralContract;
 
   // ✅ ONLY include ID if updating
   if (this.contractId) {
@@ -491,7 +654,7 @@ submitContract(): void {
   console.log('UPSERT PAYLOAD:', payload);
 
   this.funeralContractService.save(payload).subscribe({
-    next: (res: any) => {
+    next: (res: FuneralContract) => {
 
       // ✅ backend is source of truth
       if (res?.id) {
@@ -518,112 +681,6 @@ submitContract(): void {
   });
 }
 
-  // Field name to display name mapping
-  private fieldDisplayNames: { [key: string]: string } = {
-    contractNo: 'Contract Number',
-    type: 'Type of Service',
-    contractDate: 'Contract Date',
-    price: 'Contract Price',
-    discount: 'Discount',
-    dueDate: 'Due Date',
-    checkedBy: 'Checked By',
-    financialAssitance: 'Financial Assistance',
-    firstName: 'First Name',
-    middleName: 'Middle Name',
-    lastName: 'Last Name',
-    dateOfBirth: 'Date of Birth',
-    age: 'Age',
-    gender: 'Gender',
-    civilStatus: 'Civil Status',
-    dateOfDeath: 'Date of Death',
-    timeOfDeath: 'Time of Death',
-    placeOfDeath: 'Place of Death',
-    placeOfBirth: 'Place of Birth',
-    religion: 'Religion',
-    addressLine1: 'Address',
-    parentFather: 'Father\'s Name',
-    parentMother: 'Mother\'s Name',
-    nameOfInformant: 'Informant',
-    contractee: 'Contractee Name',
-    contracteeAge: 'Contractee Age',
-    contracteeGender: 'Contractee Gender',
-    contracteeCivilStatus: 'Contractee Civil Status',
-    contactNo: 'Contact Number',
-    baranggay: 'Barangay',
-    district: 'District',
-    municipality: 'City/Municipality',
-    province: 'Province',
-    plan: 'Plan',
-    planNumber: 'Plan Number',
-    relationshipToDeceased: 'Relationship to Deceased',
-    casket: 'Casket Type',
-    casketAvailable: 'Casket Available',
-    uniform: 'Uniform',
-    urnType: 'Urn Type',
-    urnDescription: 'Urn Description',
-    deliverySerialNumber: 'Delivery Serial Number',
-    deliveryDate: 'Delivery Date',
-    deliveryHelper: 'Delivery Helper',
-    deliveryRemarks: 'Delivery Remarks',
-    deliveryStatus: 'Delivery Status',
-    dateOfTransfer: 'Transfer Date',
-    transferAddress: 'Transfer Address',
-    transferTime: 'Transfer Time',
-    dateReceived: 'Date Received',
-    dateOfBurial: 'Burial Date',
-    takeOff: 'Take Off Time',
-    massTime: 'Mass Time',
-    burialDriver: 'Burial Driver',
-    burialHelper: 'Burial Helper',
-    familyCar: 'Family Car',
-    familyCarDriver: 'Family Car Driver',
-    flowerCar: 'Flower Car',
-    flowerCarDriver: 'Flower Car Driver',
-    carRental: 'Car Rental',
-    carRentalDriver: 'Car Rental Driver',
-    cremationTime: 'Cremation Time',
-    cremationOperator: 'Cremation Operator',
-    burialBenefit: 'Burial Benefit',
-    setupCrew: 'Setup Crew',
-    pallBearrer: 'Pall Bearers',
-    funeralDirector: 'Funeral Director',
-    dateEmblamed: 'Date Embalmed',
-    timeFinished: 'Time Finished',
-    makeupDressUp: 'Makeup & Dress Up',
-    makeUprequest: 'Makeup Request',
-    bodySpecialInstruction: 'Body Special Instructions',
-    nails: 'Nails',
-    lips: 'Lips',
-    emblamers: 'Embalmers',
-    finishedBy: 'Finished By',
-    embalmedBy: 'Embalmed By',
-    autopsy: 'Autopsy',
-    autopsyDate: 'Autopsy Date',
-    autopsyBy: 'Autopsy By',
-    idType: 'ID Type',
-    claimIdNumber: 'Claim ID Number',
-    seniorId: 'Senior ID',
-    issuedAt: 'Issued At',
-    issuedOn: 'Issued On',
-    baranggayIndigent: 'Barangay Indigent',
-    baranggayCaptain: 'Barangay Captain',
-    cityDocsCompletion: 'City Docs Completion',
-    supSigBurial: 'Supervisor Burial Signature',
-    omSigDelivery: 'Operations Manager Delivery Signature',
-    omSigBurial: 'Operations Manager Burial Signature',
-    chapelRental: 'Chapel Rental',
-    familyWillConvo: 'Family Will Have Conversation',
-    cleared: 'Cleared',
-    collectorRemarks: 'Collector Remarks',
-    remarks: 'Remarks',
-    billingRemarks: 'Billing Remarks',
-    startOfTransaction: 'Start of Transaction',
-    dateSubmitted: 'Date Submitted',
-    timeEncoded: 'Time Encoded',
-    dateAshReleased: 'Date Ash Released',
-    releasedBy: 'Released By',
-    receivedBy: 'Received By'
-  };
 
   // Helper Methods for Form Validation
   isFieldInvalid(fieldName: string): boolean {
@@ -636,9 +693,6 @@ submitContract(): void {
     return !!(field && field.hasError('required'));
   }
 
-  getDisplayName(fieldName: string): string {
-    return this.fieldDisplayNames[fieldName] || fieldName;
-  }
 
   getErrorMessage(fieldName: string): string {
     const field = this.form.get(fieldName);

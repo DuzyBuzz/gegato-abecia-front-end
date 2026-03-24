@@ -1,137 +1,135 @@
 export interface FuneralContract {
   id?: number;
 
-  // Contract Info
+  // ========== SECTION 1: CONTRACT INFORMATION ==========
   contractNo?: string;
-  contractDate?: Date | string;
+  contractDate?: string | null;
   type?: string;
-  price?: number | string;
-  discount?: number | string;
-  dueDate?: Date | string;
-  checkedBy?: string;
+  financialAssitance?: string | null;
+  price?: number | null;
+  discount?: number | null;
+  dueDate?: string | null;
+  checkedBy?: string | null;
 
-  // Deceased Information
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  dateOfBirth?: Date | string;
-  age?: number | string;
-  gender?: string;
-  civilStatus?: string;
-  dateOfDeath?: Date | string;
-  timeOfDeath?: string;
-  placeOfDeath?: string;
-  placeOfBirth?: string;
-  religion?: string;
-  addressLine1?: string;
-  parentFather?: string;
-  parentMother?: string;
+  // ========== SECTION 2: DECEASED INFORMATION ==========
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  dateOfBirth?: string | null;
+  age?: number | null;
+  gender?: string | null;
+  civilStatus?: string | null;
+  dateOfDeath?: string | null;
+  timeOfDeath?: string | null;
+  placeOfDeath?: string | null;
+  placeOfBirth?: string | null;
+  religion?: string | null;
+  addressLine1?: string | null;
+  parentFather?: string | null;
+  parentMother?: string | null;
 
-  // Contractee Information
-  contractee?: string;
-  contracteeAge?: number | string;
-  contracteeGender?: string;
-  contracteeCivilStatus?: string;
-  baranggay?: string;
-  district?: string;
-  municipality?: string;
-  province?: string;
-  contactNo?: string;
-  nameOfInformant?: string;
-  plan?: string;
-  planNumber?: string;
-  relationshipToDeceased?: string;
+  // ========== SECTION 3: CONTRACTEE INFORMATION ==========
+  contractee?: string | null;
+  contracteeAge?: number | null;
+  contracteeGender?: string | null;
+  contracteeCivilStatus?: string | null;
+  baranggay?: string | null;
+  district?: string | null;
+  municipality?: string | null;
+  province?: string | null;
+  contactNo?: string | null;
+  nameOfInformant?: string | null;
+  plan?: string | null;
+  planNumber?: string | null;
+  relationshipToDeceased?: string | null;
 
-  // Casket/Urn
-  casket?: string;
-  casketAvailable?: string;
-  uniform?: string;
-  urnType?: string;
-  urnDescription?: string;
+  // ========== SECTION 4: CASKET / URN ==========
+  casket?: string | null;
+  casketAvailable?: string | null;
+  uniform?: string | null;
+  urnType?: string | null;
+  urnDescription?: string | null;
 
-  // Delivery
-  deliverySerialNumber?: string;
-  deliveryHelper?: string;
-  deliveryRemarks?: string;
-  deliveryStatus?: string;
-  deliveryDate?: Date | string;
+  // ========== SECTION 5: DELIVERY ==========
+  deliverySerialNumber?: string | null;
+  deliveryHelper?: string | null;
+  deliveryDriver?: string | null;
+  deliveryRemarks?: string | null;
+  deliveryStatus?: string | null;
+  deliveryDate?: string | null;
 
+  // ========== SECTION 6: TRANSFER ==========
+  transferAddress?: string | null;
+  transferTime?: string | null;
+  dateOfTransfer?: string | null;
+  dateReceived?: string | null;
 
-  // Transfer
-  transferAddress?: string;
-  transferTime?: string;
-  dateOfTransfer?: Date | string;
-  dateReceived?: Date | string;
+  // ========== SECTION 6B: BURIAL / CREMATION ==========
+  dateOfBurial?: string | null;
+  takeOff?: string | null;
+  massTime?: string | null;
+  burialDriver?: string | null;
+  burialHelper?: string | null;
+  familyCar?: string | null;
+  familyCarDriver?: string | null;
+  flowerCar?: string | null;
+  flowerCarDriver?: string | null;
+  carRental?: string | null;
+  carRentalDriver?: string | null;
+  setupCrew?: string | null;
+  cremationTime?: string | null;
+  cremationOperator?: string | null;
+  burialBenefit?: string | null;
+  pallBearrer?: string | null;
+  funeralDirector?: string | null;
 
-  // Burial/Cremation
-  dateOfBurial?: Date | string;
-  takeOff?: string;
-  massTime?: string;
-  burialDriver?: string;
-  burialHelper?: string;
-  familyCar?: string;
-  familyCarDriver?: string;
-  flowerCar?: string;
-  flowerCarDriver?: string;
-  carRental?: string;
-  carRentalDriver?: string;
-  setupCrew?: string;
-  cremationTime?: string;
-  cremationOperator?: string;
-  burialBenefit?: string;
-  pallBearrer?: string;
-  funeralDirector?: string;
+  // ========== SECTION 7: EMBALMING & MAKEUP ==========
+  dateEmblamed?: string | null;
+  timeFinished?: string | null;
+  makeupDressUp?: string | null;
+  makeUprequest?: string | null;
+  bodySpecialInstruction?: string | null;
+  nails?: string | null;
+  lips?: string | null;
+  embalmers?: string | null;
+  finishedBy?: string | null;
+  embalmedBy?: string | null;
 
-  // Embalming & Makeup
-  dateEmblamed?: Date | string;
-  timeFinished?: string;
-  makeupDressUp?: string;
-  makeUprequest?: string;
-  bodySpecialInstruction?: string;
-  nails?: string;
-  lips?: string;
-  embalmers?: string;
-  finishedBy?: string;
-  embalmedBy?: string;
+  // ========== SECTION 8: MEDICAL ==========
+  autopsy?: string | null;
+  autopsyDate?: string | null;
+  autopsyBy?: string | null;
 
-  // Medical
-  autopsy?: string;
-  autopsyDate?: Date | string;
-  autopsyBy?: string;
+  // ========== SECTION 9: IDENTIFICATION ==========
+  idType?: string | null;
+  claimIdNumber?: string | null;
+  seniorId?: string | null;
+  issuedAt?: string | null;
+  issuedOn?: string | null;
 
-  // Identification Documents
-  idType?: string;
-  claimIdNumber?: string;
-  seniorId?: string;
-  issuedAt?: string;
-  issuedOn?: Date | string;
-
-  // Barangay/Government
-  baranggayIndigent?: string;
-  baranggayCaptain?: string;
+  // ========== SECTION 10: GOVERNMENT / SIGNATURES ==========
+  baranggayIndigent?: string | null;
+  baranggayCaptain?: string | null;
   cityDocsCompletion?: boolean;
+  supSigBurial?: string | null;
+  omSigDelivery?: string | null;
+  omSigBurial?: string | null;
+  chapelRental?: string | null;
 
-  // Signatures
-  supSigBurial?: string;
-  omSigDelivery?: string;
-  omSigBurial?: string;
-  chapelRental?: string;
-
-  // Remarks & Status
-  remarks?: string;
-  billingRemarks?: string;
+  // ========== SECTION 10B: FLAGS ==========
   familyWillConvo?: boolean;
   cleared?: boolean;
   collectorRemarks?: boolean;
 
-  // Dates & Timestamps
-  startOfTransaction?: Date | string;
-  dateSubmitted?: Date | string;
-  timeEncoded?: Date | string;
-  dateAshReleased?: Date | string;
-  releasedBy?: string;
-  receivedBy?: string;
+  // ========== SECTION 10C: REMARKS ==========
+  remarks?: string | null;
+  billingRemarks?: string | null;
 
-  // Financial Assistance
-  financialAssitance?: string;
+  // ========== SECTION 11: ADMIN / TIMESTAMPS ==========
+  startOfTransaction?: string | null; // datetime-local
+  dateSubmitted?: string | null;
+  timeEncoded?: string | null;
+  dateAshReleased?: string | null;
+  releasedBy?: string | null;
+  receivedBy?: string | null;
 }
