@@ -106,6 +106,57 @@ if (role === 'Admin') {
 }
   }
 
+  printFuneralServiceContract(): void {
+    if (!this.contractId) {
+      console.warn('[FuneralContractEntry] printFuneralServiceContract - No contractId');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Create Contract First',
+        detail: 'Please save the contract first before printing',
+        life: 3000,
+      });
+      return;
+    }
+
+    const role = this.auth.getRole();
+    const basePath = role === 'Admin' ? '/admin' : '/billing';
+    this.router.navigate([`/print/funeral-service-contract/${this.contractId}`]);
+  }
+
+  printAuthorityToCremateRemains(): void {
+    if (!this.contractId) {
+      console.warn('[FuneralContractEntry] printAuthorityToCremateRemains - No contractId');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Create Contract First',
+        detail: 'Please save the contract first before printing',
+        life: 3000,
+      });
+      return;
+    }
+
+    const role = this.auth.getRole();
+    const basePath = role === 'Admin' ? '/admin' : '/billing';
+    this.router.navigate([`/print/authority-to-cremate-remains/${this.contractId}`]);
+  }
+
+  printCremationCertificate(): void {
+    if (!this.contractId) {
+      console.warn('[FuneralContractEntry] printCremationCertificate - No contractId');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Create Contract First',
+        detail: 'Please save the contract first before printing',
+        life: 3000,
+      });
+      return;
+    }
+
+    const role = this.auth.getRole();
+    const basePath = role === 'Admin' ? '/admin' : '/billing';
+    this.router.navigate([`/print/cremation-certificate/${this.contractId}`]);
+  }
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,

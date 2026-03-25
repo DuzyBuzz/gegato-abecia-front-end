@@ -22,11 +22,11 @@
 
 
   <!-- CASSET DETAILS -->
-  <div class=" gap-2 mb-6">
-    <div>Billed to: <span class="underline">{{ contract.contractee }}</span></div>
-    <div>Address: <span class="underline">{{ contract.address }}</span></div>
-    <div>Deceased: <span class="underline">{{ contract.deceasedName }}</span> </div>
-    <div>Contract No.: <span class="underline">{{ contract.contractNo }}</span> </div>
+  <div class=" gap-4 mb-6">
+    <div class="mb-1 ">Billed To: <span class="underline uppercase "> {{ contract.contractee }}</span></div>
+    <div class="mb-1">Address: <span class="underline uppercase"> {{ contract.address }}</span></div>
+    <div class="mb-1">Deceased: <span class="underline uppercase"> {{ contract.deceasedName }}</span> </div>
+    <div class="mb-1">Contract No.: <span class="underline uppercase"> {{ contract.contractNo }}</span> </div>
   </div>
 
 <table class="w-full border border-black border-collapse text-[12px] ">
@@ -47,7 +47,7 @@
     <tr *ngFor="let row of items" class="border-b border-black">
       
       <td class="w-[40%] break-words text-left py-[4px] px-2 border-r border-black">
-        {{ row.remarks }}
+        {{ row.description }}
       </td>
 
       <td class="text-center py-[4px] px-2 border-r border-black">
@@ -75,7 +75,7 @@
   <!-- TOTALS -->
   <div class="border-t grid grid-cols-4 border-black gap-2 font-bold">
     <div class=" "></div>
-    <div class="text-left  mt-3 grid grid-cols-2">
+    <div class="text-right  mt-3 grid grid-cols-2">
         <div>
             Total: 
         </div>
@@ -134,18 +134,18 @@
 
 
     <div>
-      <div class="underline-field w-full">{{contract.releasedBy}}</div>
+      <div class="underline-field w-full uppercase">{{contract.releasedBy}}</div>
       <br />
       <span class="text-[11px]">Acknowledge By</span>
     </div>
 
     <div>
-      <div class="underline-field w-full">{{contract.checkedBy}}</div>
+      <div class="underline-field w-full uppercase">{{contract.checkedBy}}</div>
       <br />
       <span class="text-[11px]">Discount Acknowledge By</span>
     </div>
     <div>
-      <div class="underline-field w-full">{{currentUser.name}}</div>
+      <div class="underline-field w-full uppercase">{{currentUser.name}}</div>
       <br />
       <span class="text-[11px]">Officer in Charge <br> Chapel of the Hills Crematory</span>
     </div>

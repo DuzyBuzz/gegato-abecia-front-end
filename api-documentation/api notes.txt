@@ -1,0 +1,15 @@
+missing definition:
+dateOfBirth
+dateOfDeath
+church
+cementery
+cremationDate
+
+always null gd sya biskan may gna inser kag gna update:
+deliveryDate
+relationshipToDeceased
+Embalmers
+flowerCarDriver
+
+
+collectorRemarks boolean? 

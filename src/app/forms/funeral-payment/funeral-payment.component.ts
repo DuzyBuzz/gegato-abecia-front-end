@@ -22,6 +22,7 @@ import { FuneralContractService } from '../../services/funeral-contract.service'
 export interface PaymentRow extends FuneralPayment {
   isEditing?: boolean;
   FuneralContractId?: number;
+  _backup?: Partial<PaymentRow>;
 }
 
 @Component({
@@ -42,6 +43,7 @@ export interface PaymentRow extends FuneralPayment {
   ],
   providers: [MessageService],
   templateUrl: './funeral-payment.component.html',
+  styleUrl: './funeral-payment.component.scss'
 })
 export class FuneralPaymentComponent implements OnInit {
 
@@ -109,11 +111,18 @@ export class FuneralPaymentComponent implements OnInit {
       next: (res) => {
         this.loading = false;
 
-        this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
-          ...p,
-          FuneralContractId: this.serviceId,
-          isEditing: false
-        }));
+this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
+  controlNumber: p.controlNumber || '',
+  dateIssued: p.dateIssued || '',
+  bank: p.bank || '',
+  amount: p.amount || 0,
+  description: p.description || '',
+  remarks: p.remarks || '',
+  checkCleared: p.checkCleared || false,
+  id: p.id,
+  FuneralContractId: this.serviceId,
+  isEditing: false
+}));
 
         this.cdr.markForCheck(); // ✅ Trigger change detection
         this.computeTotals();
@@ -124,7 +133,10 @@ export class FuneralPaymentComponent implements OnInit {
       }
     });
   }
-
+cancelRow(row: PaymentRow): void {
+  Object.assign(row, row._backup);
+  row.isEditing = false;
+}
   // ================= CRUD =================
   addRow(): void {
     this.rows.push({
@@ -143,9 +155,10 @@ export class FuneralPaymentComponent implements OnInit {
     });
   }
 
-  editRow(row: PaymentRow): void {
-    row.isEditing = true;
-  }
+editRow(row: PaymentRow): void {
+  row._backup = { ...row }; // clone original
+  row.isEditing = true;
+}
 
   saveRow(row: PaymentRow): void {
     if (!row.controlNumber || !row.bank || !row.amount) {

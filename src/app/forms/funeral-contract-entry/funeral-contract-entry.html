@@ -18,14 +18,41 @@
         </p>
       </div>
 
-      <div class="text-sm text-gray-600">
+      <div class="text-sm text-gray-600 flex gap-2 flex-wrap">
     <button
       *ngIf="isEditMode"
       type="button"
       (click)="openBillingRecord()"
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
+      class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition shadow"
     >
       Contract Billing
+    </button>
+
+    <button
+      *ngIf="isEditMode"
+      type="button"
+      (click)="printFuneralServiceContract()"
+      class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow"
+    >
+      🖨️ Contract
+    </button>
+
+    <button
+      *ngIf="isEditMode"
+      type="button"
+      (click)="printAuthorityToCremateRemains()"
+      class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg font-semibold text-sm hover:bg-purple-700 transition shadow"
+    >
+      🖨️ Authority
+    </button>
+
+    <button
+      *ngIf="isEditMode"
+      type="button"
+      (click)="printCremationCertificate()"
+      class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition shadow"
+    >
+      🖨️ Certificate
     </button>
 
     </div>

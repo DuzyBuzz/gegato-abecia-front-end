@@ -1,0 +1,155 @@
+
+
+<div class="flex items-center justify-center h-full">
+<!-- PRINT PAGE -->
+<div class="print-page text-black text-[12px] leading-tight">
+
+    <app-print-header></app-print-header>
+
+  <h3 class="text-center font-bold text-xl mb-3 mt-4 underline">AUTHORITY TO CREMATE REMAINS</h3>
+
+
+  <div class="flex justify-between mb-4">
+    <div></div>
+    <div class="text-right">
+      <div>Date: <span class="underline-field text-center">{{ contract.date }}</span></div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+  <!-- INTRO -->
+  <p class="text-justify indent-8 mb-4">
+    The undersigned,
+    <strong>{{ contract.authorizer }}</strong>
+    whose signature appears below, hereby requests and authorizes
+    <strong>CHAPEL OF THE HILLS GEGATO-ABECIA FUNERAL HOMES INC.</strong>
+    in accordance with its rules and regulations to cremate the remains of:
+  </p>
+    <!-- DECEASED INFO -->
+  <div class="mb-3">
+    Name of the Deceased:
+    <span class="underline-field  text-center w-9/12 inline-block">
+      {{ contract.deceasedName }}
+    </span>
+  </div>
+
+
+
+<!-- CONTRACTEE -->
+<div class="grid grid-cols-[1fr_3fr] gap-2 mb-3">
+  <div>
+    Date of Death:
+    <span class="underline-field text-center  inline-block">
+      {{ contract.dod }}
+    </span>
+  </div>
+
+  <div>
+    Place:
+    <span class="underline-field w-11/12 text-center inline-block">
+      {{ contract.placeOfDeath }}
+    </span>
+  </div>
+</div>
+<!-- CONTRACTEE -->
+<div class="grid grid-cols-2 gap-2 mb-3">
+  <div>
+    Date of Cremation:
+    <span class="underline-field w-8/12 text-center  inline-block">
+      {{ contract.date }}
+    </span>
+  </div>
+
+  <div>
+    Time:
+    <span class="underline-field w-10/12 text-center inline-block">
+      {{ contract.time }}
+    </span>
+  </div>
+</div>
+
+  <p class="text-justify  mb-3">
+    Please find attached herewith are the following:
+  </p>
+        <div class="grid grid-cols-4  gap-2 w-full mb-6">
+    <div>
+    </div>
+    <div>
+      XXXX Death Certificate
+    </div>
+    <div>___Cremation Permit</div>
+    <div></div>
+    <div></div>
+    <div>____Transfer Permit</div>
+    <div>Other:________________</div>
+  </div>
+
+
+
+  <!-- LEGAL PARAGRAPHS -->
+  <p class="text-justify indent-8 mb-3">
+    This is to certify further that I/We are the authorized representative/s
+    to execute this authorization in relation to the cremation process
+    undertaken for the late
+    <strong>{{ contract.deceasedName }}</strong>
+    and that there are no circumstances which will make this act of cremation illegal.
+  </p>
+  <p class="text-justify indent-8 mb-20">
+    I/We agree to indemnify and hold 
+    <strong>CHAPEL OF THE HILLS GEGATO-ABECIA FUNERAL HOMES INC.</strong>, 
+    its stockholders, officers, directors, employees and it's assigns, free and harmless from any and all claims,
+    actions, suits, losses, charges, liabilities, proceedings and damages which may
+    arise on account of this authorization.
+  </p>
+
+
+  <div class="grid grid-cols-3 gap-2 w-full mb-0">
+    <div></div>
+    <div></div>
+    <div><span class="underline-field text-center w-full "></span></div>
+  </div>
+  
+  <div class="grid grid-cols-3 gap-2 w-full mb-0">
+    <div></div>
+    <div></div>
+    <div><span class="text-left font-bold">{{contract.authorizer}}</span></div>
+  </div>
+    <div class="grid grid-cols-3  gap-2 w-full mb-0">
+    <div></div>
+    <div></div>
+    <div><span class="text-left text-[10px]">{{contract.address}}</span></div>
+  </div>
+    <div class="grid grid-cols-3  gap-2 w-full mb-0">
+    <div></div>
+    <div></div>
+    <div>Relationship to the deceased: <span class="text-left  underline">{{contract.relationship}}</span></div>
+  </div>
+  
+  <!-- FOOTER -->
+  <div class="text-left font-black mt-10">
+Approved By:
+  </div>
+    <div class="text-left  mt-10">
+    <div class="mt-6 underline font-black text-xl">
+     {{contract.officer}}<br />
+
+    </div>
+    <div>      Officer in Charge</div>
+    <div>      Chapel of the Hills Gefato Abecia</div>
+  </div>
+  
+<!-- PRINT BUTTON (HIDDEN WHEN PRINTING) -->
+<div class="no-print mb-4 justify-center  flex w-full mt-4">
+  <button
+    class="px-4 py-2 bg-blue-600 text-white rounded"
+    (click)="print()"
+  >
+    Print 
+  </button>
+</div>
+</div>

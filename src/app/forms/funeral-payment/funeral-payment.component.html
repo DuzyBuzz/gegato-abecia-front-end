@@ -1,567 +1,433 @@
-<div class="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-
+<div class="p-6 bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
   <p-toast></p-toast>
 
-  <!-- 🔥 MODERN HEADER CARD -->
-<p-card class="mb-3 sticky top-0 z-40 border border-gray-200 shadow-sm rounded-lg">
-
-<!-- HEADER -->
-<ng-template pTemplate="header">
-  <div class="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center">
-    <div>
-      <h2 class="text-lg font-semibold text-gray-800">Contract Billing</h2>
-      <p class="text-xs text-gray-500">Overview of contract and billing details {{ editMode ? '- EDIT MODE' : '' }}</p>
-    </div>
-
-    <!-- MODIFY BUTTON -->
-    <div class="flex gap-2">
-      <button 
-        *ngIf="!editMode"
-        (click)="startEdit()"
-        pButton 
-        icon="pi pi-pencil" 
-        label="Modify"
-        class="p-button-warning"
-        size="small">
-      </button>
-
-      <button 
-        *ngIf="editMode"
-        (click)="saveEdit()"
-        pButton 
-        icon="pi pi-check" 
-        label="Save"
-        class="p-button-success"
-        size="small"
-        [loading]="loading">
-      </button>
-
-      <button 
-        *ngIf="editMode"
-        (click)="cancelEdit()"
-        pButton 
-        icon="pi pi-times" 
-        label="Cancel"
-        class="p-button-secondary"
-        size="small">
-      </button>
-    </div>
-  </div>
-</ng-template>
-
-<!-- CONTRACT DETAILS -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 px-4 py-4">
-
-  <!-- CONTRACT -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">CONTRACT</div>
-
-    <div class="text-xs">
-      <div class="text-gray-400">Contract No</div>
-      <div class="font-medium text-gray-800">
-        {{ FuneralContract?.contractNo || 'N/A' }}
-      </div>
-    </div>
-
-    <div class="text-xs mt-1">
-      <div class="text-gray-400">Service Type</div>
-      <div class="font-medium text-gray-800">
-        {{ FuneralContract?.type || 'N/A' }}
-      </div>
-    </div>
-  </div>
-
-  <!-- DECEASED -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">DECEASED</div>
-
-    <div class="text-xs text-gray-800 font-medium leading-tight">
-      {{
-        ((FuneralContract?.firstName || '') + ' ' +
-        (FuneralContract?.middleName || '') + ' ' +
-        (FuneralContract?.lastName || '')).trim() || 'N/A'
-      }}
-    </div>
-  </div>
-
-  <!-- CONTRACTEE -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">CONTRACTEE</div>
-
-    <div *ngIf="!editMode" class="text-xs">
-      <div class="font-medium text-gray-800">
-        {{ FuneralContract?.contractee || 'N/A' }}
-      </div>
-      <div class="text-gray-400 leading-tight text-[10px]">
-        {{ FuneralContract?.contactNo || 'N/A' }}
-      </div>
-    </div>
-
-    <div *ngIf="editMode" class="space-y-2">
-      <input 
-        type="text" 
-        pInputText 
-        [(ngModel)]="editedContract.contractee"
-        class="w-full text-xs"
-        placeholder="Contractee name">
-      <input 
-        type="text" 
-        pInputText 
-        [(ngModel)]="editedContract.contactNo"
-        class="w-full text-xs"
-        placeholder="Contact no">
-    </div>
-  </div>
-
-  <!-- STATUS -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">STATUS</div>
-    <p-tag 
-      [value]="balanceRemaining <= 0 ? 'PAID' : 'UNPAID'"
-      [severity]="balanceRemaining <= 0 ? 'success' : 'danger'"
-      class="text-xs">
-    </p-tag>
-  </div>
-
-  <!-- FINANCIAL ASSISTANCE -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">FINANCIAL AID</div>
-
-    <div *ngIf="!editMode" class="text-xs text-gray-800 font-medium">
-      {{ FuneralContract?.financialAssitance || 'None' }}
-    </div>
-
-    <input 
-      *ngIf="editMode"
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.financialAssitance"
-      class="w-full text-xs"
-      placeholder="Financial assistance">
-  </div>
-
-  <!-- DUE DATE -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">DUE DATE</div>
-
-    <div class="text-xs text-gray-800 font-medium">
-      {{ (FuneralContract?.dueDate | date:'MMM dd, yyyy') || 'N/A' }}
-    </div>
-  </div>
-
-</div>
-
-<!-- ADDITIONAL DETAILS ROW -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 px-4 pb-4">
-
-  <!-- CASKET AVAILABLE -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">CASKET</div>
-
-    <div *ngIf="!editMode" class="text-xs text-gray-800">
-      <p-tag 
-        [value]="FuneralContract?.casketAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'"
-        [severity]="FuneralContract?.casketAvailable ? 'success' : 'warn'"
-        class="text-xs">
-      </p-tag>
-    </div>
-
-    <input 
-      *ngIf="editMode"
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.casketAvailable"
-      class="w-full text-xs"
-      placeholder="Casket available">
-  </div>
-
-  <!-- FAMILY WILL CONVO -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">FAMILY CONVERSATION</div>
-
-    <div *ngIf="!editMode" class="text-xs">
-      <p-tag 
-        [value]="FuneralContract?.familyWillConvo ? 'DISCUSSED' : 'PENDING'"
-        [severity]="FuneralContract?.familyWillConvo ? 'success' : 'info'"
-        class="text-xs">
-      </p-tag>
-    </div>
-
-    <div *ngIf="editMode" class="flex items-center gap-2">
-      <p-checkbox 
-        [(ngModel)]="editedContract.familyWillConvo"
-        [binary]="true">
-      </p-checkbox>
-      <label class="text-xs text-gray-600">Discussed</label>
-    </div>
-  </div>
-
-  <!-- CLEARED -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">CLEARED</div>
-
-    <div *ngIf="!editMode" class="text-xs">
-      <p-tag 
-        [value]="FuneralContract?.cleared ? 'CLEARED' : 'PENDING'"
-        [severity]="FuneralContract?.cleared ? 'success' : 'warn'"
-        class="text-xs">
-      </p-tag>
-    </div>
-
-    <div *ngIf="editMode" class="flex items-center gap-2">
-      <p-checkbox 
-        [(ngModel)]="editedContract.cleared"
-        [binary]="true">
-      </p-checkbox>
-      <label class="text-xs text-gray-600">Cleared</label>
-    </div>
-  </div>
-
-  <!-- COLLECTOR REMARKS -->
-  <div class="p-3 border border-gray-200 rounded-md bg-white">
-    <div class="text-[11px] font-semibold text-gray-500 mb-1">COLLECTOR</div>
-
-    <div *ngIf="!editMode" class="text-xs">
-      <p-tag 
-        [value]="FuneralContract?.collectorRemarks ? 'NOTED' : 'NONE'"
-        [severity]="FuneralContract?.collectorRemarks ? 'warn' : 'secondary'"
-        class="text-xs">
-      </p-tag>
-    </div>
-
-    <div *ngIf="editMode" class="flex items-center gap-2">
-      <p-checkbox 
-        [(ngModel)]="editedContract.collectorRemarks"
-        [binary]="true">
-      </p-checkbox>
-      <label class="text-xs text-gray-600">Has remarks</label>
-    </div>
-  </div>
-
-</div>
-
-<!-- IDENTIFICATION & PLAN SECTION (EDIT MODE) -->
-<div *ngIf="editMode" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 px-4 pb-4">
-
-  <!-- ID TYPE -->
-  <div class="p-3 border border-blue-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-2">ID TYPE</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.idType"
-      class="w-full text-xs"
-      placeholder="e.g., National ID">
-  </div>
-
-  <!-- SENIOR ID -->
-  <div class="p-3 border border-blue-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-2">SENIOR ID</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.seniorId"
-      class="w-full text-xs"
-      placeholder="Senior ID">
-  </div>
-
-  <!-- PLAN -->
-  <div class="p-3 border border-blue-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-2">PLAN</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.plan"
-      class="w-full text-xs"
-      placeholder="Plan name">
-  </div>
-
-  <!-- PLAN NUMBER -->
-  <div class="p-3 border border-blue-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-2">PLAN NUMBER</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.planNumber"
-      class="w-full text-xs"
-      placeholder="Plan number">
-  </div>
-
-  <!-- RELIGION -->
-  <div class="p-3 border border-blue-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-2">RELIGION</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.religion"
-      class="w-full text-xs"
-      placeholder="Religion">
-  </div>
-
-</div>
-
-<!-- PERSONAL INFO SECTION (EDIT MODE) -->
-<div *ngIf="editMode" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 px-4 pb-4">
-
-  <!-- GENDER -->
-  <div class="p-3 border border-purple-200 rounded-md bg-purple-50">
-    <label for="gender" class="text-[11px] font-semibold text-purple-700 mb-2 block">GENDER</label>
-    <select 
-      id="gender"
-      [(ngModel)]="editedContract.gender"
-      class="w-full p-2 text-xs border border-gray-300 rounded">
-      <option value="">Select gender</option>
-      <option value="MALE">Male</option>
-      <option value="FEMALE">Female</option>
-      <option value="OTHER">Other</option>
-    </select>
-  </div>
-
-  <!-- CIVIL STATUS -->
-  <div class="p-3 border border-purple-200 rounded-md bg-purple-50">
-    <label for="civil-status" class="text-[11px] font-semibold text-purple-700 mb-2 block">CIVIL STATUS</label>
-    <select 
-      id="civil-status"
-      [(ngModel)]="editedContract.contracteeCivilStatus"
-      class="w-full p-2 text-xs border border-gray-300 rounded">
-      <option value="">Select status</option>
-      <option value="Single">Single</option>
-      <option value="Married">Married</option>
-      <option value="Widowed">Widowed</option>
-      <option value="Divorced">Divorced</option>
-    </select>
-  </div>
-
-  <!-- PLACE OF DEATH -->
-  <div class="p-3 border border-purple-200 rounded-md bg-purple-50">
-    <div class="text-[11px] font-semibold text-purple-700 mb-2">PLACE OF DEATH</div>
-    <input 
-      type="text" 
-      pInputText 
-      [(ngModel)]="editedContract.placeOfDeath"
-      class="w-full text-xs"
-      placeholder="Place of death">
-  </div>
-
-</div>
-
-<!-- BILLING AND REMARKS SECTION -->
-<div class="px-4 pb-4 space-y-3">
-
-  <!-- BILLING REMARKS -->
-  <div class="p-3 border border-gray-200 rounded-md bg-blue-50">
-    <div class="text-[11px] font-semibold text-blue-700 mb-1">BILLING REMARKS</div>
-    
-    <div *ngIf="!editMode" class="text-xs text-gray-700 max-h-20 overflow-y-auto">
-      {{ FuneralContract?.billingRemarks || 'No billing remarks' }}
-    </div>
-
-    <textarea 
-      *ngIf="editMode"
-      [(ngModel)]="editedContract.billingRemarks"
-      class="w-full p-2 text-xs border border-gray-300 rounded resize-none"
-      rows="3"
-      placeholder="Billing remarks">
-    </textarea>
-  </div>
-
-  <!-- GENERAL REMARKS -->
-  <div class="p-3 border border-gray-200 rounded-md bg-gray-50">
-    <div class="text-[11px] font-semibold text-gray-700 mb-1">ADDITIONAL REMARKS</div>
-    
-    <div *ngIf="!editMode" class="text-xs text-gray-700 max-h-20 overflow-y-auto">
-      {{ FuneralContract?.remarks || 'No additional remarks' }}
-    </div>
-
-    <textarea 
-      *ngIf="editMode"
-      [(ngModel)]="editedContract.remarks"
-      class="w-full p-2 text-xs border border-gray-300 rounded resize-none"
-      rows="3"
-      placeholder="Additional remarks">
-    </textarea>
-  </div>
-
-</div>
-
-<!-- SUMMARY -->
-<div class="px-4 pb-4">
-
-  <div class="text-xs font-semibold text-gray-600 mb-2">Billing Summary</div>
-
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-
-    <div class="p-3 border border-gray-200 rounded-md bg-white">
-      <div class="text-[11px] text-gray-400">Total</div>
-      <div class="text-sm font-semibold text-gray-800">
-        ₱{{ (FuneralContract?.price || 0) | number:'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="p-3 border border-gray-200 rounded-md bg-white">
-      <div class="text-[11px] text-gray-400">Discount</div>
-      <div class="text-sm font-semibold text-orange-600">
-        ₱{{ (FuneralContract?.discount || 0) | number:'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="p-3 border border-gray-200 rounded-md bg-white">
-      <div class="text-[11px] text-gray-400">Net</div>
-      <div class="text-sm font-semibold text-gray-800">
-        ₱{{ ((FuneralContract?.price || 0) - (FuneralContract?.discount || 0)) | number:'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="p-3 border border-gray-200 rounded-md bg-white">
-      <div class="text-[11px] text-gray-400">Paid</div>
-      <div class="text-sm font-semibold text-green-600">
-        ₱{{ totalPaid | number:'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="p-3 border border-gray-300 rounded-md bg-white">
-      <div class="text-[11px] text-gray-400">Balance</div>
-      <div class="text-sm font-bold"
-           [class.text-green-600]="balanceRemaining <= 0"
-           [class.text-red-600]="balanceRemaining > 0">
-        ₱{{ balanceRemaining | number:'1.2-2' }}
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-</p-card>
-
-  <!-- PAYMENT TABLE -->
-  <p-card class="border border-gray-200 shadow-sm rounded-lg">
+  <div class="h-full bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden">
 
     <!-- HEADER -->
-    <ng-template pTemplate="header">
-      <div class="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center">
+    <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">Contract Billing</h2>
+        <p class="text-xs text-gray-500">
+          Overview of contract and billing details {{ editMode ? '- EDIT MODE' : '' }}
+        </p>
+      </div>
 
-        <h2 class="text-base font-semibold text-gray-800">
-          Payment Records
-        </h2>
+      <div class="flex gap-2">
+        <!-- <button *ngIf="!editMode"
+                (click)="startEdit()"
+                pButton icon="pi pi-pencil"
+                label="Modify"
+                class="p-button-warning p-button-sm">
+        </button>
 
-        <div class="flex items-center gap-2">
+        <button *ngIf="editMode"
+                (click)="saveEdit()"
+                pButton icon="pi pi-check"
+                label="Save"
+                class="p-button-success p-button-sm"
+                [loading]="loading">
+        </button>
 
-          <button
-            type="button"
-            (click)="printStatement()"
-            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition">
-            <i class="pi pi-print"></i>
-            Statement of Accounts
-          </button>
+        <button *ngIf="editMode"
+                (click)="cancelEdit()"
+                pButton icon="pi pi-times"
+                label="Cancel"
+                class="p-button-secondary p-button-sm">
+        </button> -->
+<button 
+  (click)="printStatement()"
+  class="inline-flex items-center gap-2
+         px-4 py-2
+         text-sm font-medium
+         text-gray-700
+         border border-gray-300
+         rounded-md
+         hover:bg-gray-100
+         transition">
 
+  <i class="pi pi-print text-sm"></i>
+  Print Statement
+
+</button>
+      </div>
+      
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="px-5 pt-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Total</div>
+          <div class="text-sm font-semibold text-gray-800">
+            ₱{{ (FuneralContract?.price || 0) | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Discount</div>
+          <div class="text-sm font-semibold text-orange-600">
+            ₱{{ (FuneralContract?.discount || 0) | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Net</div>
+          <div class="text-sm font-semibold text-gray-800">
+            ₱{{ ((FuneralContract?.price || 0) - (FuneralContract?.discount || 0)) | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Paid</div>
+          <div class="text-sm font-semibold text-green-600">
+            ₱{{ totalPaid | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Balance</div>
+          <div class="text-sm font-bold"
+               [class.text-green-600]="balanceRemaining <= 0"
+               [class.text-red-600]="balanceRemaining > 0">
+            ₱{{ balanceRemaining | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400 mb-1">Status</div>
+          <p-tag
+            [value]="balanceRemaining <= 0 ? 'PAID' : 'UNPAID'"
+            [severity]="balanceRemaining <= 0 ? 'success' : 'danger'">
+          </p-tag>
         </div>
 
       </div>
-    </ng-template>
+    </div>
+<!-- CONTRACT INFO + REMARKS -->
+<div class="px-5 pt-3 pb-3">
 
-    <!-- TABLE -->
-    <p-table 
-      [value]="rows"
-      [scrollable]="true"
-      scrollHeight="300px"
-      styleClass="border border-gray-300 rounded-md overflow-hidden"
-      [tableStyle]="{ 'min-width': '60rem'}">
+  <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
 
-      <!-- HEADER -->
-      <ng-template pTemplate="header">
-        <tr class="bg-gray-100 border-b border-gray-300">
-          <th class="px-4 py-2 border-r border-gray-300">Control No</th>
-          <th class="px-4 py-2 border-r border-gray-300">Date</th>
-          <th class="px-4 py-2 border-r border-gray-300">Bank</th>
-          <th class="px-4 py-2 border-r border-gray-300 text-right">Amount</th>
-          <th class="px-4 py-2 border-r border-gray-300">Description</th>
-          <th class="px-4 py-2 border-r border-gray-300">Remarks</th>
-          <th class="px-4 py-2 border-r border-gray-300 text-center">Cleared</th>
-          <th class="px-4 py-2 text-center">Actions</th>
-        </tr>
-      </ng-template>
+    <!-- INFO -->
+    <div class="border border-gray-200 rounded-lg bg-white overflow-hidden">
 
-      <!-- BODY -->
-      <ng-template pTemplate="body" let-row let-i="rowIndex" let-last="last">
-        <tr class="border-b border-gray-200 hover:bg-gray-50">
+      <table class="w-full text-sm">
+        <tbody class="divide-y">
 
-          <td class="px-4 py-2 border-r border-gray-200">{{ row.controlNumber }}</td>
-          <td class="px-4 py-2 border-r border-gray-200">{{ row.dateIssued }}</td>
-          <td class="px-4 py-2 border-r border-gray-200">{{ row.bank }}</td>
+          <!-- ROW 1 -->          <!-- ROW 3 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs"> Deceased Name</td>
+            <td colspan="3" class="px-3 py-2 font-semibold text-gray-800">
+              {{
+                ((FuneralContract?.firstName || '') + ' ' +
+                (FuneralContract?.lastName || '')).trim() || '—'
+              }}
+            </td>
+          </tr>
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[140px]">Contract #</td>
+            <td class="px-3 py-2 font-semibold text-gray-800">
+              {{ FuneralContract?.contractNo || '—' }}
+            </td>
 
-          <td class="px-4 py-2 border-r border-gray-200 text-right font-semibold text-green-700">
-            ₱{{ row.amount | number:'1.2-2' }}
-          </td>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[140px]">Casket Type </td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.type || '—' }}
+            </td>
+          </tr>
 
-          <td class="px-4 py-2 border-r border-gray-200 break-words">
-            {{ row.description || '—' }}
-          </td>
+          <!-- ROW 2 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.dueDate | date:'MMM dd, yyyy' }}
+            </td>
 
-          <td class="px-4 py-2 border-r border-gray-200">
-            {{ row.remarks || '—' }}
-          </td>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Casket</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.casketAvailable || '—' }}
+            </td>
+          </tr>
 
-          <td class="px-4 py-2 border-r border-gray-200 text-center">
-            <p-tag 
-              [value]="row.checkCleared ? 'CLEARED' : 'PENDING'"
-              [severity]="row.checkCleared ? 'success' : 'info'">
-            </p-tag>
-          </td>
 
-          <!-- ACTIONS -->
-          <td class="px-4 py-2 text-center">
 
-            <div class="flex justify-center items-center gap-2">
+          <!-- ROW 4 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contractee</td>
+            <td class="px-3 py-2 font-medium text-gray-800">
+              {{ FuneralContract?.contractee || '—' }}
+            </td>
 
-              <button pButton icon="pi pi-pencil" size="small"></button>
-              <button pButton icon="pi pi-trash" size="small" severity="danger"></button>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contact #</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.contactNo || '—' }}
+            </td>
+          </tr>
 
-              <!-- 🔥 ADD ROW BUTTON ONLY ON LAST ROW -->
-              <button 
-                *ngIf="last"
-                pButton 
-                icon="pi pi-plus"
-                size="small"
-                class="p-button-success"
-                (click)="addRow()">
-              </button>
+          <!-- ROW 5 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Relationship</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.relationshipToDeceased || '—' }}
+            </td>
 
-            </div>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.baranggay || '' }} {{ FuneralContract?.municipality || '' }}
+            </td>
+          </tr>
 
-          </td>
+          <!-- ROW 6 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">ID Type</td>
+            <td class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.idType || '—' }}
+            </td>
 
-        </tr>
-      </ng-template>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Claim No</td>
+            <td class="px-3 py-2 text-gray-800 font-medium">
+              {{ FuneralContract?.claimIdNumber || '—' }}
+            </td>
+          </tr>
 
-      <!-- EMPTY -->
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="8" class="text-center py-6 text-gray-500">
-            No payments yet
-            <br />
-            <button 
-              class="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
-              (click)="addRow()">
-              Add First Payment
-            </button>
-          </td>
-        </tr>
-      </ng-template>
+          <!-- ROW 7 -->
+          <tr>
+            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Plan</td>
+            <td colspan="3" class="px-3 py-2 text-gray-800">
+              {{ FuneralContract?.plan || '—' }}
+            </td>
+          </tr>
 
-    </p-table>
+        </tbody>
+      </table>
 
-    <!-- FULL WIDTH ADD ROW BUTTON -->
-    <div class="px-4 py-4 border-t border-gray-300">
-      <button 
-        *ngIf="rows.length > 0"
-        (click)="addRow()"
-        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-md hover:from-blue-700 hover:to-blue-800 transition flex items-center justify-center gap-2">
-        <i class="pi pi-plus text-lg"></i>
-        Add New Payment Record
-      </button>
     </div>
 
-  </p-card>
+    <!-- REMARKS -->
+    <div class="border border-gray-200 rounded-lg bg-white flex flex-col">
+
+      <div class="px-3 py-2 border-b bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
+        Billing Remarks
+      </div>
+
+      <div class="p-3 flex-1">
+
+        <!-- VIEW MODE -->
+<!-- VIEW MODE -->
+<div *ngIf="!editMode"
+     (click)="startEdit()"
+     class="w-full h-full border border-gray-200 rounded-md p-2 text-sm text-gray-700 cursor-text hover:bg-gray-50">
+
+  {{ FuneralContract?.billingRemarks || 'Click to add remarks...' }}
+
+</div>
+
+<!-- EDIT MODE -->
+<div *ngIf="editMode" class="space-y-2">
+
+  <!-- TEXTAREA -->
+  <textarea
+    [(ngModel)]="editedContract.billingRemarks"
+    class="w-full border border-gray-300 rounded-md p-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-gray-400"
+    rows="4">
+  </textarea>
+
+  <!-- ACTION BUTTONS -->
+  <div class="flex justify-end gap-2">
+
+    <!-- CANCEL -->
+    <button 
+      (click)="cancelEdit()"
+      class="px-3 py-1.5 text-sm border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition">
+      Cancel
+    </button>
+
+    <!-- UPDATE -->
+    <button 
+      (click)="saveEdit()"
+      class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+      Update
+    </button>
+
+  </div>
+
+</div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+    <!-- TABLE -->
+    <div  class="flex-1 min-h-0 overflow-auto px-4 pb-4 max-h-[320px]">
+    <!-- HEADER -->
+    <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-800">Payment Records</h2>
+        <p class="text-xs text-gray-500">
+        </p>
+      </div>
+<table class="w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
+
+  <thead class="bg-gray-100 sticky top-0 z-10">
+    <tr class="text-xs uppercase sticky top-0 z-10 text-gray-600 border-b border-gray-300">
+      <th class="px-3 py-2 border-r">Control No</th>
+      <th class="px-3 py-2 border-r">Date</th>
+      <th class="px-3 py-2 border-r">Bank</th>
+      <th class="px-3 py-2 border-r text-right">Amount</th>
+      <th class="px-3 py-2 border-r">Description</th>
+      <th class="px-3 py-2 border-r">Remarks</th>
+      <th class="px-3 py-2 border-r text-center">Cleared</th>
+      <th class="px-3 py-2 text-center">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody class="divide-y divide-gray-200">
+
+    <tr *ngFor="let row of rows; let i = index"
+        class="hover:bg-gray-50">
+
+      <td class="px-2 py-1 border-r">
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.controlNumber" class="w-full text-xs">
+        <span *ngIf="!row.isEditing">{{ row.controlNumber || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r">
+        <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.dateIssued" class="w-full text-xs border px-1">
+        <span *ngIf="!row.isEditing">{{ row.dateIssued }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r">
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.bank" class="w-full text-xs">
+        <span *ngIf="!row.isEditing">{{ row.bank || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-right">
+        <p-inputNumber *ngIf="row.isEditing"
+                       [(ngModel)]="row.amount"
+                       mode="currency"
+                       currency="PHP">
+        </p-inputNumber>
+
+        <span *ngIf="!row.isEditing" class="font-semibold text-green-700">
+          ₱{{ row.amount | number:'1.2-2' }}
+        </span>
+      </td>
+
+      <td class="px-2 py-1 border-r">
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.description" class="w-full text-xs">
+        <span *ngIf="!row.isEditing">{{ row.description || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r">
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.remarks" class="w-full text-xs">
+        <span *ngIf="!row.isEditing">{{ row.remarks || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-center">
+        <p-checkbox *ngIf="row.isEditing" [(ngModel)]="row.checkCleared" binary="true"></p-checkbox>
+
+        <p-tag *ngIf="!row.isEditing"
+               [value]="row.checkCleared ? 'CLEARED' : 'PENDING'"
+               [severity]="row.checkCleared ? 'success' : 'secondary'">
+        </p-tag>
+      </td>
+<td class="px-2 py-1 text-center">
+  <div class="flex justify-center gap-2">
+
+    <!-- SAVE -->
+    <button *ngIf="row.isEditing"
+            (click)="saveRow(row)"
+            class="inline-flex items-center justify-center
+                   w-9 h-9
+                   rounded-md
+                   bg-green-600 text-white
+                   hover:bg-green-700
+                   shadow-sm
+                   transition">
+
+      <i class="pi pi-check text-sm"></i>
+    </button>
+
+    <!-- EDIT -->
+    <button *ngIf="!row.isEditing"
+            (click)="editRow(row)"
+            class="inline-flex items-center justify-center
+                   w-9 h-9
+                   rounded-md
+                   border border-gray-300
+                   bg-white
+                   text-yellow-600
+                   hover:bg-yellow-50
+                   shadow-sm
+                   transition">
+
+      <i class="pi pi-pencil text-sm"></i>
+    </button>
+
+    <!-- DELETE -->
+<button (click)="deleteRow(i)"
+        class="inline-flex items-center justify-center
+               w-9 h-9
+               rounded-md
+               border border-gray-300
+               bg-white
+               text-red-600
+               hover:bg-red-50
+               shadow-sm
+               transition">
+
+  <i class="pi pi-trash text-sm"></i>
+</button>
+  <!-- CANCEL -->
+  <button *ngIf="row.isEditing"
+          (click)="cancelRow(row)"
+          class="inline-flex items-center justify-center
+                 w-9 h-9
+                 rounded-md
+                 border border-gray-300
+                 bg-white
+                 text-red-600
+                 hover:bg-red-50
+                 shadow-sm
+                 transition">
+
+    <i class="pi pi-times text-sm"></i>
+  </button>
+  </div>
+</td>
+    </tr>
+
+  </tbody>
+
+  <!-- 🔥 FULL WIDTH ADD BUTTON -->
+  <tfoot>
+    <tr>
+      <td colspan="8" class="p-2">
+<button 
+  (click)="addRow()"
+  class="w-full flex items-center justify-center gap-2
+         px-4 py-2
+         text-gray-600 text-sm font-medium
+         rounded-md
+         hover:bg-gray-300 hover:text-white
+         transition">
+
+  <i class="pi pi-plus text-sm"></i>
+  Add New Payment
+
+</button>
+      </td>
+    </tr>
+  </tfoot>
+
+</table>
+    </div>
+
+  </div>
 
 </div>

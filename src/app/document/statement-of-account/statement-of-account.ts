@@ -13,7 +13,7 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
 interface StatementItem {
-  remarks: string;
+  description: string;
   amount?: number;
   discount?: number;
   payment?: number;
@@ -125,7 +125,7 @@ dateNow: Date = new Date();
           : [payments];
 
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
-          remarks: p.description || 'Payment',
+          description: p.description  || '',
           payment: Number(p.amount || 0),
           paymentDate: typeof p.dateIssued === 'string'
             ? p.dateIssued
@@ -187,13 +187,13 @@ dateNow: Date = new Date();
     this.items = [];
 
     this.items.push({
-      remarks: `Funeral Service - ${contract.type || ''}`,
+      description: `Funeral Service - ${contract.type || ''}`,
       amount: Number(contract.price || 0)
     });
 
     if (contract.discount && Number(contract.discount) > 0) {
       this.items.push({
-        remarks: 'Discount',
+        description: 'Discount',
         discount: Number(contract.discount)
       });
     }
@@ -215,7 +215,7 @@ dateNow: Date = new Date();
     };
 
     this.items = [
-      { remarks: 'No data available', amount: 0 }
+      { description: 'No data available', amount: 0 }
     ];
   }
 

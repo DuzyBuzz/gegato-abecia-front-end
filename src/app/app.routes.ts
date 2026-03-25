@@ -10,6 +10,9 @@ import { DeceasedComponent } from './pages/deceased/deceased.component';
 import { BillingLayoutComponent } from './shared/layout/billing-layout/billing-layout.component';
 import { FuneralPaymentComponent } from './forms/funeral-payment/funeral-payment.component';
 import { StatementOfAccount } from './document/statement-of-account/statement-of-account';
+import { FuneralServiceContractPrinting } from './document/funeral-service-contract-printing/funeral-service-contract-printing';
+import { AuthorityToCremateRemainsPrinting } from './document/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
+import { CremationCertificate } from './document/cremation-certificate/cremation-certificate';
 
 export const routes: Routes = [
 
@@ -138,6 +141,18 @@ export const routes: Routes = [
             {
               path: 'statement-of-account/:contractId',
               component: StatementOfAccount
+            },
+            {
+              path: 'funeral-service-contract/:contractId',
+              component: FuneralServiceContractPrinting
+            },
+            {
+              path: 'authority-to-cremate-remains/:contractId',
+              component: AuthorityToCremateRemainsPrinting
+            },
+            {
+              path: 'cremation-certificate/:contractId',
+              component: CremationCertificate
             },
 
 
