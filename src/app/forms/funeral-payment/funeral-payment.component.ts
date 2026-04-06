@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
@@ -13,6 +13,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { FuneralPayment } from '../../models/funeral-payment.model';
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
@@ -39,9 +40,10 @@ export interface PaymentRow extends FuneralPayment {
     TooltipModule,
     InputTextModule,
     InputNumberModule,
-    CheckboxModule
+    CheckboxModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './funeral-payment.component.html',
   styleUrl: './funeral-payment.component.scss'
 })
@@ -65,6 +67,7 @@ export class FuneralPaymentComponent implements OnInit {
     private funeralPaymentsService: FuneralPaymentsService,
     private funeralContractService: FuneralContractService,
     private messageService: MessageService,
+    private confirmationService: ConfirmationService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -139,6 +142,17 @@ cancelRow(row: PaymentRow): void {
 }
   // ================= CRUD =================
   addRow(): void {
+    this.confirmationService.confirm({
+      header: 'Add New Payment',
+      message: 'Do you want to add a new payment row?',
+      icon: 'pi pi-question-circle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      accept: () => this.createNewRow()
+    });
+  }
+
+  private createNewRow(): void {
     this.rows.push({
       controlNumber: '',
       dateIssued: this.getToday(),
@@ -161,6 +175,20 @@ editRow(row: PaymentRow): void {
 }
 
   saveRow(row: PaymentRow): void {
+    const isNew = !row.id;
+    this.confirmationService.confirm({
+      header: isNew ? 'Save New Payment' : 'Save Payment Changes',
+      message: isNew
+        ? 'Do you want to save this new payment?'
+        : 'Do you want to save changes to this payment?',
+      icon: 'pi pi-check-circle',
+      acceptLabel: 'Save',
+      rejectLabel: 'Cancel',
+      accept: () => this.persistRow(row)
+    });
+  }
+
+  private persistRow(row: PaymentRow): void {
     if (!row.controlNumber || !row.bank || !row.amount) {
       this.messageService.add({
         severity: 'error',
@@ -205,15 +233,55 @@ editRow(row: PaymentRow): void {
 
   deleteRow(index: number): void {
     const row = this.rows[index];
+    const label = row?.controlNumber || `#${index + 1}`;
+
+    this.confirmationService.confirm({
+      header: 'Delete Payment',
+      message: `Are you sure you want to delete payment ${label}?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      acceptLabel: 'Delete',
+      rejectLabel: 'Cancel',
+      accept: () => this.performDelete(index)
+    });
+  }
+
+  private performDelete(index: number): void {
+    const row = this.rows[index];
 
     if (row.id) {
-      this.funeralPaymentsService.delete(row.id).subscribe(() => {
-        this.rows.splice(index, 1);
-        this.computeTotals();
+      this.loading = true;
+      this.funeralPaymentsService.delete(row.id).subscribe({
+        next: () => {
+          this.loading = false;
+          this.rows.splice(index, 1);
+          this.computeTotals();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Payment deleted successfully'
+          });
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Delete Failed',
+            detail: 'Unable to delete payment. Please try again.'
+          });
+          this.cdr.markForCheck();
+        }
       });
     } else {
       this.rows.splice(index, 1);
       this.computeTotals();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Removed',
+        detail: 'Unsaved payment row removed'
+      });
+      this.cdr.markForCheck();
     }
   }
 get netAmount(): number {
@@ -262,6 +330,19 @@ get netAmount(): number {
   saveEdit(): void {
     if (!this.editedContract) return;
 
+    this.confirmationService.confirm({
+      header: 'Save Contract Remarks',
+      message: 'Do you want to save your billing remarks changes?',
+      icon: 'pi pi-check-circle',
+      acceptLabel: 'Save',
+      rejectLabel: 'Cancel',
+      accept: () => this.persistContractEdit()
+    });
+  }
+
+  private persistContractEdit(): void {
+    if (!this.editedContract) return;
+
     this.loading = true;
 
     const payload: FuneralContract = {
@@ -278,8 +359,8 @@ get netAmount(): number {
 
         this.messageService.add({
           severity: 'success',
-          summary: 'Updated',
-          detail: 'Contract updated successfully'
+          summary: 'Saved',
+          detail: 'Billing remarks saved successfully'
         });
 
         this.cdr.markForCheck();
@@ -289,7 +370,7 @@ get netAmount(): number {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to update contract'
+          detail: 'Failed to save billing remarks'
         });
       }
     });

@@ -4,6 +4,8 @@ import { PrintHeader } from "../print-header/print-header";
 import { CommonModule, Location } from '@angular/common';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
+import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-funeral-service-contract-printing',
@@ -15,6 +17,10 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
   contractId: number | null = null;
   selectedContract: FuneralContract | null = null;
   isReady = false; // 🔥 control printing
+  currentUser = {
+    name: 'Officer in Charge',
+    role: 'Biller'
+  };
 
   contract = {
     time: new Date().toLocaleTimeString(),
@@ -41,20 +47,34 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
     relationship: 'N/A',
     contactNo: 'N/A',
     deliveryDate: 'N/A',
-    contractNo: 'N/A'
+    contractNo: 'N/A',
+    officer: 'Officer in Charge'
   };
 
   constructor(
     private location: Location,
     private route: ActivatedRoute,
     private contractService: FuneralContractService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private auth: AuthService
   ) {}
 
   // ======================================================
   // 🔥 INIT
   // ======================================================
   ngOnInit(): void {
+    const authUser = this.auth.currentUser;
+    if (authUser) {
+      const firstName = authUser.firstName || '';
+      const lastName = authUser.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      this.currentUser = {
+        name: fullName || authUser.username || 'Officer in Charge',
+        role: authUser.role || 'Biller'
+      };
+    }
+
     this.route.paramMap.subscribe(params => {
       const param = params.get('contractId');
 
@@ -115,6 +135,11 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
   // 🔥 MAP CONTRACT DATA
   // ======================================================
   private mapContract(contract: FuneralContract): void {
+    const atDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
+    const ageValue = atDeath !== null ? atDeath.toString() : 'N/A';
+
+    const burialOrCremationDate = contract.dateOfBurial || contract.cremationDate || null;
+
     this.contract = {
       time: new Date().toLocaleTimeString(),
       date: contract.contractDate 
@@ -128,21 +153,22 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
       deceasedName: this.formatName(contract.firstName, contract.middleName, contract.lastName),
       dob: contract.dateOfBirth ? this.formatDate(contract.dateOfBirth) : 'N/A',
       dod: contract.dateOfDeath ? this.formatDate(contract.dateOfDeath) : 'N/A',
-      age: contract.age ? contract.age.toString() : 'N/A',
+      age: ageValue,
 
       address: contract.addressLine1 || 'N/A',
       placeOfDeath: contract.placeOfDeath || 'N/A',
 
-      wake: 'N/A', // Not in model yet
-      church: 'N/A', // Not in model yet
-      burialDate: contract.dateOfBurial ? this.formatDate(contract.dateOfBurial) : 'N/A',
-      cemetery: 'N/A', // Not in model yet
+      wake: contract.transferAddress || 'N/A',
+      church: contract.church || 'N/A',
+      burialDate: burialOrCremationDate ? this.formatDate(burialOrCremationDate) : 'N/A',
+      cemetery: contract.cementary || 'N/A',
 
       contractee: contract.contractee || 'N/A',
       relationship: contract.relationshipToDeceased || 'N/A',
       contactNo: contract.contactNo || 'N/A',
       deliveryDate: contract.deliveryDate ? this.formatDate(contract.deliveryDate) : 'N/A',
-      contractNo: contract.contractNo || 'N/A'
+      contractNo: contract.contractNo || 'N/A',
+      officer: this.currentUser.name
     };
   }
 

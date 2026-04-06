@@ -4,6 +4,8 @@ import { CommonModule, Location } from '@angular/common';
 import { PrintHeader } from "../print-header/print-header";
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
+import { AuthService } from '../../services/auth.service';
+import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 
 @Component({
   selector: 'app-authority-to-cremate-remains-printing',
@@ -17,18 +19,35 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
   contractId: number | null = null;
   selectedContract: FuneralContract | null = null;
   isReady = false; // 🔥 control printing
+  currentUser = {
+    name: 'Officer in Charge',
+    role: 'Biller'
+  };
 
   constructor(
     private location: Location,
     private route: ActivatedRoute,
     private contractService: FuneralContractService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private auth: AuthService
   ) {}
 
   // ======================================================
   // 🔥 INIT
   // ======================================================
   ngOnInit(): void {
+    const authUser = this.auth.currentUser;
+    if (authUser) {
+      const firstName = authUser.firstName || '';
+      const lastName = authUser.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      this.currentUser = {
+        name: fullName || authUser.username || 'Officer in Charge',
+        role: authUser.role || 'Biller'
+      };
+    }
+
     this.route.paramMap.subscribe(params => {
       const param = params.get('contractId');
 
@@ -89,6 +108,8 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
   // 🔥 MAP CONTRACT DATA
   // ======================================================
   private mapContractToDisplay(contract: FuneralContract): void {
+    const ageAtDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
+
     this.contract = {
       time: new Date().toLocaleTimeString(),
       date: contract.contractDate 
@@ -98,7 +119,7 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
       deceasedName: this.formatName(contract.firstName, contract.middleName, contract.lastName),
       dob: contract.dateOfBirth ? this.formatDate(contract.dateOfBirth) : 'N/A',
       dod: contract.dateOfDeath ? this.formatDate(contract.dateOfDeath) : 'N/A',
-      age: contract.age ? contract.age.toString() : 'N/A',
+      age: ageAtDeath !== null ? ageAtDeath.toString() : 'N/A',
 
       authorizer: contract.contractee || 'N/A',
       address: contract.addressLine1 || 'N/A',
@@ -108,7 +129,8 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
       burialDate: contract.dateOfBurial ? this.formatDate(contract.dateOfBurial) : 'N/A',
       cemetery: 'N/A', // Not directly in model
       relationship: contract.relationshipToDeceased || 'N/A',
-      contractNo: contract.contractNo || 'N/A'
+      contractNo: contract.contractNo || 'N/A',
+      officer: this.currentUser.name
     };
   }
 
@@ -131,7 +153,8 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
       burialDate: 'N/A',
       cemetery: 'N/A',
       relationship: 'N/A',
-      contractNo: 'N/A'
+      contractNo: 'N/A',
+      officer: this.currentUser.name
     };
     this.isReady = true;
   }

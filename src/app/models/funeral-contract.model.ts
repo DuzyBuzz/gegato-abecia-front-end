@@ -78,10 +78,13 @@ export interface FuneralContract {
   carRentalDriver?: string | null;
   setupCrew?: string | null;
   cremationTime?: string | null;
+  cremationDate?: string | null;
   cremationOperator?: string | null;
   burialBenefit?: string | null;
   pallBearrer?: string | null;
   funeralDirector?: string | null;
+  church?: string | null;
+  cementary?: string | null;
 
   // ========== SECTION 7: EMBALMING & MAKEUP ==========
   dateEmblamed?: string | null;

@@ -4,6 +4,13 @@ import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angula
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { MessageModule } from 'primeng/message';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 interface MockUser {
   username: string;
@@ -16,18 +23,27 @@ interface MockUser {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CardModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    MessageModule,
+    FloatLabelModule,
+    ProgressSpinnerModule 
+  ],
   templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
-showPassword = false;
-
   errorMessage = '';
   form: FormGroup;
   mockUsers: MockUser[] = [];
   showMockUsers = true;
   private mockDataGenerated = false;
-
+loading = false;
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
@@ -61,6 +77,8 @@ submit() {
     return;
   }
 
+  this.loading = true; // START LOADING
+
   const { username, password } = this.form.value;
 
   this.auth.login(username, password).subscribe({
@@ -69,6 +87,7 @@ submit() {
 
       if (!user) {
         this.errorMessage = 'Login failed';
+        this.loading = false;
         return;
       }
 
@@ -81,10 +100,12 @@ submit() {
       }
 
       this.router.navigate([redirectPath]);
+      this.loading = false;
     },
     error: (err) => {
       console.error(err);
       this.errorMessage = err.message || 'Invalid username or password';
+      this.loading = false; // STOP LOADING
     }
   });
 }

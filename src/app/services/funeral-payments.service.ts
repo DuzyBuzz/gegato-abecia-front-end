@@ -100,8 +100,8 @@ export class FuneralPaymentsService {
   /**
    * ✅ Delete payment by ID
    */
-  delete(id: number): Observable<any> {
-    console.log('🗑️ FuneralPaymentsService: delete', { id });
-    return this.http.delete(`${this.api}/delete/${id}`);
-  }
+delete(id: number): Observable<any> {
+  console.log('🗑️ FuneralPaymentsService: delete', { id });
+  return this.http.post(`${this.api}/delete/${id}`, {});
+}
 }

@@ -1,106 +1,114 @@
-<div class="relative min-h-screen flex flex-col md:flex-row items-center justify-center md:justify-between bg-[#3B1546] px-4 sm:px-8 md:px-16 gap-8 md:gap-12">
+<!-- GLOBAL LOADING OVERLAY -->
+<div *ngIf="loading" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+<div class="login-container min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-700 flex items-center justify-center px-4 py-12">
 
-  <!-- Left side: Logo (hidden on mobile/tablet) -->
-  <div class="hidden md:flex md:flex-1 items-center justify-center">
-    <div class="w-96 h-96 lg:w-[900px] lg:h-[900px] flex items-center justify-center">
-      <img src="assets/images/gegato-logo.jpg" alt="Gegato Logo" class="w-full h-full object-cover rounded-2xl">
+
+
+  <div class="w-full max-w-md">
+    <!-- Main Login Card -->
+    <p-card class="shadow-2xl" [style]="{ 'border-radius': '1rem' }">
+      <ng-template pTemplate="header">
+        <div class="bg-gradient-to-r from-purple-700 to-purple-900 p-8 flex justify-center rounded-t-2xl">
+          <img 
+            src="assets/images/gegato-logo.jpg" 
+            alt="Gegato Logo" 
+            class="w-24 h-24 rounded-full shadow-lg border-4 border-white"
+          >
+        </div>
+      </ng-template>
+
+      <!-- Card Content -->
+      <div class="p-8">
+        <!-- Heading -->
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Welcome Back</h1>
+
+        <!-- Error Message -->
+        <p-message 
+          *ngIf="errorMessage" 
+          severity="error" 
+          [text]="errorMessage"
+          [styleClass]="'w-full mb-6'"
+        ></p-message>
+
+        <!-- Login Form -->
+        <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+          <!-- Username Field -->
+          <div class="field">
+            <p-floatlabel>
+              <input 
+                pInputText 
+                id="username"
+                type="text"
+                formControlName="username"
+                class="w-full"
+                [class.ng-invalid.ng-touched]="form.get('username')?.invalid && form.get('username')?.touched"
+              />
+              <label for="username" class="font-semibold">Username</label>
+            </p-floatlabel>
+            <small 
+              *ngIf="form.get('username')?.invalid && form.get('username')?.touched" 
+              class="text-red-600 block mt-1"
+            >
+              Username is required
+            </small>
+          </div>
+
+          <!-- Password Field -->
+          <div class="field ">
+            <p-floatlabel>
+              <p-password
+                id="password"
+                formControlName="password"
+                [feedback]="false"
+                [toggleMask]="true"
+                iconDisplay="focus"
+                class="w-full"
+                [styleClass]="'w-full'"
+              ></p-password>
+              <label for="password" class="font-semibold">Password</label>
+            </p-floatlabel>
+            <small 
+              *ngIf="form.get('password')?.invalid && form.get('password')?.touched" 
+              class="text-red-600 block mt-1"
+            >
+              Password is required
+            </small>
+          </div>
+<br>
+          <!-- Submit Button -->
+<p-button
+  type="submit"
+  label="Sign In"
+  icon="pi pi-sign-in"
+  class="w-full mt-10"
+  [loading]="loading"
+  [disabled]="loading"
+  [styleClass]="'p-button-lg w-full'"
+></p-button>
+
+        </form>
+
+        <!-- Footer Note -->
+        <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+          <p class="text-sm text-gray-600">
+            <span class="font-semibold text-purple-700">Gegato-Abecia</span> Funeral Management System <br>
+            <span>© 2026. All Rights Reserved.</span>
+          </p>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Security Note -->
+    <div class="mt-6 text-center text-white text-sm">
+      <p class="flex items-center justify-center gap-2">
+        <i class="pi pi-download text-lg"></i>
+        <span class="hidden sm:inline">Download Desktop App</span>
+
+      </p>
     </div>
   </div>
-
-<!-- Right side: Login card (slightly smaller width) -->
-<div class="w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl bg-white rounded-xl sm:rounded-2xl p-10 sm:p-16 md:p-20 lg:p-24 flex flex-col items-center">
-  
-  <!-- Logo above heading (mobile only) -->
-  <div class="md:hidden w-32 h-32 sm:w-40 sm:h-40 mb-6 sm:mb-8">
-    <img src="assets/images/gegato-logo.jpg" alt="Gegato Logo" class="w-full h-full object-cover rounded-full border-2 border-purple-600">
-  </div>
-
-  <!-- Heading (responsive text size) -->
-  <h1 class="text-center text-gray-800 mb-6 sm:mb-8 text-2xl sm:text-3xl md:text-4xl font-bold">Login</h1>
-
-  <!-- Login form -->
-<form class="w-full" (ngSubmit)="submit()" [formGroup]="form">
-
-  <!-- ERROR -->
-  <div *ngIf="errorMessage"
-       class="bg-red-100 text-red-800 px-4 py-3 rounded mb-4">
-    {{ errorMessage }}
-  </div>
-
-  <!-- USERNAME -->
-  <input
-    type="text"
-    formControlName="username"
-    placeholder="Username"
-    class="w-full px-4 py-3 border rounded"
-  />
-
-  <!-- PASSWORD -->
-<div class="relative w-full mt-4">
-  <input
-    [type]="showPassword ? 'text' : 'password'"
-    formControlName="password"
-    placeholder="Password"
-    class="w-full px-4 py-3 border rounded pr-12"
-  />
-
-  <button
-    type="button"
-    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-    (click)="showPassword = !showPassword"
-  >
-    {{ showPassword ? 'Hide' : 'Show' }}
-  </button>
-</div>
-
-  <!-- SUBMIT -->
-  <button
-    type="submit"
-    class="w-full mt-6 py-3 bg-purple-800 text-white rounded hover:bg-purple-900 transition-colors"
-  >
-    Login
-  </button>
-
-
-
-  <!-- <button (click)="GenerateMockData()"
-    class="w-full mt-6 py-3 bg-purple-800 text-white rounded hover:bg-purple-900 transition-colors"
-  >
-    mock data
-  </button> -->
-</form>
-
-
-<!-- Mock Users Quick Access (Development/Testing) -->
-<!-- <div *ngIf="mockUsers.length > 0" class="w-full mt-8 pt-8 border-t border-gray-300">
-  <p class="text-center text-gray-600 text-sm font-semibold mb-4">Test Accounts</p>
-  <div class="space-y-2">
-    <div *ngFor="let mockUser of mockUsers" 
-         class="p-3 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
-      <button
-        type="button"
-        (click)="quickLogin(mockUser.username, 'password123')"
-        class="w-full text-left"
-      >
-        <div class="font-semibold text-gray-800 text-sm">{{ mockUser.firstName }} {{ mockUser.lastName }}</div>
-        <div class="text-xs text-gray-600">{{ mockUser.username }}</div>
-        <div class="text-xs text-purple-600 font-medium">{{ mockUser.role }}</div>
-      </button>
-    </div>
-  </div>
-  <p class="text-center text-xs text-gray-500 mt-3">Password: password123</p>
-</div> -->
-
-
-<a
-  href="assets\downloads\Gegato Abecia_1.0.0_x64-setup.zip"
-  download
- class="absolute top-4 left-4 text-white text-sm sm:text-base hover:underline"
->
-  Download Desktop App
-</a>
-
-
-</div>
 
 </div>

@@ -10,6 +10,7 @@ import { FuneralContractService } from '../../services/funeral-contract.service'
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
 import { DialogModule } from "primeng/dialog";
 import { FuneralContract } from '../../models/funeral-contract.model';
+import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 
 // ========== FIELD LABEL MAP ==========
 const FIELD_LABELS: { [key: string]: string } = {
@@ -156,7 +157,19 @@ if (role === 'Admin') {
     const basePath = role === 'Admin' ? '/admin' : '/billing';
     this.router.navigate([`/print/cremation-certificate/${this.contractId}`]);
   }
+  // ================= PRINTING =================
+  printStatement(): void {
+    if (!this.contractId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Contract ID not found'
+      });
+      return;
+    }
 
+    this.router.navigate(['/print/statement-of-account', this.contractId]);
+  }
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -183,7 +196,7 @@ if (role === 'Admin') {
       middleName: [''],
       lastName: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
-      age: ['', [Validators.required]],
+      age: [''],
       gender: ['', Validators.required],
       civilStatus: ['', Validators.required],
       dateOfDeath: ['', Validators.required],
@@ -242,11 +255,14 @@ if (role === 'Admin') {
       carRental: [''],
       carRentalDriver: [''],
       cremationTime: [''],
+      cremationDate: [''],
       cremationOperator: [''],
       burialBenefit: [''],
       setupCrew: [''],
       pallBearrer: [''],
       funeralDirector: [''],
+      church: [''],
+      cementary: [''],
 
       // ========== SECTION 7: EMBALMING & MAKEUP ==========
       dateEmblamed: [''],
@@ -297,6 +313,8 @@ if (role === 'Admin') {
 
     // Preload all combobox collections IMMEDIATELY in parallel
     this.preloadComboboxes();
+
+
   }
 
   private preloadComboboxes(): void {
@@ -341,18 +359,9 @@ ngAfterViewInit() {
       }
     });
 
-    // Auto-calculate age when dateOfBirth changes
-    this.form.get('dateOfBirth')?.valueChanges.subscribe(dateOfBirth => {
-      if (dateOfBirth) {
-
-        const [year, month, day] = dateOfBirth.split('-').map(Number);
-
-        const localDate = new Date(year, month - 1, day); // ✅ LOCAL SAFE
-
-        const calculatedAge = this.calculateAge(localDate);
-
-        this.form.get('age')?.setValue(calculatedAge, { emitEvent: false });
-      }
+    const ageControls = ['dateOfBirth', 'dateOfDeath'] as const;
+    ageControls.forEach((field) => {
+      this.form.get(field)?.valueChanges.subscribe(() => this.updateDeceasedAge());
     });
 
 
@@ -384,7 +393,20 @@ formatNumber(field: string): void {
       this.intersectionObserver = null;
     }
   }
+private updateAgeFromDOB(): void {
+  this.updateDeceasedAge();
+}
 
+private updateDeceasedAge(): void {
+  const dob = this.form.get('dateOfBirth')?.value as string | null | undefined;
+  const dod = this.form.get('dateOfDeath')?.value as string | null | undefined;
+  const age = deceasedAgeAtDeath(dob, dod);
+  if (age !== null) {
+    this.form.get('age')?.setValue(age, { emitEvent: false });
+  } else {
+    this.form.get('age')?.setValue('', { emitEvent: false });
+  }
+}
 private setupIntersectionObserver(): void {
   const options = {
     root: null,
@@ -441,7 +463,7 @@ private async loadContractData(id: number): Promise<void> {
 
         // 🔥 PATCH ALL DATA (service mapper already converted dates to yyyy-MM-dd strings)
         this.form.patchValue(data, { emitEvent: false });
-
+        this.updateAgeFromDOB();
         console.log('✅ FORM AFTER PATCH (verify dates populated):');
         console.log('  - contractDate:', this.form.get('contractDate')?.value);
         console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
@@ -505,7 +527,7 @@ async loadDataFromSelected(funeralService: FuneralContract): Promise<void> {
 
     // 🔥 PATCH ALL DATA (mapper already converted dates to yyyy-MM-dd strings)
     this.form.patchValue(data, { emitEvent: false });
-
+this.updateAgeFromDOB();
     console.log('✅ FORM AFTER PATCH (verify dates populated):');
     console.log('  - contractDate:', this.form.get('contractDate')?.value);
     console.log('  - dateOfBirth:', this.form.get('dateOfBirth')?.value);
@@ -573,7 +595,7 @@ private verifyFormDateValues(label: string = ''): void {
   const dateFields = [
     'contractDate', 'dueDate', 'dateOfBirth', 'dateOfDeath', 
     'dateOfBurial', 'dateOfTransfer', 'dateReceived', 'deliveryDate',
-    'dateEmblamed', 'autopsyDate', 'issuedOn', 'issuedAt'
+    'dateEmblamed', 'autopsyDate', 'issuedOn', 'cremationDate'
   ];
 
   console.log(`\n📋 VERIFY FORM DATES ${label}:`);
@@ -586,17 +608,6 @@ private verifyFormDateValues(label: string = ''): void {
   console.log('');
 }
 
-  private calculateAge(birthDate: Date): number {
-    const today = new Date(); 
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return Math.max(0, age);
-  }
 scrollToSection(sectionId: number): void {
   const element = document.querySelector(`[data-section="${sectionId}"]`);
 

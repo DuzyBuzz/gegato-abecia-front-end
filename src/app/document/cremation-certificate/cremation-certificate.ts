@@ -5,6 +5,7 @@ import { CommonModule, Location } from '@angular/common';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { AuthService } from '../../services/auth.service';
+import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 
 @Component({
   selector: 'app-cremation-certificate',
@@ -138,6 +139,9 @@ export class CremationCertificate implements OnInit, OnDestroy {
   // 🔥 MAP CONTRACT DATA
   // ======================================================
   private mapContractToDisplay(contract: FuneralContract): void {
+    const atDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
+    const ageValue = atDeath !== null ? atDeath.toString() : 'N/A';
+
     this.contract = {
       time: new Date().toLocaleTimeString(),
       date: contract.contractDate 
@@ -151,7 +155,7 @@ export class CremationCertificate implements OnInit, OnDestroy {
       deceasedName: this.formatName(contract.firstName, contract.middleName, contract.lastName),
       dob: contract.dateOfBirth ? this.formatDate(contract.dateOfBirth) : 'N/A',
       dod: contract.dateOfDeath ? this.formatDate(contract.dateOfDeath) : 'N/A',
-      age: contract.age ? contract.age.toString() : 'N/A',
+      age: ageValue,
 
       authorizer: contract.contractee || 'N/A',
       address: contract.addressLine1 || 'N/A',
@@ -168,7 +172,9 @@ export class CremationCertificate implements OnInit, OnDestroy {
       contactNo: contract.contactNo || 'N/A',
       deliveryDate: contract.deliveryDate ? this.formatDate(contract.deliveryDate) : 'N/A',
       contractNo: contract.contractNo || 'N/A',
-      cremationDate: contract.cremationTime ? this.formatDate(contract.cremationTime) : 'N/A'
+      cremationDate: contract.cremationDate
+        ? this.formatDate(contract.cremationDate)
+        : (contract.dateOfDeath ? this.formatDate(contract.dateOfDeath) : 'N/A')
     };
   }
 
@@ -190,12 +196,15 @@ export class CremationCertificate implements OnInit, OnDestroy {
   }
 
   private formatDate(dateStr: string): string {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
-    } catch {
+    if (!dateStr) return 'N/A';
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      // e.g. time-only strings like "08:46" or unexpected formats
       return dateStr;
     }
+
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
   }
 
   private formatCurrency(amount: number): string {

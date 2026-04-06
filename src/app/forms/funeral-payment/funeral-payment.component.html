@@ -1,15 +1,14 @@
 <div class="p-6 bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
   <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
 
   <div class="h-full bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden">
 
     <!-- HEADER -->
-    <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+    <div class="px-5 py-4 border-b border-blue-600 flex justify-between items-center">
       <div>
         <h2 class="text-lg font-semibold text-gray-800">Contract Billing</h2>
-        <p class="text-xs text-gray-500">
-          Overview of contract and billing details {{ editMode ? '- EDIT MODE' : '' }}
-        </p>
+
       </div>
 
       <div class="flex gap-2">
@@ -273,8 +272,8 @@
       </div>
 <table class="w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
 
-  <thead class="bg-gray-100 sticky top-0 z-10">
-    <tr class="text-xs uppercase sticky top-0 z-10 text-gray-600 border-b border-gray-300">
+  <thead class="bg-blue-600 sticky top-0 z-10">
+    <tr class="text-xs uppercase sticky top-0 z-10 text-gray-100 border-b border-gray-300">
       <th class="px-3 py-2 border-r">Control No</th>
       <th class="px-3 py-2 border-r">Date</th>
       <th class="px-3 py-2 border-r">Bank</th>

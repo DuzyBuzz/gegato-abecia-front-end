@@ -25,6 +25,7 @@ export function mapFuneralContract(api: any): FuneralContract {
     dateEmblamed: formatDate(api.dateEmblamed),
     dateAshReleased: formatDate(api.dateAshReleased),
     timeEncoded: formatDate(api.timeEncoded),
+    cremationDate: formatDate(api.cremationDate),
 
     // ✅ datetime-local
     startOfTransaction: formatDateTime(api.startOfTransaction),
@@ -76,6 +77,7 @@ export function mapFuneralContractToApi(form: FuneralContract): any {
     dateEmblamed: toTimestamp(form.dateEmblamed),
     dateAshReleased: toTimestamp(form.dateAshReleased),
     timeEncoded: toTimestamp(form.timeEncoded),
+    cremationDate: toTimestamp(form.cremationDate),
 
     // datetime-local
     startOfTransaction: toTimestamp(form.startOfTransaction),

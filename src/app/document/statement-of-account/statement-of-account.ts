@@ -11,6 +11,7 @@ import { FuneralPaymentsService } from '../../services/funeral-payments.service'
 
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 
 interface StatementItem {
   description: string;
@@ -46,6 +47,7 @@ export class StatementOfAccount implements OnInit, OnDestroy {
     contractee: 'N/A',
     address: 'N/A',
     deceasedName: 'N/A',
+    deceasedAge: 'N/A',
     contractNo: 'N/A',
     officer: 'Officer in Charge',
     releasedBy: 'N/A'
@@ -173,12 +175,15 @@ dateNow: Date = new Date();
       contract.province
     ].filter(Boolean).join(', ');
 
+    const atDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
+
     this.contract = {
       dod: contract.dateOfDeath || 'N/A',
       checkedBy: contract.checkedBy || 'N/A',
       contractee: contract.contractee || 'N/A',
       address: address || 'N/A',
       deceasedName: fullName || 'N/A',
+      deceasedAge: atDeath !== null ? String(atDeath) : 'N/A',
       contractNo: contract.contractNo || 'N/A',
       officer: contract.checkedBy || 'Officer in Charge',
       releasedBy: contract.releasedBy || 'N/A'
@@ -209,6 +214,7 @@ dateNow: Date = new Date();
       contractee: 'N/A',
       address: 'N/A',
       deceasedName: 'N/A',
+      deceasedAge: 'N/A',
       contractNo: 'N/A',
       officer: 'Officer in Charge',
       releasedBy: 'N/A'

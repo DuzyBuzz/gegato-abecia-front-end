@@ -1,0 +1,159 @@
+.login-container {
+  background: linear-gradient(135deg, #3b1546 0%, #5a2d7f 50%, #2d0d3b 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(126, 34, 206, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+// PrimeNG Component Customizations
+::ng-deep {
+  .p-card {
+    border: none;
+
+    .p-card-header {
+      padding: 0;
+      border: none;
+    }
+
+    .p-card-body {
+      padding: 2rem;
+    }
+
+    .p-card-content {
+      padding: 0;
+    }
+  }
+
+  .p-input-text,
+  .p-password > .p-password-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: #9333ea;
+      box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+      outline: none;
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: #ef4444;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+
+  .p-password {
+    width: 100%;
+
+    .p-password-input {
+      width: 100%;
+    }
+
+    .p-password-toggle {
+      color: #6b7280;
+      right: 1rem;
+
+      &:hover {
+        color: #9333ea;
+      }
+    }
+  }
+
+  .p-floatlabel > label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 600;
+    top: -0.75rem;
+    padding: 0 0.25rem;
+    background-color: white;
+  }
+
+  .p-button.p-button-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border: none;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+      transform: translateY(-2px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .p-button-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .p-message {
+    border-radius: 0.5rem;
+    border-left: 4px solid;
+    font-size: 0.95rem;
+
+    &.p-message-error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border-left-color: #dc2626;
+    }
+
+    .p-message-text {
+      margin-left: 0.5rem;
+    }
+  }
+
+  // Smooth field transitions
+  .field {
+    position: relative;
+    transition: all 0.3s ease;
+
+    small {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  ::ng-deep {
+    .p-card {
+      .p-card-body {
+        padding: 1.5rem;
+      }
+    }
+
+    .p-button.p-button-lg {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+    }
+  }
+}
