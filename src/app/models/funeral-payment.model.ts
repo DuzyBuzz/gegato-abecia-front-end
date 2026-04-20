@@ -2,23 +2,23 @@ export interface FuneralPayment {
   id?: number;
   
   // Payment Information
-  controlNumber?: string;
-  dateIssued?: Date | string;
-  checkDate?: Date | string;
-  issuedBy?: string;
+  controlNumber?: string | null;
+  dateIssued?: Date | string | null;
+  checkDate?: Date | string | null;
+  issuedBy?: string | null;
   
   // Bank & Account Details
-  bank?: string;
-  accountNumber?: string;
+  bank?: string | null;
+  accountNumber?: string | null;
   
-  amount?: number | string;
+  amount?: number | string | null;
 
 
-  description?: string;
-  remarks?: string;
+  description?: string | null;
+  remarks?: string | null;
 
-  checkCleared?: boolean;
+  checkCleared?: boolean | null;
   
   // Reference to Funeral Service
-  funeralServiceId?: number;
+  funeralServiceId?: number | null;
 }

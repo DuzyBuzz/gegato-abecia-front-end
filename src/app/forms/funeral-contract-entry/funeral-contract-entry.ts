@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, Input, Inject, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -182,49 +182,47 @@ if (role === 'Admin') {
   ) {
     this.form = this.fb.group({
       // ========== SECTION 1: CONTRACT INFORMATION ==========
-      contractNo: ['', [Validators.required, Validators.minLength(3)]],
-      type: ['', Validators.required],
-      contractDate: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(0)]],
-      discount: [0],
-      dueDate: ['', Validators.required],
+      contractNo: [''],
+      type: [''],
+      contractDate: [''],
+      dueDate: [''],
       checkedBy: [''],
       financialAssitance: [''],
 
       // ========== SECTION 2: DECEASED INFORMATION ==========
-      firstName: ['', Validators.required],
+      firstName: [''],
       middleName: [''],
-      lastName: ['', Validators.required],
-      dateOfBirth: ['', Validators.required],
+      lastName: [''],
+      dateOfBirth: [''],
       age: [''],
-      gender: ['', Validators.required],
-      civilStatus: ['', Validators.required],
-      dateOfDeath: ['', Validators.required],
+      gender: [''],
+      civilStatus: [''],
+      dateOfDeath: [''],
       timeOfDeath: [''],
-      placeOfDeath: ['', Validators.required],
+      placeOfDeath: [''],
       placeOfBirth: [''],
-      religion: ['', Validators.required],
-      addressLine1: ['', Validators.required],
+      religion: [''],
+      addressLine1: [''],
       parentFather: [''],
       parentMother: [''],
       nameOfInformant: [''],
 
       // ========== SECTION 3: CONTRACTEE INFORMATION ==========
-      contractee: ['', Validators.required],
-      contracteeAge: ['', [Validators.required, Validators.min(0), Validators.max(150)]],
+      contractee: [''],
+      contracteeAge: [''],
       contracteeGender: [''],
       contracteeCivilStatus: [''],
-      contactNo: ['', [Validators.required]],
-      baranggay: ['', Validators.required],
-      district: ['', Validators.required],
-      municipality: ['', Validators.required],
+      contactNo: [''],
+      baranggay: [''],
+      district: [''],
+      municipality: [''],
       province: [''], 
       plan: [''],
       planNumber: [''],
       relationshipToDeceased: [''],
 
       // ========== SECTION 4: CASKET/URN & SERVICES ==========
-      casket: ['', Validators.required],
+      casket: [''],
       casketAvailable: [''],
       uniform: [''],
       urnType: [''],
@@ -369,22 +367,6 @@ ngAfterViewInit() {
     setTimeout(() => {
       this.setupIntersectionObserver();
     }, 100);
-  }
-formatNumber(field: string): void {
-  const control = this.form.get(field);
-
-  if (!control) return;
-
-  let value = control.value;
-
-  if (value === null || value === '' || isNaN(value)) {
-    control.setValue('0.00', { emitEvent: false });
-    return;
-  }
-
-  const formatted = parseFloat(value).toFixed(2);
-
-  control.setValue(formatted, { emitEvent: false });
 }
   ngOnDestroy(): void {
     // Clean up IntersectionObserver

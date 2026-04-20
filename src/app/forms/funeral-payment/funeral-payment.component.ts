@@ -154,12 +154,15 @@ this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
   private loadChargesData(): void {
     if (!this.serviceId) {
       this.charges = [];
+      this.computeBalance();
       return;
     }
 
     this.funeralChargesService.getChargesByServiceId(this.serviceId).subscribe({
       next: (res) => {
-        this.charges = (Array.isArray(res) ? res : [res]).map(c => ({
+        const mappedCharges = (Array.isArray(res) ? res : [res])
+          .filter((charge): charge is ContractCharges => !!charge)
+          .map(c => ({
           id: c.id,
           funeralContractId: this.serviceId,
           chargeType: c.chargeType || '',
@@ -174,10 +177,14 @@ this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
           isEditing: false
         }));
 
+        this.charges = mappedCharges.length > 0 ? mappedCharges : [this.buildNewChargeRow()];
+
+        this.computeBalance();
         this.cdr.markForCheck();
       },
       error: () => {
-        this.charges = [];
+        this.charges = [this.buildNewChargeRow()];
+        this.computeBalance();
       }
     });
   }
@@ -192,7 +199,11 @@ cancelRow(row: PaymentRow): void {
   }
 
   private createNewCharge(): void {
-    this.charges.push({
+    this.charges.push(this.buildNewChargeRow());
+  }
+
+  private buildNewChargeRow(): ChargeRow {
+    return {
       funeralContractId: this.serviceId,
       chargeType: 'EXTRA',
       description: '',
@@ -202,7 +213,7 @@ cancelRow(row: PaymentRow): void {
       createdBy: '',
       updatedBy: '',
       isEditing: true
-    });
+    };
   }
 
   editCharge(charge: ChargeRow): void {
@@ -225,15 +236,6 @@ cancelRow(row: PaymentRow): void {
   }
 
   private persistCharge(charge: ChargeRow): void {
-    if (!charge.description || !charge.quantity || !charge.unitPrice) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation',
-        detail: 'Description, Quantity, and Unit Price are required'
-      });
-      return;
-    }
-
     this.loading = true;
 
     const payload: ContractCharges = {
@@ -247,6 +249,7 @@ cancelRow(row: PaymentRow): void {
 
         Object.assign(charge, res);
         charge.isEditing = false;
+        this.computeBalance();
 
         this.messageService.add({
           severity: 'success',
@@ -289,6 +292,7 @@ cancelRow(row: PaymentRow): void {
         next: () => {
           this.loading = false;
           this.charges.splice(index, 1);
+          this.computeBalance();
           this.messageService.add({
             severity: 'success',
             summary: 'Deleted',
@@ -308,6 +312,7 @@ cancelRow(row: PaymentRow): void {
       });
     } else {
       this.charges.splice(index, 1);
+      this.computeBalance();
       this.messageService.add({
         severity: 'success',
         summary: 'Removed',
@@ -318,6 +323,12 @@ cancelRow(row: PaymentRow): void {
   }
 
   cancelCharge(charge: ChargeRow): void {
+    if (!charge.id && !charge._backup) {
+      this.charges = this.charges.filter(currentCharge => currentCharge !== charge);
+      this.computeBalance();
+      return;
+    }
+
     Object.assign(charge, charge._backup);
     charge.isEditing = false;
   }
@@ -339,9 +350,7 @@ cancelRow(row: PaymentRow): void {
   }
 
   getNetAmount(): number {
-    const total = this.getTotalCharges();
-    const discount = Number(this.FuneralContract?.discount) || 0;
-    return total - discount;
+    return this.getTotalCharges();
   }
   // ================= CRUD =================
   addRow(): void {
@@ -385,15 +394,6 @@ editRow(row: PaymentRow): void {
   }
 
   private persistRow(row: PaymentRow): void {
-    if (!row.controlNumber || !row.bank || !row.amount) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation',
-        detail: 'Control No, Bank, and Amount are required'
-      });
-      return;
-    }
-
     this.loading = true;
 
     const payload: FuneralPayment = {
@@ -488,9 +488,7 @@ editRow(row: PaymentRow): void {
 
   private computeBalance(): void {
     const chargesTotal = this.getTotalCharges();
-    const discountAmount = Number(this.FuneralContract?.discount) || 0;
-    const amountDue = chargesTotal - discountAmount;
-    this.balanceRemaining = Math.max(0, amountDue - this.totalPaid);
+    this.balanceRemaining = Math.max(0, chargesTotal - this.totalPaid);
   }
 
   private getToday(): string {

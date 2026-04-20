@@ -59,8 +59,12 @@ export function mapFuneralContract(api: any): FuneralContract {
 export function mapFuneralContractToApi(form: FuneralContract): any {
   console.log('🔄 MAPPER: mapFuneralContractToApi starting', { id: form.id, firstName: form.firstName });
 
+  const contractData = { ...form };
+  delete contractData.price;
+  delete contractData.discount;
+
   const result = {
-    ...form,
+    ...contractData,
 
     // ✅ convert string → timestamp
     contractDate: toTimestamp(form.contractDate),

@@ -1,0 +1,33 @@
+// ================= HELPER COMPONENTS Z-INDEX =================
+
+app-select-helper,
+app-auto-complete-helper {
+  position: relative;
+  z-index: 50;
+
+  ::ng-deep {
+    .p-dropdown,
+    .p-autocomplete {
+      z-index: 50 !important;
+    }
+
+    .p-autocomplete-panel,
+    .p-dropdown-panel {
+      z-index: 9999 !important;
+    }
+  }
+}
+
+// Ensure table cells allow overflow
+td {
+  position: relative;
+  overflow: visible !important;
+}
+
+// Dropdown and autocomplete panel styles
+::ng-deep {
+  .p-autocomplete-panel,
+  .p-dropdown-panel {
+    z-index: 9999 !important;
+  }
+}

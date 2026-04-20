@@ -54,19 +54,19 @@
 
     <!-- SUMMARY -->
     <div class="px-5 pt-4">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Charge Lines</div>
+          <div class="text-sm font-semibold text-slate-700">
+            {{ charges.length }}
+          </div>
+        </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
           <div class="text-[11px] uppercase text-gray-400">Total Charges</div>
           <div class="text-sm font-semibold text-emerald-600">
             ₱{{ getTotalCharges() | number:'1.2-2' }}
-          </div>
-        </div>
-
-        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Discount</div>
-          <div class="text-sm font-semibold text-orange-600">
-            ₱{{ (FuneralContract?.discount || 0) | number:'1.2-2' }}
           </div>
         </div>
 
@@ -110,7 +110,7 @@
         <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Service Type</td>
         <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.type || '—' }}</td>
         <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
-        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.baranggay || '' }} {{ FuneralContract?.municipality || '' }}</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.baranggay && FuneralContract?.municipality ? FuneralContract?.baranggay + ', ' + FuneralContract?.municipality : FuneralContract?.baranggay || FuneralContract?.municipality || '—' }}</td>
       </tr>
     </tbody>
   </table>
@@ -332,7 +332,12 @@
       </td>
 
       <td class="px-2 py-1 border-r">
-        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.bank" class="w-full text-xs">
+        <app-auto-complete-helper *ngIf="row.isEditing" 
+                                  [(ngModel)]="row.bank"
+                                  [placeholder]="'e.g., BPI, BDO'"
+                                  comboboxName="banks"
+                                  class="relative z-50">
+        </app-auto-complete-helper>
         <span *ngIf="!row.isEditing">{{ row.bank || '—' }}</span>
       </td>
 
@@ -349,7 +354,12 @@
       </td>
 
       <td class="px-2 py-1 border-r">
-        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.description" class="w-full text-xs">
+        <app-auto-complete-helper *ngIf="row.isEditing" 
+                                  [(ngModel)]="row.description"
+                                  [placeholder]="'e.g., Check, Cash'"
+                                  comboboxName="paymentDescriptions"
+                                  class="relative z-50">
+        </app-auto-complete-helper>
         <span *ngIf="!row.isEditing">{{ row.description || '—' }}</span>
       </td>
 

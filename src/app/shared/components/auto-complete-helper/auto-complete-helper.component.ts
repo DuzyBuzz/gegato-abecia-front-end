@@ -30,33 +30,22 @@ import { AutoCompleteFirestoreService } from '../../../services/auto-complete-fi
     },
   ],
   template: `
-<div class="flex items-center gap-2 w-full" #acElement tabindex="0">
+<div class="flex items-center gap-2 w-full relative z-50" #acElement tabindex="0">
   <p-autoComplete
     [(ngModel)]="selectedValue"
     [suggestions]="filteredOptions"
-    [dropdown]="true"
+    [dropdown]="false"
     [forceSelection]="false"
     [minLength]="0"
     [ngClass]="{'ng-invalid ng-touched': isInvalid}"
     [placeholder]="placeholder"
     [disabled]="isLoading"
+    class="w-full"
     (completeMethod)="filter($event)"
     (ngModelChange)="onValueChange($event)"
     (onBlur)="onBlur()"
+    (onSelect)="onSelectItem($event)"
   >
-    <ng-template pTemplate="footer">
-      <div class="px-3 py-1">
-        <p-button
-          label="Edit List"
-          fluid
-          severity="secondary"
-          text
-          size="small"
-          icon="pi pi-pencil"
-          (onClick)="open()"
-        ></p-button>
-      </div>
-    </ng-template>
   </p-autoComplete>
 </div>
 
@@ -189,6 +178,26 @@ export class AutoCompleteHelperComponent implements ControlValueAccessor, OnInit
 
   onBlur(): void {
     this.onTouched();
+  }
+
+  onSelectItem(event: any): void {
+    const value = event?.value || this.selectedValue;
+    if (value && !this.options.includes(value)) {
+      // Add new item to list
+      this.options.push(value);
+      this.saveItemToList(value);
+    }
+  }
+
+  private async saveItemToList(value: string): Promise<void> {
+    if (!this._listName || !value) return;
+    
+    try {
+      const allItems = [...new Set([...this.options, value])].filter(Boolean);
+      await this.ac.updateList(this._listName, allItems.join('\n'));
+    } catch (err) {
+      console.error('Failed to save item to autocomplete list:', err);
+    }
   }
 
   filter(event: { query: string }): void {

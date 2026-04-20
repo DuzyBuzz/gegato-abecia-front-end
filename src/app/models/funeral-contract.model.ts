@@ -2,9 +2,9 @@ export interface FuneralContract {
   id?: number;
 
   // ========== SECTION 1: CONTRACT INFORMATION ==========
-  contractNo?: string;
+  contractNo?: string | null;
   contractDate?: string | null;
-  type?: string;
+  type?: string | null;
   financialAssitance?: string | null;
   price?: number | null;
   discount?: number | null;
@@ -113,16 +113,16 @@ export interface FuneralContract {
   // ========== SECTION 10: GOVERNMENT / SIGNATURES ==========
   baranggayIndigent?: string | null;
   baranggayCaptain?: string | null;
-  cityDocsCompletion?: boolean;
+  cityDocsCompletion?: boolean | null;
   supSigBurial?: string | null;
   omSigDelivery?: string | null;
   omSigBurial?: string | null;
   chapelRental?: string | null;
 
   // ========== SECTION 10B: FLAGS ==========
-  familyWillConvo?: boolean;
-  cleared?: boolean;
-  collectorRemarks?: boolean;
+  familyWillConvo?: boolean | null;
+  cleared?: boolean | null;
+  collectorRemarks?: boolean | null;
 
   // ========== SECTION 10C: REMARKS ==========
   remarks?: string | null;
