@@ -54,12 +54,12 @@
 
     <!-- SUMMARY -->
     <div class="px-5 pt-4">
-      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Total</div>
-          <div class="text-sm font-semibold text-gray-800">
-            ₱{{ (FuneralContract?.price || 0) | number:'1.2-2' }}
+          <div class="text-[11px] uppercase text-gray-400">Total Charges</div>
+          <div class="text-sm font-semibold text-emerald-600">
+            ₱{{ getTotalCharges() | number:'1.2-2' }}
           </div>
         </div>
 
@@ -71,21 +71,14 @@
         </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Net</div>
-          <div class="text-sm font-semibold text-gray-800">
-            ₱{{ ((FuneralContract?.price || 0) - (FuneralContract?.discount || 0)) | number:'1.2-2' }}
-          </div>
-        </div>
-
-        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Paid</div>
+          <div class="text-[11px] uppercase text-gray-400">Total Paid</div>
           <div class="text-sm font-semibold text-green-600">
             ₱{{ totalPaid | number:'1.2-2' }}
           </div>
         </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Balance</div>
+          <div class="text-[11px] uppercase text-gray-400">Balance Due</div>
           <div class="text-sm font-bold"
                [class.text-green-600]="balanceRemaining <= 0"
                [class.text-red-600]="balanceRemaining > 0">
@@ -93,173 +86,211 @@
           </div>
         </div>
 
-        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400 mb-1">Status</div>
-          <p-tag
-            [value]="balanceRemaining <= 0 ? 'PAID' : 'UNPAID'"
-            [severity]="balanceRemaining <= 0 ? 'success' : 'danger'">
-          </p-tag>
-        </div>
-
       </div>
     </div>
-<!-- CONTRACT INFO + REMARKS -->
-<div class="px-5 pt-3 pb-3">
-
-  <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-4">
-
-    <!-- INFO -->
-    <div class="border border-gray-200 rounded-lg bg-white overflow-hidden">
-
-      <table class="w-full text-sm">
-        <tbody class="divide-y">
-
-          <!-- ROW 1 -->          <!-- ROW 3 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs"> Deceased Name</td>
-            <td colspan="3" class="px-3 py-2 font-semibold text-gray-800">
-              {{
-                ((FuneralContract?.firstName || '') + ' ' +
-                (FuneralContract?.lastName || '')).trim() || '—'
-              }}
-            </td>
-          </tr>
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[140px]">Contract #</td>
-            <td class="px-3 py-2 font-semibold text-gray-800">
-              {{ FuneralContract?.contractNo || '—' }}
-            </td>
-
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[140px]">Casket Type </td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.type || '—' }}
-            </td>
-          </tr>
-
-          <!-- ROW 2 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.dueDate | date:'MMM dd, yyyy' }}
-            </td>
-
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Casket</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.casketAvailable || '—' }}
-            </td>
-          </tr>
-
-
-
-          <!-- ROW 4 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contractee</td>
-            <td class="px-3 py-2 font-medium text-gray-800">
-              {{ FuneralContract?.contractee || '—' }}
-            </td>
-
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contact #</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.contactNo || '—' }}
-            </td>
-          </tr>
-
-          <!-- ROW 5 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Relationship</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.relationshipToDeceased || '—' }}
-            </td>
-
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.baranggay || '' }} {{ FuneralContract?.municipality || '' }}
-            </td>
-          </tr>
-
-          <!-- ROW 6 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">ID Type</td>
-            <td class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.idType || '—' }}
-            </td>
-
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Claim No</td>
-            <td class="px-3 py-2 text-gray-800 font-medium">
-              {{ FuneralContract?.claimIdNumber || '—' }}
-            </td>
-          </tr>
-
-          <!-- ROW 7 -->
-          <tr>
-            <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Plan</td>
-            <td colspan="3" class="px-3 py-2 text-gray-800">
-              {{ FuneralContract?.plan || '—' }}
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-
-    </div>
-
-    <!-- REMARKS -->
-    <div class="border border-gray-200 rounded-lg bg-white flex flex-col">
-
-      <div class="px-3 py-2 border-b bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
-        Billing Remarks
-      </div>
-
-      <div class="p-3 flex-1">
-
-        <!-- VIEW MODE -->
-<!-- VIEW MODE -->
-<div *ngIf="!editMode"
-     (click)="startEdit()"
-     class="w-full h-full border border-gray-200 rounded-md p-2 text-sm text-gray-700 cursor-text hover:bg-gray-50">
-
-  {{ FuneralContract?.billingRemarks || 'Click to add remarks...' }}
-
+<!-- CONTRACT INFO - 2 ROWS ONLY -->
+<div class="px-5 py-3 border-t border-gray-200">
+  <table class="w-full text-sm">
+    <tbody class="divide-y">
+      <!-- ROW 1 -->
+      <tr>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[120px]">Deceased</td>
+        <td class="px-3 py-2 font-semibold text-gray-800">
+          {{ ((FuneralContract?.firstName || '') + ' ' + (FuneralContract?.lastName || '')).trim() || '—' }}
+        </td>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[120px]">Contract #</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.contractNo || '—' }}</td>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[100px]">Contractee</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.contractee || '—' }}</td>
+      </tr>
+      <!-- ROW 2 -->
+      <tr>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.dueDate | date:'MMM dd, yyyy' }}</td>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Service Type</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.type || '—' }}</td>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
+        <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.baranggay || '' }} {{ FuneralContract?.municipality || '' }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
-<!-- EDIT MODE -->
-<div *ngIf="editMode" class="space-y-2">
+<!-- CHARGES SECTION -->
+<div class="flex-1 min-h-0 overflow-auto px-4 pb-4 max-h-[320px]">
+    <!-- HEADER -->
+    <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-800">Charges</h2>
+        <p class="text-xs text-gray-500">
+        </p>
+      </div>
+<table class="w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
 
-  <!-- TEXTAREA -->
-  <textarea
-    [(ngModel)]="editedContract.billingRemarks"
-    class="w-full border border-gray-300 rounded-md p-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-gray-400"
-    rows="4">
-  </textarea>
+  <thead class="bg-emerald-600 sticky top-0 z-10">
+    <tr class="text-xs uppercase sticky top-0 z-10 text-gray-100 border-b border-gray-300">
+      <th class="px-3 py-2 border-r">Type</th>
+      <th class="px-3 py-2 border-r">Description</th>
+      <th class="px-3 py-2 border-r text-right">Qty</th>
+      <th class="px-3 py-2 border-r text-right">Unit Price</th>
+      <th class="px-3 py-2 border-r text-right">Discount</th>
+      <th class="px-3 py-2 border-r text-right">Amount</th>
+      <th class="px-3 py-2 text-center">Actions</th>
+    </tr>
+  </thead>
 
-  <!-- ACTION BUTTONS -->
-  <div class="flex justify-end gap-2">
+  <tbody class="divide-y divide-gray-200">
 
-    <!-- CANCEL -->
-    <button 
-      (click)="cancelEdit()"
-      class="px-3 py-1.5 text-sm border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 transition">
-      Cancel
+    <tr *ngFor="let charge of charges; let i = index"
+        class="hover:bg-gray-50">
+
+      <td class="px-2 py-1 border-r relative">
+        <app-auto-complete-helper *ngIf="charge.isEditing" 
+                           [(ngModel)]="charge.chargeType"
+                           comboboxName="chargeTypes"
+                           class="relative z-50">
+        </app-auto-complete-helper>
+        <span *ngIf="!charge.isEditing">{{ charge.chargeType || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r relative">
+        <app-auto-complete-helper *ngIf="charge.isEditing" 
+                                  [(ngModel)]="charge.description"
+                                  [placeholder]="'e.g., Casket, Flowers'"
+                                  comboboxName="chargeDescriptions"
+                                  class="relative z-50">
+        </app-auto-complete-helper>
+        <span *ngIf="!charge.isEditing">{{ charge.description || '—' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-right">
+        <p-inputNumber *ngIf="charge.isEditing"
+                       [(ngModel)]="charge.quantity"
+                       [min]="0"
+                       [useGrouping]="false"
+                       inputId="qty">
+        </p-inputNumber>
+        <span *ngIf="!charge.isEditing">{{ charge.quantity | number:'1.0-0' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-right">
+        <p-inputNumber *ngIf="charge.isEditing"
+                       [(ngModel)]="charge.unitPrice"
+                       mode="currency"
+                       currency="PHP">
+        </p-inputNumber>
+        <span *ngIf="!charge.isEditing" class="font-semibold">
+          ₱{{ charge.unitPrice | number:'1.2-2' }}
+        </span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-right">
+        <p-inputNumber *ngIf="charge.isEditing"
+                       [(ngModel)]="charge.discount"
+                       mode="currency"
+                       currency="PHP"
+                       [min]="0">
+        </p-inputNumber>
+        <span *ngIf="!charge.isEditing">₱{{ charge.discount | number:'1.2-2' }}</span>
+      </td>
+
+      <td class="px-2 py-1 border-r text-right font-semibold text-emerald-700">
+        ₱{{ getChargeAmount(charge) | number:'1.2-2' }}
+      </td>
+
+<td class="px-2 py-1 text-center">
+  <div class="flex justify-center gap-2">
+
+    <!-- SAVE -->
+    <button *ngIf="charge.isEditing"
+            (click)="saveCharge(charge)"
+            class="inline-flex items-center justify-center
+                   w-9 h-9
+                   rounded-md
+                   bg-green-600 text-white
+                   hover:bg-green-700
+                   shadow-sm
+                   transition">
+
+      <i class="pi pi-check text-sm"></i>
     </button>
 
-    <!-- UPDATE -->
-    <button 
-      (click)="saveEdit()"
-      class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-      Update
+    <!-- EDIT -->
+    <button *ngIf="!charge.isEditing"
+            (click)="editCharge(charge)"
+            class="inline-flex items-center justify-center
+                   w-9 h-9
+                   rounded-md
+                   border border-gray-300
+                   bg-white
+                   text-yellow-600
+                   hover:bg-yellow-50
+                   shadow-sm
+                   transition">
+
+      <i class="pi pi-pencil text-sm"></i>
     </button>
 
+    <!-- DELETE -->
+<button (click)="deleteCharge(i)"
+        class="inline-flex items-center justify-center
+               w-9 h-9
+               rounded-md
+               border border-gray-300
+               bg-white
+               text-red-600
+               hover:bg-red-50
+               shadow-sm
+               transition">
+
+  <i class="pi pi-trash text-sm"></i>
+</button>
+  <!-- CANCEL -->
+  <button *ngIf="charge.isEditing"
+          (click)="cancelCharge(charge)"
+          class="inline-flex items-center justify-center
+                 w-9 h-9
+                 rounded-md
+                 border border-gray-300
+                 bg-white
+                 text-red-600
+                 hover:bg-red-50
+                 shadow-sm
+                 transition">
+
+    <i class="pi pi-times text-sm"></i>
+  </button>
   </div>
+</td>
+    </tr>
 
-</div>
+  </tbody>
 
-      </div>
+  <!-- 🔥 FULL WIDTH ADD BUTTON -->
+  <tfoot>
+    <tr>
+      <td colspan="7" class="p-2">
+<button 
+  (click)="addCharge()"
+  class="w-full flex items-center justify-center gap-2
+         px-4 py-2
+         text-gray-600 text-sm font-medium
+         rounded-md
+         hover:bg-gray-300 hover:text-white
+         transition">
 
+  <i class="pi pi-plus text-sm"></i>
+  Add New Charge
+
+</button>
+      </td>
+    </tr>
+  </tfoot>
+
+</table>
     </div>
 
-  </div>
 
-</div>
+  </div>
 
 
     <!-- TABLE -->
@@ -426,7 +457,4 @@
 
 </table>
     </div>
-
-  </div>
-
 </div>

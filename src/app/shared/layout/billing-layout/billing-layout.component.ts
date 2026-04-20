@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { DialogModule } from 'primeng/dialog';
 import { AuthService } from '../../../services/auth.service';
+import { ProfileComponent } from '../../../pages/profile/profile.component';
 
 interface DisplayUser {
   name: string;
@@ -12,7 +14,7 @@ interface DisplayUser {
 
 @Component({
   selector: 'app-billing-layout',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DialogModule, ProfileComponent],
   templateUrl: './billing-layout.component.html',
   styleUrl: './billing-layout.component.scss',
 })
@@ -23,6 +25,7 @@ export class BillingLayoutComponent implements OnInit {
   };
 
   userMenuOpen = false;
+  profileModalOpen = false;
 
   constructor(private router: Router, private auth: AuthService) {}
 
@@ -69,10 +72,12 @@ export class BillingLayoutComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  openSettings(): void {
-    // Handle settings navigation
-    console.log('Opening settings...');
+  openProfile(): void {
+    this.profileModalOpen = true;
     this.userMenuOpen = false;
-    // this.router.navigate(['/settings']);
+  }
+
+  closeProfileModal(): void {
+    this.profileModalOpen = false;
   }
 }

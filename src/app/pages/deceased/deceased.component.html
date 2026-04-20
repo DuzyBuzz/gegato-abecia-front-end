@@ -7,14 +7,26 @@
   </ng-template>
 
   <!-- RIGHT -->
-  <ng-template #end>
+
+<ng-template #end>
+  <div class="flex gap-2">
+    
+    <p-button
+      label="Schedules"
+      icon="pi pi-calendar"
+      severity="secondary"
+      routerLink="/billing/schedule"
+    ></p-button>
+
     <p-button
       label="New Funeral Contract"
-      icon="pi pi-user-plus"
+      icon="pi pi-plus"
       severity="success"
       (onClick)="openNewFuneralContract()"
     ></p-button>
-  </ng-template>
+
+  </div>
+</ng-template>
 </p-toolbar>
 
 <app-deceased-table (contractSelected)="onContractSelected($event)"></app-deceased-table>

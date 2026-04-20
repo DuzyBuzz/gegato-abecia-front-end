@@ -5,9 +5,11 @@ import { PrintHeader } from '../print-header/print-header';
 
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralPayment } from '../../models/funeral-payment.model';
+import { ContractCharges } from '../../models/contract-charges.model';
 
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
+import { FuneralChargesService } from '../../services/funeral-charges.service';
 
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -65,6 +67,7 @@ dateNow: Date = new Date();
     private route: ActivatedRoute,
     private contractService: FuneralContractService,
     private paymentService: FuneralPaymentsService,
+    private chargesService: FuneralChargesService,
     private cdr: ChangeDetectorRef,
      private auth: AuthService
   ) {}
@@ -109,22 +112,34 @@ dateNow: Date = new Date();
   }
 
   // ======================================================
-  // 🔥 LOAD ALL DATA (CONTRACT + PAYMENTS)
+  // 🔥 LOAD ALL DATA (CONTRACT + CHARGES + PAYMENTS)
   // ======================================================
   private loadAllData(id: number): void {
     forkJoin({
       contract: this.contractService.getFuneralService(id),
+      charges: this.chargesService.getChargesByServiceId(id),
       payments: this.paymentService.getFuneralPaymentByServiceId(id)
     }).subscribe({
-      next: ({ contract, payments }) => {
-        console.log('✅ ALL DATA LOADED:', { contract, payments });
+      next: ({ contract, charges, payments }) => {
+        console.log('✅ ALL DATA LOADED:', { contract, charges, payments });
 
         this.selectedContract = contract;
         this.mapContract(contract);
 
+        // Add charges to items
+        const chargesArray: ContractCharges[] = Array.isArray(charges) ? charges : (charges ? [charges] : []);
+        const chargeItems: StatementItem[] = chargesArray.map(c => ({
+          description: `${c.chargeType || 'Charge'} - ${c.description || ''}`,
+          amount: this.calculateChargeAmount(c),
+          discount: Number(c.discount) || 0
+        }));
+
+        this.items = [...this.items, ...chargeItems];
+
+        // Add payments to items
         const paymentArray: FuneralPayment[] = Array.isArray(payments)
           ? payments
-          : [payments];
+          : (payments ? [payments] : []);
 
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
           description: p.description  || '',
@@ -189,19 +204,17 @@ dateNow: Date = new Date();
       releasedBy: contract.releasedBy || 'N/A'
     };
 
+    // Initialize items array (charges and payments will be added in loadAllData)
     this.items = [];
+  }
 
-    this.items.push({
-      description: `Funeral Service - ${contract.type || ''}`,
-      amount: Number(contract.price || 0)
-    });
-
-    if (contract.discount && Number(contract.discount) > 0) {
-      this.items.push({
-        description: 'Discount',
-        discount: Number(contract.discount)
-      });
-    }
+  // ======================================================
+  // 🔥 CALCULATE CHARGE AMOUNT
+  // ======================================================
+  private calculateChargeAmount(charge: ContractCharges): number {
+    const qty = Number(charge.quantity) || 0;
+    const price = Number(charge.unitPrice) || 0;
+    return qty * price;
   }
 
   // ======================================================

@@ -68,12 +68,12 @@
 
         <div class="py-2">
           <button
-            (click)="openSettings()"
+            (click)="openProfile()"
             class="w-full text-left px-4 py-2 text-sm text-gray-700
                    hover:bg-gray-100 flex items-center gap-3 transition"
           >
-            <span class="material-icons text-base">settings</span>
-            Settings
+            <span class="material-icons text-base">person</span>
+            Profile
           </button>
 
           <button
@@ -93,5 +93,17 @@
   <main class="pt-20 px-8 py-6">
     <router-outlet></router-outlet>
   </main>
+
+  <!-- ================= PROFILE MODAL ================= -->
+  <p-dialog 
+    [(visible)]="profileModalOpen"
+    [header]="'User Profile'"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '500px' }"
+    [baseZIndex]="10000"
+    (onHide)="closeProfileModal()"
+  >
+    <app-profile (closeModal)="closeProfileModal()"></app-profile>
+  </p-dialog>
 
 </div>

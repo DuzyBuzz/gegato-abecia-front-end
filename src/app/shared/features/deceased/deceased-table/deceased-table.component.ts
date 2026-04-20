@@ -85,6 +85,14 @@ export class DeceasedTableComponent implements OnInit {
       filterType: 'text',
       width: '12rem'
     },
+        {
+      field: 'contractee',
+      header: 'Contractee',
+      sortable: true,
+      filterable: true,
+      filterType: 'text',
+      width: '12rem'
+    },
     {
       field: 'startOfTransaction',
       header: 'Start Date',

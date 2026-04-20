@@ -26,7 +26,7 @@ export class FuneralContractService {
       .pipe(
         map(res => res.map(mapFuneralContract))
       );
-  }
+  } 
 
   // ======================================================
   // ✅ GET SINGLE
@@ -87,6 +87,17 @@ export class FuneralContractService {
   // ✅ DELETE
   // ======================================================
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/delete/${id}`);
+    return this.http.post<void>(`${this.api}/delete/${id}`, {});
+  }
+
+  // ======================================================
+  // ✅ GET BURIAL SCHEDULE BY DATE RANGE
+  // ======================================================
+  getBurialSchedule(startDate: string, endDate: string): Observable<FuneralContract[]> {
+    return this.http
+      .get<any[]>(`${this.api}/find_by_burial/${startDate}/${endDate}`)
+      .pipe(
+        map(res => res.map(mapFuneralContract))
+      );
   }
 }

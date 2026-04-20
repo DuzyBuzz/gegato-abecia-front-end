@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DeceasedTableComponent } from "../../shared/features/deceased/deceased-table/deceased-table.component";
 import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -10,7 +10,7 @@ import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-deceased',
-  imports: [DeceasedTableComponent, ButtonModule, ToolbarModule, Dialog, TagModule],
+  imports: [DeceasedTableComponent, ButtonModule, ToolbarModule, Dialog, TagModule, RouterLink],
   templateUrl: './deceased.component.html',
   styleUrl: './deceased.component.scss',
 })

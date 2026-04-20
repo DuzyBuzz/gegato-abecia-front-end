@@ -3,6 +3,7 @@ import { MainLayout } from './shared/layout/main-layout/main-layout.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UsersComponent } from './pages/users/users.component';
+import { ScheduleComponent } from './pages/schedule/schedule.component';
 
 import { FuneralContractEntry } from './forms/funeral-contract-entry/funeral-contract-entry';
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
@@ -60,6 +61,11 @@ export const routes: Routes = [
         component: DeceasedComponent
       },
 
+      {
+        path: 'schedule',
+        component: ScheduleComponent
+      },
+
       // DOCUMENT ENTRY FORMS
       {
         path: 'documents',
@@ -103,6 +109,10 @@ export const routes: Routes = [
       {
         path: 'deceased',
         component: DeceasedComponent
+      },
+            {
+        path: 'schedule',
+        component: ScheduleComponent
       },
 
       // DOCUMENT ENTRY FORMS
@@ -158,6 +168,20 @@ export const routes: Routes = [
 
         ]
       },
+
+  // 🔐 SCHEDULE (ACCESSIBLE FROM ANYWHERE WITH AUTHENTICATION)
+  {
+    path: 'schedule',
+    component: MainLayout,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        component: ScheduleComponent
+      }
+    ]
+  },
+
   // FALLBACK
   {
     path: '**',

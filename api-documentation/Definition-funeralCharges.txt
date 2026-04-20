@@ -1,0 +1,12 @@
+        "id": 1,
+        "funeralService": 68725,
+        "chargeType": "EXTRA",
+        "description": "Flowers",
+        "quantity": 2.0,
+        "unitPrice": 500.0,
+        "discount": 100.0,
+        "createdOn": null,
+        "updatedOn": null,
+        "createdBy": "admin",
+        "updatedBy": null,
+        "dueDate": null -- ignore this field

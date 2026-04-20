@@ -134,17 +134,17 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Date <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Date </label>
           <input type="date" formControlName="contractDate" [class.border-red-500]="isFieldInvalid('contractDate')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Contract Date">
           <small *ngIf="isFieldInvalid('contractDate')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractDate') }}</small>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Number <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Number </label>
           <input type="text" formControlName="contractNo" [class.border-red-500]="isFieldInvalid('contractNo')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Contract Number">
           <small *ngIf="isFieldInvalid('contractNo')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractNo') }}</small>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Type of Service <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Type of Service </label>
           <app-select-helper formControlName="type" comboboxName="type" [searchable]="true" [isInvalid]="isFieldInvalid('type')"></app-select-helper>
           <small *ngIf="isFieldInvalid('type')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('type') }}</small>
         </div>
@@ -156,7 +156,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Price <span class="text-red-500">*</span> </label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contract Price  </label>
           <div class="flex items-center gap-2">
             <span class="text-gray-700 font-semibold">₱</span>
             <input type="number" formControlName="price" [class.border-red-500]="isFieldInvalid('price')"  (blur)="formatNumber('price')" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="0.01" title="Contract Price">
@@ -171,7 +171,7 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Due Date <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Due Date </label>
           <input type="date" formControlName="dueDate" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Select due date" title="Due Date">
         </div>
         <div>
@@ -194,7 +194,7 @@
 
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            First Name <span class="text-red-500">*</span>
+            First Name 
           </label>
           <input type="text" title="First Name"
             formControlName="firstName"
@@ -213,7 +213,7 @@
 
         <div>
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Last Name <span class="text-red-500">*</span>
+            Last Name 
           </label>
           <input type="text" title="Last Name"
             formControlName="lastName"
@@ -229,7 +229,7 @@
         <!-- Date of Birth -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Date of Birth <span class="text-red-500">*</span>
+            Date of Birth 
           </label>
           <input
             type="date"
@@ -242,7 +242,7 @@
         <!-- Age -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Age <span class="text-red-500">*</span>
+            Age 
           </label>
           <input
             type="number"
@@ -255,7 +255,7 @@
         <!-- Gender -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Gender <span class="text-red-500">*</span>
+            Gender 
           </label>
           <app-select-helper
             formControlName="gender"
@@ -268,7 +268,7 @@
         <!-- Civil Status -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Civil Status <span class="text-red-500">*</span>
+            Civil Status 
           </label>
           <app-select-helper
             formControlName="civilStatus"
@@ -281,7 +281,7 @@
         <!-- Religion -->
         <div class="sm:col-span-4">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Religion <span class="text-red-500">*</span>
+            Religion 
           </label>
           <app-select-helper
             formControlName="religion"
@@ -338,7 +338,7 @@
       <div class="mt-4">
 
         <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-          Place of Death <span class="text-red-500">*</span>
+          Place of Death 
         </label>
 
         <input type="text" title="Place of Death"
@@ -358,7 +358,7 @@
         <!-- Date of Death -->
         <div class="sm:col-span-2">
           <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-            Date of Death <span class="text-red-500">*</span>
+            Date of Death 
           </label>
           <input
             type="date"
@@ -397,12 +397,12 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="sm:col-span-1 lg:col-span-2">
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contractee Name <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Contractee Name </label>
           <input type="text" formControlName="contractee" [class.border-red-500]="isFieldInvalid('contractee')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="Contractee Name">
           <small *ngIf="isFieldInvalid('contractee')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contractee') }}</small>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Age </label>
           <input type="number" formControlName="contracteeAge" [class.border-red-500]="isFieldInvalid('contracteeAge')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="150" title="Contractee Age">
           <small *ngIf="isFieldInvalid('contracteeAge')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('contracteeAge') }}</small>
         </div>
@@ -449,7 +449,7 @@
   <!-- Contact Number -->
   <div>
     <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-      Contact Number <span class="text-red-500">*</span>
+      Contact Number 
     </label>
     <input
       type="text"
@@ -469,7 +469,7 @@
       <!-- ROW 2B: ADDRESS -->
       <div class="mt-4">
         <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-          Address <span class="text-red-500">*</span>
+          Address 
         </label>
         <input 
           type="text" 
@@ -483,12 +483,12 @@
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Barangay </label>
           <input type="text" formControlName="baranggay" [class.border-red-500]="isFieldInvalid('baranggay')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter barangay" title="Barangay">
           <small *ngIf="isFieldInvalid('baranggay')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('baranggay') }}</small>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">District </label>
           <input type="text" formControlName="district" [class.border-red-500]="isFieldInvalid('district')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" title="District">
           <small *ngIf="isFieldInvalid('district')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('district') }}</small>
         </div>
@@ -496,7 +496,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
         <div>
-          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">City/Municipality <span class="text-red-500">*</span></label>
+          <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">City/Municipality </label>
           <input type="text" formControlName="municipality" [class.border-red-500]="isFieldInvalid('municipality')" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"  title="City/Municipality">
           <small *ngIf="isFieldInvalid('municipality')" class="text-red-500 text-xs mt-1 block">{{ getErrorMessage('municipality') }}</small>
         </div>
@@ -555,7 +555,7 @@
 
     <div>
       <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">
-        Casket Type <span class="text-red-500">*</span>
+        Casket Type 
       </label>
 
       <app-select-helper

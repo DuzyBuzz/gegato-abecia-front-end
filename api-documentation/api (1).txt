@@ -10,6 +10,13 @@ Funeral Service:
 /save (send FuneralService definition as body)
 /delete/{id:number}
 
+
+
+Funeral Charges (same /funeralservice as funeral service)
+/save_charge (send FuneralCharge definition as body)
+/delete_charge/{id}
+/find_charges/{funeralServiceId}
+
 Payments
 https://gegato-abecia-fh.appspot.com/payments
 
@@ -23,9 +30,10 @@ https://gegato-abecia-fh.appspot.com/payments
 
 
 Users
+https://gegato-abecia-fh.appspot.com/ua_control
+
 /save (send Account definition as body)
 /find_record/{id:number}
 /find_record/{filter:string (username)}
 /find find all accounts
 {encrypt the passwords before sending}
-

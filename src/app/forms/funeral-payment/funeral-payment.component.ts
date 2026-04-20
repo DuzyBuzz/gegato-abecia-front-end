@@ -17,13 +17,21 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { FuneralPayment } from '../../models/funeral-payment.model';
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
+import { ContractCharges } from '../../models/contract-charges.model';
+import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
+import { AutoCompleteHelperComponent } from '../../shared/components/auto-complete-helper/auto-complete-helper.component';
 
 export interface PaymentRow extends FuneralPayment {
   isEditing?: boolean;
   FuneralContractId?: number;
   _backup?: Partial<PaymentRow>;
+}
+
+export interface ChargeRow extends ContractCharges {
+  isEditing?: boolean;
+  _backup?: Partial<ChargeRow>;
 }
 
 @Component({
@@ -41,7 +49,8 @@ export interface PaymentRow extends FuneralPayment {
     InputTextModule,
     InputNumberModule,
     CheckboxModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    AutoCompleteHelperComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './funeral-payment.component.html',
@@ -55,6 +64,7 @@ export class FuneralPaymentComponent implements OnInit {
   editedContract: Partial<FuneralContract> = {};
 
   rows: PaymentRow[] = [];
+  charges: ChargeRow[] = [];
   loading = false;
 
   // Computed values only (NO duplicated state)
@@ -65,6 +75,7 @@ export class FuneralPaymentComponent implements OnInit {
 
   constructor(
     private funeralPaymentsService: FuneralPaymentsService,
+    private funeralChargesService: FuneralChargesService,
     private funeralContractService: FuneralContractService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
@@ -128,11 +139,45 @@ this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
 }));
 
         this.cdr.markForCheck(); // ✅ Trigger change detection
+        this.loadChargesData();
         this.computeTotals();
       },
       error: () => {
         this.loading = false;
         this.rows = [];
+        this.loadChargesData();
+      }
+    });
+  }
+
+  // ================= LOAD CHARGES =================
+  private loadChargesData(): void {
+    if (!this.serviceId) {
+      this.charges = [];
+      return;
+    }
+
+    this.funeralChargesService.getChargesByServiceId(this.serviceId).subscribe({
+      next: (res) => {
+        this.charges = (Array.isArray(res) ? res : [res]).map(c => ({
+          id: c.id,
+          funeralContractId: this.serviceId,
+          chargeType: c.chargeType || '',
+          description: c.description || '',
+          quantity: c.quantity || 0,
+          unitPrice: c.unitPrice || 0,
+          discount: c.discount || 0,
+          createdBy: c.createdBy || '',
+          updatedBy: c.updatedBy || '',
+          createdOn: c.createdOn,
+          createdAt: c.createdAt,
+          isEditing: false
+        }));
+
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.charges = [];
       }
     });
   }
@@ -140,16 +185,167 @@ cancelRow(row: PaymentRow): void {
   Object.assign(row, row._backup);
   row.isEditing = false;
 }
+
+  // ================= CHARGES CRUD =================
+  addCharge(): void {
+    this.createNewCharge();
+  }
+
+  private createNewCharge(): void {
+    this.charges.push({
+      funeralContractId: this.serviceId,
+      chargeType: 'EXTRA',
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      discount: 0,
+      createdBy: '',
+      updatedBy: '',
+      isEditing: true
+    });
+  }
+
+  editCharge(charge: ChargeRow): void {
+    charge._backup = { ...charge };
+    charge.isEditing = true;
+  }
+
+  saveCharge(charge: ChargeRow): void {
+    const isNew = !charge.id;
+    this.confirmationService.confirm({
+      header: isNew ? 'Save New Charge' : 'Save Charge Changes',
+      message: isNew
+        ? 'Do you want to save this new charge?'
+        : 'Do you want to save changes to this charge?',
+      icon: 'pi pi-check-circle',
+      acceptLabel: 'Save',
+      rejectLabel: 'Cancel',
+      accept: () => this.persistCharge(charge)
+    });
+  }
+
+  private persistCharge(charge: ChargeRow): void {
+    if (!charge.description || !charge.quantity || !charge.unitPrice) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation',
+        detail: 'Description, Quantity, and Unit Price are required'
+      });
+      return;
+    }
+
+    this.loading = true;
+
+    const payload: ContractCharges = {
+      ...charge,
+      funeralContractId: this.serviceId
+    };
+
+    this.funeralChargesService.save(payload).subscribe({
+      next: (res) => {
+        this.loading = false;
+
+        Object.assign(charge, res);
+        charge.isEditing = false;
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Saved',
+          detail: 'Charge saved'
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Save failed'
+        });
+      }
+    });
+  }
+
+  deleteCharge(index: number): void {
+    const charge = this.charges[index];
+    const label = charge?.description || `#${index + 1}`;
+
+    this.confirmationService.confirm({
+      header: 'Delete Charge',
+      message: `Are you sure you want to delete charge ${label}?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      acceptLabel: 'Delete',
+      rejectLabel: 'Cancel',
+      accept: () => this.performDeleteCharge(index)
+    });
+  }
+
+  private performDeleteCharge(index: number): void {
+    const charge = this.charges[index];
+
+    if (charge.id) {
+      this.loading = true;
+      this.funeralChargesService.delete(charge.id).subscribe({
+        next: () => {
+          this.loading = false;
+          this.charges.splice(index, 1);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Charge deleted successfully'
+          });
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Delete Failed',
+            detail: 'Unable to delete charge. Please try again.'
+          });
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.charges.splice(index, 1);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Removed',
+        detail: 'Unsaved charge row removed'
+      });
+      this.cdr.markForCheck();
+    }
+  }
+
+  cancelCharge(charge: ChargeRow): void {
+    Object.assign(charge, charge._backup);
+    charge.isEditing = false;
+  }
+
+  // ================= CHARGE CALCULATION =================
+  getChargeAmount(charge: ChargeRow): number {
+    const qty = Number(charge.quantity) || 0;
+    const price = Number(charge.unitPrice) || 0;
+    const discount = Number(charge.discount) || 0;
+    return (qty * price) - discount;
+  }
+
+  getTotalCharges(): number {
+    return this.charges.reduce((sum, c) => sum + this.getChargeAmount(c), 0);
+  }
+
+  getGrandTotal(): number {
+    return this.getTotalCharges();
+  }
+
+  getNetAmount(): number {
+    const total = this.getTotalCharges();
+    const discount = Number(this.FuneralContract?.discount) || 0;
+    return total - discount;
+  }
   // ================= CRUD =================
   addRow(): void {
-    this.confirmationService.confirm({
-      header: 'Add New Payment',
-      message: 'Do you want to add a new payment row?',
-      icon: 'pi pi-question-circle',
-      acceptLabel: 'Yes',
-      rejectLabel: 'No',
-      accept: () => this.createNewRow()
-    });
+    this.createNewRow();
   }
 
   private createNewRow(): void {
@@ -284,23 +480,17 @@ editRow(row: PaymentRow): void {
       this.cdr.markForCheck();
     }
   }
-get netAmount(): number {
-  const price = Number(this.FuneralContract?.price) || 0;
-  const discount = Number(this.FuneralContract?.discount) || 0;
-  return price - discount;
-}
-  // ================= COMPUTATION =================
+// ================= COMPUTATION =================
   private computeTotals(): void {
     this.totalPaid = this.rows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
     this.computeBalance();
   }
 
   private computeBalance(): void {
-    const price = Number(this.FuneralContract?.price) || 0;
-    const discount = Number(this.FuneralContract?.discount) || 0;
-
-    const net = price - discount;
-    this.balanceRemaining = Math.max(0, net - this.totalPaid);
+    const chargesTotal = this.getTotalCharges();
+    const discountAmount = Number(this.FuneralContract?.discount) || 0;
+    const amountDue = chargesTotal - discountAmount;
+    this.balanceRemaining = Math.max(0, amountDue - this.totalPaid);
   }
 
   private getToday(): string {

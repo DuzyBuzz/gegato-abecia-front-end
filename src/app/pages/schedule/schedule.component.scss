@@ -1,0 +1,48 @@
+// Calendar custom styling
+.grid.contents {
+  display: contents;
+}
+
+// Smooth animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(0.5rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Responsive calendar adjustments
+@media (max-width: 640px) {
+  .min-h-28 {
+    min-height: 6rem;
+  }
+
+  .text-xs {
+    font-size: 0.675rem;
+  }
+}
+
+// Event badge styling
+.text-white.px-2.py-1.rounded.truncate {
+  font-weight: 500;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  border-radius: 0.25rem;
+}
+

@@ -77,7 +77,8 @@ submit() {
     return;
   }
 
-  this.loading = true; // START LOADING
+  this.loading = true;
+  this.errorMessage = ''; // Clear previous errors
 
   const { username, password } = this.form.value;
 
@@ -86,7 +87,7 @@ submit() {
       const user = this.auth.currentUser;
 
       if (!user) {
-        this.errorMessage = 'Login failed';
+        this.errorMessage = 'Login failed - user not found';
         this.loading = false;
         return;
       }
@@ -102,10 +103,20 @@ submit() {
       this.router.navigate([redirectPath]);
       this.loading = false;
     },
-    error: (err) => {
-      console.error(err);
-      this.errorMessage = err.message || 'Invalid username or password';
-      this.loading = false; // STOP LOADING
+    error: (err: any) => {
+      console.error('[LoginComponent] Login error:', err);
+      this.loading = false;
+      
+      // Provide clear error message based on error type
+      if (err.message === 'Invalid password') {
+        this.errorMessage = 'Invalid username or password';
+      } else if (err.message === 'User not found') {
+        this.errorMessage = 'Invalid username or password';
+      } else if (err.name === 'TimeoutError') {
+        this.errorMessage = 'Login request timed out. Please try again.';
+      } else {
+        this.errorMessage = err.message || 'Login failed. Please try again.';
+      }
     }
   });
 }

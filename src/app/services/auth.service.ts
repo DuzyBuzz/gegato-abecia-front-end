@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { of, tap } from 'rxjs';
+import { throwError, switchMap, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,20 +11,20 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string) {
-
     // Step 1: find user by username
     return this.http.get<any>(`${this.api}/find_record/${username}`).pipe(
-      tap(user => {
+      timeout(10000), // 10 second timeout
+      switchMap(user => {
         console.log('[AuthService] API RESPONSE:', user);
 
         if (!user) {
-          throw new Error('User not found');
+          return throwError(() => new Error('User not found'));
         }
 
         // Step 2: compare password
         // ⚠️ If backend returns encrypted → you must encrypt input too
         if (user.password !== password) {
-          throw new Error('Invalid password');
+          return throwError(() => new Error('Invalid password'));
         }
 
         // Step 3: normalize user
@@ -37,6 +37,7 @@ export class AuthService {
         };
 
         localStorage.setItem('user', JSON.stringify(mappedUser));
+        return new Promise(resolve => resolve(mappedUser));
       })
     );
   }
