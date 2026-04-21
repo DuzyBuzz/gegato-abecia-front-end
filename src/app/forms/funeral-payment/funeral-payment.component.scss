@@ -6,12 +6,13 @@ app-auto-complete-helper {
   z-index: 50;
 
   ::ng-deep {
-    .p-dropdown,
+    .p-select,
     .p-autocomplete {
       z-index: 50 !important;
     }
 
     .p-autocomplete-panel,
+    .p-select-overlay,
     .p-dropdown-panel {
       z-index: 9999 !important;
     }
@@ -27,6 +28,7 @@ td {
 // Dropdown and autocomplete panel styles
 ::ng-deep {
   .p-autocomplete-panel,
+  .p-select-overlay,
   .p-dropdown-panel {
     z-index: 9999 !important;
   }

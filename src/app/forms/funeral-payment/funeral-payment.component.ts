@@ -21,15 +21,17 @@ import { ContractCharges } from '../../models/contract-charges.model';
 import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
-import { AutoCompleteHelperComponent } from '../../shared/components/auto-complete-helper/auto-complete-helper.component';
+import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
 
 export interface PaymentRow extends FuneralPayment {
+  uiKey?: string;
   isEditing?: boolean;
   FuneralContractId?: number;
   _backup?: Partial<PaymentRow>;
 }
 
 export interface ChargeRow extends ContractCharges {
+  uiKey?: string;
   isEditing?: boolean;
   _backup?: Partial<ChargeRow>;
 }
@@ -50,7 +52,7 @@ export interface ChargeRow extends ContractCharges {
     InputNumberModule,
     CheckboxModule,
     ConfirmDialogModule,
-    AutoCompleteHelperComponent
+    SelectHelperComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './funeral-payment.component.html',
@@ -66,6 +68,9 @@ export class FuneralPaymentComponent implements OnInit {
   rows: PaymentRow[] = [];
   charges: ChargeRow[] = [];
   loading = false;
+  isChargesSectionVisible = true;
+  private paymentKeyCounter = 0;
+  private chargeKeyCounter = 0;
 
   // Computed values only (NO duplicated state)
   totalPaid = 0;
@@ -125,26 +130,13 @@ export class FuneralPaymentComponent implements OnInit {
       next: (res) => {
         this.loading = false;
 
-this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
-  controlNumber: p.controlNumber || '',
-  dateIssued: p.dateIssued || '',
-  bank: p.bank || '',
-  amount: p.amount || 0,
-  description: p.description || '',
-  remarks: p.remarks || '',
-  checkCleared: p.checkCleared || false,
-  id: p.id,
-  FuneralContractId: this.serviceId,
-  isEditing: false
-}));
-
-        this.cdr.markForCheck(); // ✅ Trigger change detection
+        this.applyPaymentsResponse(res);
         this.loadChargesData();
-        this.computeTotals();
       },
       error: () => {
         this.loading = false;
         this.rows = [];
+        this.refreshPaymentTable();
         this.loadChargesData();
       }
     });
@@ -160,37 +152,18 @@ this.rows = (Array.isArray(res) ? res : [res]).map(p => ({
 
     this.funeralChargesService.getChargesByServiceId(this.serviceId).subscribe({
       next: (res) => {
-        const mappedCharges = (Array.isArray(res) ? res : [res])
-          .filter((charge): charge is ContractCharges => !!charge)
-          .map(c => ({
-          id: c.id,
-          funeralContractId: this.serviceId,
-          chargeType: c.chargeType || '',
-          description: c.description || '',
-          quantity: c.quantity || 0,
-          unitPrice: c.unitPrice || 0,
-          discount: c.discount || 0,
-          createdBy: c.createdBy || '',
-          updatedBy: c.updatedBy || '',
-          createdOn: c.createdOn,
-          createdAt: c.createdAt,
-          isEditing: false
-        }));
-
-        this.charges = mappedCharges.length > 0 ? mappedCharges : [this.buildNewChargeRow()];
-
-        this.computeBalance();
-        this.cdr.markForCheck();
+        this.applyChargesResponse(res);
       },
       error: () => {
         this.charges = [this.buildNewChargeRow()];
-        this.computeBalance();
+        this.refreshChargeTable();
       }
     });
   }
 cancelRow(row: PaymentRow): void {
   Object.assign(row, row._backup);
   row.isEditing = false;
+  this.refreshPaymentTable();
 }
 
   // ================= CHARGES CRUD =================
@@ -199,13 +172,15 @@ cancelRow(row: PaymentRow): void {
   }
 
   private createNewCharge(): void {
-    this.charges.push(this.buildNewChargeRow());
+    this.charges = [...this.charges, this.buildNewChargeRow()];
+    this.refreshChargeTable();
   }
 
   private buildNewChargeRow(): ChargeRow {
     return {
+      uiKey: this.nextChargeKey(),
       funeralContractId: this.serviceId,
-      chargeType: 'EXTRA',
+      chargeType: '',
       description: '',
       quantity: 1,
       unitPrice: 0,
@@ -247,9 +222,11 @@ cancelRow(row: PaymentRow): void {
       next: (res) => {
         this.loading = false;
 
-        Object.assign(charge, res);
+        Object.assign(charge, this.mapChargeRow(res, charge));
         charge.isEditing = false;
-        this.computeBalance();
+        charge._backup = undefined;
+        this.refreshChargeTable();
+        this.syncChargesSilently();
 
         this.messageService.add({
           severity: 'success',
@@ -291,8 +268,9 @@ cancelRow(row: PaymentRow): void {
       this.funeralChargesService.delete(charge.id).subscribe({
         next: () => {
           this.loading = false;
-          this.charges.splice(index, 1);
-          this.computeBalance();
+          this.charges = this.charges.filter((_, currentIndex) => currentIndex !== index);
+          this.refreshChargeTable();
+          this.syncChargesSilently();
           this.messageService.add({
             severity: 'success',
             summary: 'Deleted',
@@ -307,30 +285,30 @@ cancelRow(row: PaymentRow): void {
             summary: 'Delete Failed',
             detail: 'Unable to delete charge. Please try again.'
           });
-          this.cdr.markForCheck();
+          this.refreshChargeTable();
         }
       });
     } else {
-      this.charges.splice(index, 1);
-      this.computeBalance();
+      this.charges = this.charges.filter((_, currentIndex) => currentIndex !== index);
+      this.refreshChargeTable();
       this.messageService.add({
         severity: 'success',
         summary: 'Removed',
         detail: 'Unsaved charge row removed'
       });
-      this.cdr.markForCheck();
     }
   }
 
   cancelCharge(charge: ChargeRow): void {
     if (!charge.id && !charge._backup) {
       this.charges = this.charges.filter(currentCharge => currentCharge !== charge);
-      this.computeBalance();
+      this.refreshChargeTable();
       return;
     }
 
     Object.assign(charge, charge._backup);
     charge.isEditing = false;
+    this.refreshChargeTable();
   }
 
   // ================= CHARGE CALCULATION =================
@@ -358,7 +336,8 @@ cancelRow(row: PaymentRow): void {
   }
 
   private createNewRow(): void {
-    this.rows.push({
+    this.rows = [...this.rows, {
+      uiKey: this.nextPaymentKey(),
       controlNumber: '',
       dateIssued: this.getToday(),
       checkDate: this.getToday(),
@@ -371,7 +350,8 @@ cancelRow(row: PaymentRow): void {
       checkCleared: false,
       FuneralContractId: this.serviceId,
       isEditing: true
-    });
+    }];
+    this.refreshPaymentTable();
   }
 
 editRow(row: PaymentRow): void {
@@ -405,8 +385,9 @@ editRow(row: PaymentRow): void {
       next: (res) => {
         this.loading = false;
 
-        Object.assign(row, res);
+        Object.assign(row, this.mapPaymentRow(res, row));
         row.isEditing = false;
+        row._backup = undefined;
 
         this.messageService.add({
           severity: 'success',
@@ -414,7 +395,8 @@ editRow(row: PaymentRow): void {
           detail: 'Payment saved'
         });
 
-        this.computeTotals();
+        this.refreshPaymentTable();
+        this.syncPaymentsSilently();
       },
       error: () => {
         this.loading = false;
@@ -450,8 +432,9 @@ editRow(row: PaymentRow): void {
       this.funeralPaymentsService.delete(row.id).subscribe({
         next: () => {
           this.loading = false;
-          this.rows.splice(index, 1);
-          this.computeTotals();
+          this.rows = this.rows.filter((_, currentIndex) => currentIndex !== index);
+          this.refreshPaymentTable();
+          this.syncPaymentsSilently();
           this.messageService.add({
             severity: 'success',
             summary: 'Deleted',
@@ -466,18 +449,17 @@ editRow(row: PaymentRow): void {
             summary: 'Delete Failed',
             detail: 'Unable to delete payment. Please try again.'
           });
-          this.cdr.markForCheck();
+          this.refreshPaymentTable();
         }
       });
     } else {
-      this.rows.splice(index, 1);
-      this.computeTotals();
+      this.rows = this.rows.filter((_, currentIndex) => currentIndex !== index);
+      this.refreshPaymentTable();
       this.messageService.add({
         severity: 'success',
         summary: 'Removed',
         detail: 'Unsaved payment row removed'
       });
-      this.cdr.markForCheck();
     }
   }
 // ================= COMPUTATION =================
@@ -495,6 +477,14 @@ editRow(row: PaymentRow): void {
     return new Date().toISOString().split('T')[0];
   }
 
+  trackByChargeRow = (_index: number, charge: ChargeRow): string | number => {
+    return charge.uiKey || charge.id || _index;
+  };
+
+  trackByPaymentRow = (_index: number, row: PaymentRow): string | number => {
+    return row.uiKey || row.id || _index;
+  };
+
   // ================= PRINTING =================
   printStatement(): void {
     if (!this.serviceId) {
@@ -511,7 +501,11 @@ editRow(row: PaymentRow): void {
 
   // ================= CONTRACT EDIT MODE =================
   startEdit(): void {
-    this.editedContract = { ...this.FuneralContract };
+    if (!this.FuneralContract) return;
+
+    this.editedContract = {
+      billingRemarks: this.FuneralContract.billingRemarks || ''
+    };
     this.editMode = true;
   }
 
@@ -567,5 +561,154 @@ editRow(row: PaymentRow): void {
   cancelEdit(): void {
     this.editMode = false;
     this.editedContract = {};
+  }
+
+  private nextPaymentKey(): string {
+    this.paymentKeyCounter += 1;
+    return `payment-${this.paymentKeyCounter}`;
+  }
+
+  private nextChargeKey(): string {
+    this.chargeKeyCounter += 1;
+    return `charge-${this.chargeKeyCounter}`;
+  }
+
+  private mapPaymentRow(payment: FuneralPayment, existing?: PaymentRow): PaymentRow {
+    return {
+      uiKey: existing?.uiKey || this.nextPaymentKey(),
+      controlNumber: payment.controlNumber || '',
+      dateIssued: payment.dateIssued || '',
+      bank: payment.bank || '',
+      amount: payment.amount || 0,
+      description: payment.description || '',
+      remarks: payment.remarks || '',
+      checkCleared: payment.checkCleared || false,
+      id: payment.id,
+      FuneralContractId: this.serviceId,
+      isEditing: false
+    };
+  }
+
+  private mapChargeRow(charge: ContractCharges, existing?: ChargeRow): ChargeRow {
+    return {
+      uiKey: existing?.uiKey || this.nextChargeKey(),
+      id: charge.id,
+      funeralContractId: this.serviceId,
+      chargeType: charge.chargeType || '',
+      description: charge.description || '',
+      quantity: charge.quantity || 0,
+      unitPrice: charge.unitPrice || 0,
+      discount: charge.discount || 0,
+      createdBy: charge.createdBy || '',
+      updatedBy: charge.updatedBy || '',
+      createdOn: charge.createdOn,
+      createdAt: charge.createdAt,
+      isEditing: false
+    };
+  }
+
+  private applyPaymentsResponse(res: FuneralPayment | FuneralPayment[]): void {
+    const existingById = new Map(
+      this.rows
+        .filter((row): row is PaymentRow & { id: number } => typeof row.id === 'number')
+        .map((row) => [row.id, row])
+    );
+
+    const editingRowsById = new Map(
+      this.rows
+        .filter((row): row is PaymentRow & { id: number } => row.isEditing === true && typeof row.id === 'number')
+        .map((row) => [row.id, row])
+    );
+
+    const draftRows = this.rows.filter((row) => row.isEditing && !row.id);
+    const mappedRows = this.toPaymentArray(res).map((payment) => {
+      if (typeof payment.id === 'number' && editingRowsById.has(payment.id)) {
+        return editingRowsById.get(payment.id)!;
+      }
+
+      return this.mapPaymentRow(payment, typeof payment.id === 'number' ? existingById.get(payment.id) : undefined);
+    });
+
+    this.rows = [...mappedRows, ...draftRows];
+    this.refreshPaymentTable();
+  }
+
+  private applyChargesResponse(res: ContractCharges[] | ContractCharges): void {
+    const existingById = new Map(
+      this.charges
+        .filter((charge): charge is ChargeRow & { id: number } => typeof charge.id === 'number')
+        .map((charge) => [charge.id, charge])
+    );
+
+    const editingChargesById = new Map(
+      this.charges
+        .filter((charge): charge is ChargeRow & { id: number } => charge.isEditing === true && typeof charge.id === 'number')
+        .map((charge) => [charge.id, charge])
+    );
+
+    const draftCharges = this.charges.filter((charge) => charge.isEditing && !charge.id);
+    const mappedCharges = this.toChargeArray(res).map((charge) => {
+      if (typeof charge.id === 'number' && editingChargesById.has(charge.id)) {
+        return editingChargesById.get(charge.id)!;
+      }
+
+      return this.mapChargeRow(charge, typeof charge.id === 'number' ? existingById.get(charge.id) : undefined);
+    });
+
+    this.charges = mappedCharges.length > 0
+      ? [...mappedCharges, ...draftCharges]
+      : (draftCharges.length > 0 ? draftCharges : [this.buildNewChargeRow()]);
+
+    this.refreshChargeTable();
+  }
+
+  private toPaymentArray(res: FuneralPayment | FuneralPayment[] | null | undefined): FuneralPayment[] {
+    if (!res) {
+      return [];
+    }
+
+    return (Array.isArray(res) ? res : [res]).filter((payment): payment is FuneralPayment => !!payment);
+  }
+
+  private toChargeArray(res: ContractCharges[] | ContractCharges | null | undefined): ContractCharges[] {
+    if (!res) {
+      return [];
+    }
+
+    return (Array.isArray(res) ? res : [res]).filter((charge): charge is ContractCharges => !!charge);
+  }
+
+  private refreshPaymentTable(): void {
+    this.rows = [...this.rows];
+    this.computeTotals();
+    this.cdr.markForCheck();
+  }
+
+  private refreshChargeTable(): void {
+    this.charges = [...this.charges];
+    this.computeBalance();
+    this.cdr.markForCheck();
+  }
+
+  private syncPaymentsSilently(): void {
+    if (!this.serviceId) {
+      return;
+    }
+
+    this.funeralPaymentsService.getFuneralPaymentByServiceId(this.serviceId).subscribe({
+      next: (res) => this.applyPaymentsResponse(res),
+      error: (err) => console.warn('[FuneralPayment] Silent payment sync failed', err)
+    });
+  }
+
+  private syncChargesSilently(): void {
+    if (!this.serviceId) {
+      return;
+    }
+
+    this.funeralChargesService.getChargesByServiceId(this.serviceId).subscribe({
+      next: (res) => this.applyChargesResponse(res),
+      error: (err) => console.warn('[FuneralPayment] Silent charge sync failed', err)
+    });
   }
 }

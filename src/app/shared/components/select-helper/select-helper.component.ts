@@ -40,6 +40,7 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
     optionLabel="label"
     optionValue="value"
     styleClass="w-full"
+    appendTo="body"
     [ngClass]="{'ng-invalid ng-touched': isInvalid}"
     placeholder="Select"
     [filter]="searchable"
