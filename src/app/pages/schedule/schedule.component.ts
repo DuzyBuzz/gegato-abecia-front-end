@@ -170,8 +170,7 @@ export class ScheduleComponent implements OnInit {
    */
   private mapContractToEvent(contract: FuneralContract, index: number): BurialEvent {
     const deceasedName = this.buildDeceasedName(contract);
-    const status = this.getEventStatus(contract.deliveryStatus);
-    const backgroundColor = this.getStatusColor(status);
+    const status: BurialEventDetails['status'] = 'Scheduled';
     const burialDateString = this.convertTimestampToDateString(contract.dateOfBurial);
     const price = typeof contract.price === 'string' ? parseFloat(contract.price) : contract.price;
 
@@ -189,8 +188,8 @@ export class ScheduleComponent implements OnInit {
         remarks: contract.deliveryRemarks,
         contractId: contract.id
       },
-      backgroundColor,
-      borderColor: backgroundColor,
+      backgroundColor: '#475569',
+      borderColor: '#475569',
       textColor: '#ffffff'
     };
   }
@@ -206,35 +205,6 @@ export class ScheduleComponent implements OnInit {
     ].filter(part => part && part.trim());
 
     return parts.length > 0 ? parts.join(' ') : 'Unknown Deceased';
-  }
-
-  /**
-   * Map delivery status to event status
-   */
-  private getEventStatus(deliveryStatus: string | null | undefined): BurialEventDetails['status'] {
-    if (!deliveryStatus) return 'Scheduled';
-
-    const statusMap: Record<string, BurialEventDetails['status']> = {
-      'Completed': 'Completed',
-      'In Progress': 'In Progress',
-      'Cancelled': 'Cancelled'
-    };
-
-    return statusMap[deliveryStatus] || 'Scheduled';
-  }
-
-  /**
-   * Get color based on event status
-   */
-  private getStatusColor(status: BurialEventDetails['status']): string {
-    const colors: Record<BurialEventDetails['status'], string> = {
-      'Scheduled': '#3b82f6',
-      'In Progress': '#f59e0b',
-      'Completed': '#10b981',
-      'Cancelled': '#ef4444'
-    };
-
-    return colors[status];
   }
 
   /**
@@ -513,20 +483,14 @@ export class ScheduleComponent implements OnInit {
    * Get event color
    */
   getEventColor(event: BurialEvent): string {
-    return event.backgroundColor || '#3b82f6';
+    return event.backgroundColor || '#475569';
   }
 
   /**
    * Get status badge styling
    */
-  getStatusBadgeClass(status: string): string {
-    const statusMap: Record<string, string> = {
-      'Scheduled': 'bg-blue-100 text-blue-800',
-      'In Progress': 'bg-amber-100 text-amber-800',
-      'Completed': 'bg-green-100 text-green-800',
-      'Cancelled': 'bg-red-100 text-red-800'
-    };
-    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  getStatusBadgeClass(): string {
+    return 'bg-slate-100 text-slate-800';
   }
 
   /**

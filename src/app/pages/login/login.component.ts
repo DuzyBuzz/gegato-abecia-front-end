@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { finalize, take } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
@@ -43,11 +44,14 @@ export class LoginComponent implements OnInit {
   mockUsers: MockUser[] = [];
   showMockUsers = true;
   private mockDataGenerated = false;
-loading = false;
+  loading = false;
+
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
   ) {
     
     this.form = this.fb.group({
@@ -72,27 +76,28 @@ loading = false;
   }
 
 submit() {
+  if (this.loading) {
+    return;
+  }
+
   if (this.form.invalid) {
     this.form.markAllAsTouched();
     return;
   }
 
-  this.loading = true;
-  this.errorMessage = ''; // Clear previous errors
+  this.setLoading(true);
+  this.setErrorMessage('');
 
   const { username, password } = this.form.value;
 
-  this.auth.login(username, password).subscribe({
-    next: () => {
-      const user = this.auth.currentUser;
-
-      if (!user) {
-        this.errorMessage = 'Login failed - user not found';
-        this.loading = false;
-        return;
-      }
-
-      let redirectPath = '/login';
+  this.auth.login(username, password).pipe(
+    take(1),
+    finalize(() => {
+      this.setLoading(false);
+    })
+  ).subscribe({
+    next: (user) => {
+      let redirectPath: string | null = null;
 
       if (user.role === 'Admin') {
         redirectPath = '/admin/dashboard';
@@ -100,25 +105,51 @@ submit() {
         redirectPath = '/billing/deceased';
       }
 
-      this.router.navigate([redirectPath]);
-      this.loading = false;
+      if (!redirectPath) {
+        this.auth.logout();
+        this.setErrorMessage('This account does not have access to the application.');
+        return;
+      }
+
+      void this.router.navigate([redirectPath]).catch((error) => {
+        console.error('[LoginComponent] Navigation error:', error);
+        this.setErrorMessage('Login succeeded, but redirect failed. Please try again.');
+      });
     },
     error: (err: any) => {
       console.error('[LoginComponent] Login error:', err);
-      this.loading = false;
       
       // Provide clear error message based on error type
       if (err.message === 'Invalid password') {
-        this.errorMessage = 'Invalid username or password';
+        this.setErrorMessage('Invalid username or password');
       } else if (err.message === 'User not found') {
-        this.errorMessage = 'Invalid username or password';
+        this.setErrorMessage('Invalid username or password');
       } else if (err.name === 'TimeoutError') {
-        this.errorMessage = 'Login request timed out. Please try again.';
+        this.setErrorMessage('Login request timed out. Please try again.');
       } else {
-        this.errorMessage = err.message || 'Login failed. Please try again.';
+        this.setErrorMessage(err.message || 'Login failed. Please try again.');
       }
     }
   });
 }
+
+  private setLoading(value: boolean): void {
+    this.runInAngular(() => {
+      this.loading = value;
+    });
+  }
+
+  private setErrorMessage(message: string): void {
+    this.runInAngular(() => {
+      this.errorMessage = message;
+    });
+  }
+
+  private runInAngular(update: () => void): void {
+    this.ngZone.run(() => {
+      update();
+      this.cdr.detectChanges();
+    });
+  }
 
 }

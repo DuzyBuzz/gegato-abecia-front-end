@@ -17,13 +17,20 @@ export class AuthInterceptor implements HttpInterceptor {
     const user = this.auth.currentUser;
     
     if (user) {
+      const resolvedUserId = user.userId ?? user.id;
+      const headers: Record<string, string> = {
+        'X-User-Role': String(user.role || ''),
+        'X-Username': String(user.accountNumber || user.username || ''),
+      };
+
+      if (resolvedUserId !== undefined && resolvedUserId !== null) {
+        headers['Authorization'] = `Bearer ${resolvedUserId}`;
+        headers['X-User-ID'] = String(resolvedUserId);
+      }
+
       // Clone the request and add auth headers
       const clonedReq = req.clone({
-        setHeaders: {
-          'Authorization': `Bearer ${user.userId || ''}`,
-          'X-User-ID': String(user.userId || ''),
-          'X-User-Role': String(user.role || ''),
-        }
+        setHeaders: headers
       });
       return next.handle(clonedReq);
     }
