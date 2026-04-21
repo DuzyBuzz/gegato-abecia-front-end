@@ -18,7 +18,6 @@ const FIELD_LABELS: { [key: string]: string } = {
   contractNo: 'Contract Number',
   type: 'Type of Service',
   contractDate: 'Contract Date',
-  price: 'Contract Price',
   dueDate: 'Due Date',
 
   // Section 2: Deceased Information
@@ -40,9 +39,6 @@ const FIELD_LABELS: { [key: string]: string } = {
   baranggay: 'Barangay',
   district: 'District',
   municipality: 'City/Municipality',
-
-  // Section 4: Casket/Urn
-  casket: 'Casket Type',
 };
 
 @Component({
@@ -76,14 +72,13 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     { id: 1, name: 'Contract ' },
     { id: 2, name: 'Deceased ' },
     { id: 3, name: 'Contractee ' },
-    { id: 4, name: 'Casket/Urn ' },
-    { id: 5, name: 'Delivery' },
-    { id: 6, name: 'Transfer & Burial/Cremation' },
-    { id: 7, name: 'Embalming & Makeup' },
-    { id: 8, name: 'Medical' },
-    { id: 9, name: 'Identification ' },
-    { id: 10, name: 'Government Signatures' },
-    { id: 11, name: 'Remarks' }
+    { id: 4, name: 'Delivery' },
+    { id: 5, name: 'Transfer & Burial/Cremation' },
+    { id: 6, name: 'Embalming & Makeup' },
+    { id: 7, name: 'Medical' },
+    { id: 8, name: 'Identification ' },
+    { id: 9, name: 'Government Signatures' },
+    { id: 10, name: 'Remarks' }
   ];
 
   openBillingRecord(): void {
@@ -187,7 +182,6 @@ if (role === 'Admin') {
       contractDate: [''],
       dueDate: [''],
       checkedBy: [''],
-      financialAssitance: [''],
 
       // ========== SECTION 2: DECEASED INFORMATION ==========
       firstName: [''],
@@ -221,14 +215,7 @@ if (role === 'Admin') {
       planNumber: [''],
       relationshipToDeceased: [''],
 
-      // ========== SECTION 4: CASKET/URN & SERVICES ==========
-      casket: [''],
-      casketAvailable: [''],
-      uniform: [''],
-      urnType: [''],
-      urnDescription: [''],
-
-      // ========== SECTION 5: DELIVERY ==========
+      // ========== SECTION 4: DELIVERY ==========
       deliverySerialNumber: [''],
       deliveryDate: [''],
       deliveryHelper: [''],
@@ -236,7 +223,7 @@ if (role === 'Admin') {
       deliveryRemarks: [''],
       deliveryStatus: [''],
 
-      // ========== SECTION 6: TRANSFER & BURIAL/CREMATION SCHEDULE ==========
+      // ========== SECTION 5: TRANSFER & BURIAL/CREMATION SCHEDULE ==========
       dateOfTransfer: [''],
       transferAddress: [''],
       transferTime: [''],
@@ -262,7 +249,7 @@ if (role === 'Admin') {
       church: [''],
       cementary: [''],
 
-      // ========== SECTION 7: EMBALMING & MAKEUP ==========
+      // ========== SECTION 6: EMBALMING & MAKEUP ==========
       dateEmblamed: [''],
       timeFinished: [''],
       makeupDressUp: [''],
@@ -274,19 +261,19 @@ if (role === 'Admin') {
       finishedBy: [''],
       embalmedBy: [''],
 
-      // ========== SECTION 8: MEDICAL ==========
+      // ========== SECTION 7: MEDICAL ==========
       autopsy: [''],
       autopsyDate: [''],
       autopsyBy: [''],
 
-      // ========== SECTION 9: IDENTIFICATION DOCUMENTS ==========
+      // ========== SECTION 8: IDENTIFICATION DOCUMENTS ==========
       idType: [''],
       claimIdNumber: [''],
       seniorId: [''],
       issuedAt: [''],
       issuedOn: [''],
 
-      // ========== SECTION 10: GOVERNMENT/SIGNATURES/REMARKS ==========
+      // ========== SECTION 9: GOVERNMENT/SIGNATURES/REMARKS ==========
       baranggayIndigent: [''],
       baranggayCaptain: [''],
       cityDocsCompletion: [false],
@@ -318,11 +305,8 @@ if (role === 'Admin') {
   private preloadComboboxes(): void {
     const comboboxNames = [
       'type',
-      'financialAssitance',
       'gender',
       'civilStatus',
-      'casket',
-      'urnType',
       'autopsy',
       'idType',
       'deliveryStatus'

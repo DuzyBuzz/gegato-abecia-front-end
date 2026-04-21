@@ -2,10 +2,14 @@ import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { FuneralContractService } from '../../services/funeral-contract.service';
-import { BurialEvent, BurialEventDetails } from '../../models/burial-event.model';
+import { BurialEvent, BurialEventChargeLine, BurialEventDetails } from '../../models/burial-event.model';
 import { FuneralContract } from '../../models/funeral-contract.model';
+import { ContractCharges } from '../../models/contract-charges.model';
+import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { CalendarSkeletonComponent } from '../../shared/components/calendar-skeleton/calendar-skeleton.component';
 
 interface CalendarDay {
@@ -59,6 +63,7 @@ export class ScheduleComponent implements OnInit {
 
   constructor(
     private funeralContractService: FuneralContractService,
+    private funeralChargesService: FuneralChargesService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private router: Router
@@ -107,12 +112,19 @@ export class ScheduleComponent implements OnInit {
     this.ngZone.run(() => {
       this.funeralContractService
         .getBurialSchedule(formattedStartDate, formattedEndDate)
+        .pipe(
+          switchMap((contracts: FuneralContract[]) =>
+            this.buildChargeLookup(contracts).pipe(
+              map((chargeLookup) => ({ contracts, chargeLookup }))
+            )
+          )
+        )
         .subscribe({
-          next: (contracts: FuneralContract[]) => {
+          next: ({ contracts, chargeLookup }) => {
             console.log('✅ API Response received successfully');
             console.log('   Total contracts:', contracts.length);
             
-            this.events = this.transformContractsToEvents(contracts);
+            this.events = this.transformContractsToEvents(contracts, chargeLookup);
             console.log('   Transformed events:', this.events.length);
             
             this.generateCalendar();
@@ -138,7 +150,10 @@ export class ScheduleComponent implements OnInit {
   /**
    * Transform FuneralContract data to BurialEvent
    */
-  private transformContractsToEvents(contracts: FuneralContract[]): BurialEvent[] {
+  private transformContractsToEvents(
+    contracts: FuneralContract[],
+    chargeLookup: Map<number, ContractCharges[]> = new Map()
+  ): BurialEvent[] {
     console.log('🔄 Transforming', contracts.length, 'contracts to events...');
     
     const filtered = contracts.filter(contract => {
@@ -152,12 +167,14 @@ export class ScheduleComponent implements OnInit {
     console.log('   Filtered to', filtered.length, 'contracts with burial dates');
 
     const events = filtered.map((contract, index) => {
-      const event = this.mapContractToEvent(contract, index);
+      const charges = contract.id ? chargeLookup.get(contract.id) ?? [] : [];
+      const event = this.mapContractToEvent(contract, index, charges);
       console.log(`   [${index + 1}] Event created:`, {
         contractNo: contract.contractNo,
         burialDate: event.start,
         deceased: event.title,
-        status: event.extendedProps.status
+        status: event.extendedProps.status,
+        totalCharges: event.extendedProps.amount
       });
       return event;
     });
@@ -165,14 +182,62 @@ export class ScheduleComponent implements OnInit {
     return events;
   }
 
+  private buildChargeLookup(contracts: FuneralContract[]) {
+    const contractIds = contracts
+      .map((contract) => contract.id)
+      .filter((id): id is number => typeof id === 'number' && Number.isFinite(id));
+
+    if (contractIds.length === 0) {
+      return of(new Map<number, ContractCharges[]>());
+    }
+
+    return forkJoin(
+      contractIds.map((contractId) =>
+        this.funeralChargesService.getChargesByServiceId(contractId).pipe(
+          catchError((error) => {
+            console.warn('⚠️ Failed to load charges for contract:', contractId, error);
+            return of([] as ContractCharges[]);
+          }),
+          map((charges) => this.filterUsefulCharges(charges))
+        )
+      )
+    ).pipe(
+      map((chargeGroups) => {
+        const chargeLookup = new Map<number, ContractCharges[]>();
+        contractIds.forEach((contractId, index) => {
+          chargeLookup.set(contractId, chargeGroups[index] || []);
+        });
+        return chargeLookup;
+      })
+    );
+  }
+
+  private filterUsefulCharges(charges: ContractCharges[]): ContractCharges[] {
+    return charges.filter((charge) => this.isUsefulCharge(charge));
+  }
+
+  private isUsefulCharge(charge: ContractCharges): boolean {
+    return !!(
+      charge.id ||
+      (charge.chargeType && charge.chargeType.trim()) ||
+      (charge.description && charge.description.trim()) ||
+      Number(charge.quantity) ||
+      Number(charge.unitPrice) ||
+      Number(charge.discount)
+    );
+  }
+
   /**
    * Map single funeral contract to burial event
    */
-  private mapContractToEvent(contract: FuneralContract, index: number): BurialEvent {
+  private mapContractToEvent(contract: FuneralContract, index: number, charges: ContractCharges[] = []): BurialEvent {
     const deceasedName = this.buildDeceasedName(contract);
     const status: BurialEventDetails['status'] = 'Scheduled';
     const burialDateString = this.convertTimestampToDateString(contract.dateOfBurial);
-    const price = typeof contract.price === 'string' ? parseFloat(contract.price) : contract.price;
+    const legacyPrice = this.toNumber(contract.price);
+    const chargeItems = this.buildChargeItems(charges);
+    const totalCharges = chargeItems.reduce((sum, charge) => sum + charge.amount, 0);
+    const amount = chargeItems.length > 0 ? totalCharges : legacyPrice;
 
     return {
       id: contract.id || `burial-${index}`,
@@ -181,17 +246,76 @@ export class ScheduleComponent implements OnInit {
       extendedProps: {
         contractNo: contract.contractNo || 'N/A',
         deceasedName,
+        contractee: contract.contractee || 'N/A',
+        serviceType: contract.type || 'Not specified',
+        burialDate: this.formatReadableDate(contract.dateOfBurial) || 'Not scheduled',
+        wakeLocation: contract.transferAddress || 'Not specified',
         cemetery: contract.cementary || 'TBD',
+        church: contract.church || 'Not specified',
         driver: contract.burialDriver || 'Unassigned',
+        contactNo: contract.contactNo || 'Not provided',
         status,
-        amount: price,
-        remarks: contract.deliveryRemarks,
+        amount,
+        chargeCount: chargeItems.length,
+        chargeItems,
+        deliveryRemarks: contract.deliveryRemarks,
+        remarks: contract.remarks,
+        billingRemarks: contract.billingRemarks,
         contractId: contract.id
       },
       backgroundColor: '#475569',
       borderColor: '#475569',
       textColor: '#ffffff'
     };
+  }
+
+  private buildChargeItems(charges: ContractCharges[]): BurialEventChargeLine[] {
+    return charges.map((charge) => ({
+      label: this.buildChargeLabel(charge),
+      quantity: this.toNumber(charge.quantity),
+      unitPrice: this.toNumber(charge.unitPrice),
+      discount: this.toNumber(charge.discount),
+      amount: this.calculateChargeAmount(charge)
+    }));
+  }
+
+  private buildChargeLabel(charge: ContractCharges): string {
+    const parts = [charge.chargeType, charge.description]
+      .filter((part): part is string => !!part && part.trim().length > 0);
+    return parts.length > 0 ? parts.join(' - ') : 'Charge';
+  }
+
+  private calculateChargeAmount(charge: ContractCharges): number {
+    const qty = Number(charge.quantity) || 0;
+    const unitPrice = Number(charge.unitPrice) || 0;
+    const discount = Number(charge.discount) || 0;
+    return (qty * unitPrice) - discount;
+  }
+
+  private toNumber(value: number | string | null | undefined): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private formatReadableDate(dateValue?: string | null): string | null {
+    if (!dateValue) {
+      return null;
+    }
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) {
+      return dateValue;
+    }
+
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit'
+    });
   }
 
   /**

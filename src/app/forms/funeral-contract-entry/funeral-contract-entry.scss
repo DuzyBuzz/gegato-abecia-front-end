@@ -1,0 +1,38 @@
+:host {
+	display: block;
+}
+
+.contract-entry-shell {
+	background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.contract-entry-nav {
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+}
+
+.contract-entry-form [data-section] {
+	scroll-margin-top: 6rem;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 20px 45px -30px rgba(15, 23, 42, 0.32);
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.contract-entry-form [data-section]:hover {
+	box-shadow: 0 24px 50px -32px rgba(15, 23, 42, 0.4);
+}
+
+.contract-entry-form input,
+.contract-entry-form textarea {
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.contract-entry-form input[readonly] {
+	background-color: #f8fafc;
+}
+
+@media (max-width: 1279px) {
+	.contract-entry-form [data-section] {
+		scroll-margin-top: 5rem;
+	}
+}

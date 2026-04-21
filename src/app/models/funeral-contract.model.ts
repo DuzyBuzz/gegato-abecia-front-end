@@ -5,9 +5,9 @@ export interface FuneralContract {
   contractNo?: string | null;
   contractDate?: string | null;
   type?: string | null;
-  financialAssitance?: string | null;
-  price?: number | null;
-  discount?: number | null;
+  financialAssitance?: string | null;  //removed because this will be in the contract charges now
+  price?: number | null; //removed because this will be in the contract charges now
+  discount?: number | null; //removed because this will be in the contract charges now
   dueDate?: string | null;
   checkedBy?: string | null;
 
@@ -44,11 +44,11 @@ export interface FuneralContract {
   relationshipToDeceased?: string | null;
 
   // ========== SECTION 4: CASKET / URN ==========
-  casket?: string | null;
-  casketAvailable?: string | null;
-  uniform?: string | null;
-  urnType?: string | null;
-  urnDescription?: string | null;
+  casket?: string | null; //removed because this will be in the contract charges now
+  casketAvailable?: string | null; //removed because this will be in the contract charges now
+  uniform?: string | null; //removed because this will be in the contract charges now
+  urnType?: string | null; //removed because this will be in the contract charges now
+  urnDescription?: string | null; //removed because this will be in the contract charges now
 
   // ========== SECTION 5: DELIVERY ==========
   deliverySerialNumber?: string | null;

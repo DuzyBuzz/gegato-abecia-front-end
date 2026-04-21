@@ -1,4 +1,4 @@
-<div class="flex items-center justify-center h-full">
+<div class="print-shell flex items-center justify-center h-full">
   
 <!-- LOADING STATE -->
 <div *ngIf="!isReady" class="flex flex-col items-center justify-center h-screen gap-4">
@@ -26,7 +26,6 @@
     <div class="mb-1 ">Billed To: <span class="underline uppercase "> {{ contract.contractee }}</span></div>
     <div class="mb-1">Address: <span class="underline uppercase"> {{ contract.address }}</span></div>
     <div class="mb-1">Deceased: <span class="underline uppercase"> {{ contract.deceasedName }}</span>
-      <span *ngIf="contract.deceasedAge !== 'N/A'"> (Age at death: {{ contract.deceasedAge }})</span>
     </div>
     <div class="mb-1">Contract No.: <span class="underline uppercase"> {{ contract.contractNo }}</span> </div>
   </div>
@@ -83,6 +82,13 @@
         </div>
             <div>
             {{ totalAmount | number:'1.2-2' }}
+        </div>
+
+        <div>
+          Total Discount:
+        </div>
+          <div>
+          {{ totalDiscount | number:'1.2-2' }}
         </div>
         
             <div>

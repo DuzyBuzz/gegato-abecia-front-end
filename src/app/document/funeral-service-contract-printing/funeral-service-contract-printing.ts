@@ -3,9 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { PrintHeader } from "../print-header/print-header";
 import { CommonModule, Location } from '@angular/common';
 import { FuneralContract } from '../../models/funeral-contract.model';
+import { ContractCharges } from '../../models/contract-charges.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
+import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 import { AuthService } from '../../services/auth.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-funeral-service-contract-printing',
@@ -55,6 +59,7 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
     private location: Location,
     private route: ActivatedRoute,
     private contractService: FuneralContractService,
+    private chargesService: FuneralChargesService,
     private cdr: ChangeDetectorRef,
     private auth: AuthService
   ) {}
@@ -93,20 +98,28 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
       this.contractId = id;
 
       // 🔥 LOAD CONTRACT DATA
-      this.loadContractData(id);
+      this.loadPrintData(id);
     });
   }
 
   // ======================================================
   // 🔥 LOAD CONTRACT DATA
   // ======================================================
-  private loadContractData(id: number): void {
-    this.contractService.getFuneralService(id).subscribe({
-      next: (contract) => {
-        console.log('✅ PRINTING: Contract loaded:', contract);
+  private loadPrintData(id: number): void {
+    forkJoin({
+      contract: this.contractService.getFuneralService(id),
+      charges: this.chargesService.getChargesByServiceId(id).pipe(
+        catchError((err) => {
+          console.warn('⚠️ Unable to load charges for print view, using contract fallback price.', err);
+          return of([] as ContractCharges[]);
+        })
+      )
+    }).subscribe({
+      next: ({ contract, charges }) => {
+        console.log('✅ PRINTING: Contract and charges loaded:', { contract, charges });
 
         this.selectedContract = contract;
-        this.mapContract(contract);
+        this.mapContract(contract, charges);
 
         // 🔥 FORCE CHANGE DETECTION 
         this.cdr.markForCheck();
@@ -134,11 +147,13 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
   // ======================================================
   // 🔥 MAP CONTRACT DATA
   // ======================================================
-  private mapContract(contract: FuneralContract): void {
+  private mapContract(contract: FuneralContract, charges: ContractCharges[] = []): void {
     const atDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
     const ageValue = atDeath !== null ? atDeath.toString() : 'N/A';
 
     const burialOrCremationDate = contract.dateOfBurial || contract.cremationDate || null;
+    const totalCharges = this.getTotalCharges(charges);
+    const hasChargeLines = this.hasChargeLines(charges);
 
     this.contract = {
       time: new Date().toLocaleTimeString(),
@@ -148,7 +163,9 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
 
       casket: contract.casket || 'N/A',
       casketDescription: contract.urnDescription || 'N/A',
-      price: contract.price ? `PHP ${this.formatCurrency(contract.price)}` : 'N/A',
+      price: hasChargeLines
+        ? `PHP ${this.formatCurrency(totalCharges)}`
+        : this.formatLegacyPrice(contract.price),
 
       deceasedName: this.formatName(contract.firstName, contract.middleName, contract.lastName),
       dob: contract.dateOfBirth ? this.formatDate(contract.dateOfBirth) : 'N/A',
@@ -170,6 +187,36 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
       contractNo: contract.contractNo || 'N/A',
       officer: this.currentUser.name
     };
+  }
+
+  private hasChargeLines(charges: ContractCharges[]): boolean {
+    return charges.some((charge) => {
+      return !!(
+        charge.id ||
+        (charge.description && charge.description.trim()) ||
+        (charge.chargeType && charge.chargeType.trim()) ||
+        Number(charge.quantity) ||
+        Number(charge.unitPrice) ||
+        Number(charge.discount)
+      );
+    });
+  }
+
+  private getTotalCharges(charges: ContractCharges[]): number {
+    return charges.reduce((sum, charge) => sum + this.getChargeAmount(charge), 0);
+  }
+
+  private getChargeAmount(charge: ContractCharges): number {
+    const qty = Number(charge.quantity) || 0;
+    const price = Number(charge.unitPrice) || 0;
+    const discount = Number(charge.discount) || 0;
+    return (qty * price) - discount;
+  }
+
+  private formatLegacyPrice(amount?: number | null): string {
+    return amount !== null && amount !== undefined
+      ? `PHP ${this.formatCurrency(amount)}`
+      : 'N/A';
   }
 
   // ======================================================

@@ -12,17 +12,35 @@ export interface BurialEvent {
   textColor?: string;
 }
 
+export interface BurialEventChargeLine {
+  label: string;
+  quantity?: number | null;
+  unitPrice?: number | null;
+  discount?: number | null;
+  amount: number;
+}
+
 /**
  * BurialEventDetails contains detailed information about a burial event
  */
 export interface BurialEventDetails {
   contractNo: string;
   deceasedName: string;
+  contractee?: string;
+  serviceType?: string;
+  burialDate?: string;
+  wakeLocation?: string;
   cemetery: string;
+  church?: string;
   driver?: string;
+  contactNo?: string;
   status: 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
   amount?: number | null;
+  chargeCount?: number;
+  chargeItems?: BurialEventChargeLine[];
+  deliveryRemarks?: string | null;
   remarks?: string | null;
+  billingRemarks?: string | null;
   contractId?: number;
 }
 

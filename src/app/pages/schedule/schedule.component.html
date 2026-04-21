@@ -211,7 +211,7 @@
                 <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wider hidden sm:table-cell">Deceased</th>
                 <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wider">Status</th>
                 <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wider hidden md:table-cell">Driver</th>
-                <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wider hidden lg:table-cell">Amount</th>
+                <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wider hidden lg:table-cell">Total Charges</th>
                 <th class="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs font-bold text-blue-900 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
@@ -252,7 +252,7 @@
                   </span>
                 </td>
 
-                <!-- Amount -->
+                <!-- Total Charges -->
                 <td class="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
                   <span class="font-semibold text-blue-600 text-xs sm:text-sm">
                     {{ formatCurrency(event.extendedProps.amount) }}
@@ -308,8 +308,10 @@
       <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-4 sm:px-6 py-6 sm:py-8 text-white flex-shrink-0">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <h2 class="text-2xl sm:text-3xl font-bold break-words">Burial Contract Details</h2>
-            <p class="text-blue-100 text-xs sm:text-sm mt-2 truncate">Complete information for {{ selectedEvent.deceasedName }}</p>
+            <h2 class="text-2xl sm:text-3xl font-bold break-words">Schedule Preview</h2>
+            <p class="text-blue-100 text-xs sm:text-sm mt-2 truncate">
+              Contract {{ selectedEvent.contractNo }} for {{ selectedEvent.deceasedName }}
+            </p>
           </div>
           <div class="flex items-center justify-between sm:block">
             <span
@@ -332,12 +334,12 @@
       <!-- Content Area with Scroll -->
       <div class="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-6">
         <!-- Two Column Grid Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
           
-          <!-- Left Column: Personal Information -->
+          <!-- Left Column: Contract Overview -->
           <div class="space-y-4">
             <h3 class="text-base sm:text-lg font-bold text-gray-900 pb-3 border-b-2 border-gray-200">
-              Personal Information
+              Contract Overview
             </h3>
 
             <!-- Contract Number -->
@@ -354,20 +356,45 @@
               <p class="mt-2 text-base sm:text-lg font-semibold text-gray-900 break-words">{{ selectedEvent.deceasedName }}</p>
             </div>
 
-            <!-- Amount -->
             <div>
-              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contract Amount</label>
-              <p class="mt-2 text-xl sm:text-2xl font-bold text-blue-600">
-                {{ formatCurrency(selectedEvent.amount) }}
-              </p>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contractee</label>
+              <p class="mt-2 text-sm sm:text-base text-gray-900 font-medium break-words">{{ selectedEvent.contractee || 'Not specified' }}</p>
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Service Type</label>
+              <p class="mt-2 text-sm sm:text-base text-gray-900 font-medium break-words">{{ selectedEvent.serviceType || 'Not specified' }}</p>
+            </div>
+
+            <!-- Total Charges -->
+            <div>
+              <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                <label class="text-xs font-semibold text-blue-900 uppercase tracking-wide">Total Charges</label>
+                <p class="mt-2 text-xl sm:text-2xl font-bold text-blue-700">{{ formatCurrency(selectedEvent.amount) }}</p>
+                <p class="mt-1 text-xs text-blue-900">{{ selectedEvent.chargeCount || 0 }} charge line(s)</p>
+              </div>
             </div>
           </div>
 
-          <!-- Right Column: Burial Information -->
+          <!-- Right Column: Schedule Details -->
           <div class="space-y-4">
             <h3 class="text-base sm:text-lg font-bold text-gray-900 pb-3 border-b-2 border-gray-200">
-              Burial Information
+              Schedule Details
             </h3>
+
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Schedule Date</label>
+              <p class="mt-2 text-sm sm:text-base text-gray-900 font-medium break-words">
+                {{ selectedEvent.burialDate || 'Not scheduled' }}
+              </p>
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Wake Location</label>
+              <p class="mt-2 text-sm sm:text-base text-gray-900 font-medium break-words">
+                {{ selectedEvent.wakeLocation || 'Not specified' }}
+              </p>
+            </div>
 
             <!-- Cemetery -->
             <div>
@@ -385,6 +412,13 @@
               </p>
             </div>
 
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact Number</label>
+              <p class="mt-2 text-sm sm:text-base text-gray-900 font-medium break-words">
+                {{ selectedEvent.contactNo || 'Not provided' }}
+              </p>
+            </div>
+
             <!-- Status -->
             <div>
               <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
@@ -393,11 +427,61 @@
           </div>
         </div>
 
-        <!-- Remarks Section -->
-        <div *ngIf="selectedEvent.remarks" class="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
-          <h3 class="text-base sm:text-lg font-bold text-gray-900 pb-3">Remarks & Special Instructions</h3>
-          <div class="bg-amber-50 border-l-4 border-amber-400 p-3 sm:p-4 rounded">
-            <p class="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">{{ selectedEvent.remarks }}</p>
+        <!-- Charges Section -->
+        <div class="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
+          <div class="flex items-center justify-between gap-3 pb-3 border-b-2 border-gray-200">
+            <h3 class="text-base sm:text-lg font-bold text-gray-900">Charge Breakdown</h3>
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {{ selectedEvent.chargeCount || 0 }} item(s)
+            </span>
+          </div>
+
+          <div *ngIf="selectedEvent.chargeItems?.length; else noChargeItems" class="mt-4 space-y-3">
+            <div
+              *ngFor="let charge of selectedEvent.chargeItems"
+              class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-gray-900 break-words">{{ charge.label }}</p>
+                  <p class="mt-1 text-xs text-gray-500">
+                    Qty: {{ charge.quantity || 0 }}
+                    <span class="mx-1">|</span>
+                    Unit: {{ formatCurrency(charge.unitPrice) }}
+                    <span class="mx-1">|</span>
+                    Discount: {{ formatCurrency(charge.discount) }}
+                  </p>
+                </div>
+                <div class="text-sm font-bold text-blue-700 whitespace-nowrap">
+                  {{ formatCurrency(charge.amount) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noChargeItems>
+            <div class="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-sm text-gray-600">
+              No charge lines have been added to this contract yet.
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Notes Section -->
+        <div *ngIf="selectedEvent.deliveryRemarks || selectedEvent.remarks || selectedEvent.billingRemarks" class="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
+          <h3 class="text-base sm:text-lg font-bold text-gray-900 pb-3">Notes</h3>
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div *ngIf="selectedEvent.deliveryRemarks" class="bg-amber-50 border-l-4 border-amber-400 p-3 sm:p-4 rounded">
+              <p class="text-xs font-semibold text-amber-900 uppercase tracking-wide">Delivery Remarks</p>
+              <p class="mt-2 text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">{{ selectedEvent.deliveryRemarks }}</p>
+            </div>
+            <div *ngIf="selectedEvent.remarks" class="bg-blue-50 border-l-4 border-blue-400 p-3 sm:p-4 rounded">
+              <p class="text-xs font-semibold text-blue-900 uppercase tracking-wide">Contract Remarks</p>
+              <p class="mt-2 text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">{{ selectedEvent.remarks }}</p>
+            </div>
+            <div *ngIf="selectedEvent.billingRemarks" class="bg-emerald-50 border-l-4 border-emerald-400 p-3 sm:p-4 rounded">
+              <p class="text-xs font-semibold text-emerald-900 uppercase tracking-wide">Billing Remarks</p>
+              <p class="mt-2 text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">{{ selectedEvent.billingRemarks }}</p>
+            </div>
           </div>
         </div>
       </div>
