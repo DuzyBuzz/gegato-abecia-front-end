@@ -144,9 +144,7 @@ dateNow: Date = new Date();
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
           description: p.description  || '',
           payment: Number(p.amount || 0),
-          paymentDate: typeof p.dateIssued === 'string'
-            ? p.dateIssued
-            : (p.dateIssued?.toString() || '')
+          paymentDate: this.formatPaymentDate(p.dateIssued)
         }));
 
         this.items = [...this.items, ...paymentItems];
@@ -269,5 +267,22 @@ dateNow: Date = new Date();
   // ======================================================
   private goBack(): void {
     this.location.back();
+  }
+
+  private formatPaymentDate(value: Date | string | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return typeof value === 'string' ? value : '';
+    }
+
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric'
+    });
   }
 }
