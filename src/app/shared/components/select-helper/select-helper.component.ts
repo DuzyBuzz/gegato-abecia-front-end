@@ -48,12 +48,12 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
     filterPlaceholder="Search items..."
     resetFilterOnHide="true"
     (ngModelChange)="onSelectionChange($event)"
-    [disabled]="isLoading"
+    [disabled]="isLoading || isDisabled"
     [virtualScroll]="dropdownOptions.length > 100"
     [virtualScrollItemSize]="40">
 
     <ng-template #footer>
-      <div class="px-3 py-1">
+      <div class="px-3 py-1" *ngIf="!isDisabled">
         <p-button label="Add New" fluid severity="secondary" text size="small" icon="pi pi-plus" (onClick)="open()"></p-button>
       </div>
     </ng-template>
@@ -115,6 +115,7 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   private _comboboxName = '';
   private _hasLoaded = false;
   private _isLoading = false;
+  isDisabled = false;
   private _modalJustClosed = false;
   private _pendingValue: any = null;
 
@@ -192,8 +193,6 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
       this.options = data.items || [];
       this.storedDefault = data.default || '';
 
-      this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
-
       console.log(`[SelectHelper:${this._comboboxName}] ✅ Options loaded:`, this.options);
 
       // Apply pending value if it exists
@@ -213,6 +212,8 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
         this.selectedValue = null;
         console.log(`[SelectHelper:${this._comboboxName}] ✅ No value set (none pending, selected, or default)`);
       }
+
+      this.syncDropdownOptions(this.selectedValue);
 
     } catch (err) {
 
@@ -236,12 +237,7 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
           this.options = d.items || [];
           this.storedDefault = d.default || '';
 
-          this.dropdownOptions = this.options.map(o => ({ label: o, value: o }));
-
-          if (this.selectedValue && !this.options.includes(this.selectedValue)) {
-            this.selectedValue = null;
-            this.onChange(null);
-          }
+          this.syncDropdownOptions(this.selectedValue);
 
           this.cdr.markForCheck();
         }
@@ -269,13 +265,41 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
         console.warn(`[SelectHelper:${this._comboboxName}] Value "${obj}" not in options:`, this.options);
       }
       this.selectedValue = obj;
+      this.syncDropdownOptions(this.selectedValue);
       console.log(`[SelectHelper:${this._comboboxName}] writeValue set immediately:`, obj);
     }
     this.cdr.markForCheck();
   }
 
+  private syncDropdownOptions(selectedValue?: unknown): void {
+    const currentValue = typeof selectedValue === 'string'
+      ? selectedValue.trim()
+      : selectedValue == null
+        ? ''
+        : String(selectedValue).trim();
+
+    const values = [...this.options];
+
+    if (currentValue && !values.includes(currentValue)) {
+      values.unshift(currentValue);
+    }
+
+    this.dropdownOptions = values.map((option) => ({
+      label: option,
+      value: option,
+    }));
+
+    if (typeof selectedValue === 'string' && selectedValue !== currentValue) {
+      this.selectedValue = currentValue;
+    }
+  }
+
   registerOnChange(fn: any): void { this.onChange = fn; }
   registerOnTouched(fn: any): void { this.onTouched = fn; }
+  setDisabledState(isDisabled: boolean): void {
+    this.isDisabled = isDisabled;
+    this.cdr.markForCheck();
+  }
 
   onSelectionChange(selection: any): void {
     this.selectedValue = selection;
@@ -284,6 +308,9 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   }
 
   open(): void {
+    if (this.isDisabled) {
+      return;
+    }
 
     this.editorText = this.options.join('\n');
     this.editorDefault = this.storedDefault || '';

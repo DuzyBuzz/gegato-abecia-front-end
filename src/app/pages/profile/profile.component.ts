@@ -1,7 +1,8 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../../environments/environment';
@@ -16,9 +17,6 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {
-  
-  @Output() closeModal = new EventEmitter<void>();
-
   form: FormGroup;
   profileForm: FormGroup;
   loading = false;
@@ -33,6 +31,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
+    private router: Router,
     private authService: AuthService,
     private messageService: MessageService
   ) {
@@ -63,6 +62,27 @@ export class ProfileComponent implements OnInit {
         lastName: this.currentUser.lastName
       });
     }
+  }
+
+  get roleLabel(): string {
+    return this.currentUser?.role || 'User';
+  }
+
+  get profileName(): string {
+    return `${this.currentUser?.firstName || ''} ${this.currentUser?.lastName || ''}`.trim() || this.currentUser?.username || 'User';
+  }
+
+  get initials(): string {
+    return this.profileName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part: string) => part.charAt(0).toUpperCase())
+      .join('');
+  }
+
+  goBackToWorkspace(): void {
+    this.router.navigateByUrl(this.authService.getHomeRoute());
   }
 
   // Validate passwords match
@@ -138,10 +158,6 @@ export class ProfileComponent implements OnInit {
           detail: 'Password changed successfully'
         });
         this.form.reset();
-        // Close modal after 1.5 seconds
-        setTimeout(() => {
-          this.closeModal.emit();
-        }, 1500);
       },
       error: (err) => {
         this.loading = false;

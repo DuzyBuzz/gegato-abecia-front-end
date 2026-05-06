@@ -30,6 +30,36 @@
     <div class="mb-1">Contract No.: <span class="underline uppercase"> {{ contract.contractNo }}</span> </div>
   </div>
 
+    <div class="grid grid-cols-4 gap-2 mb-4 text-[11px]">
+      <div class="border border-black px-2 py-2">
+        <div class="font-bold uppercase">Contract Price</div>
+        <div class="mt-1 text-[15px] font-bold">{{ contractBaseAmount | number:'1.2-2' }}</div>
+        <div class="mt-1 text-[10px]">Less discount: {{ contractBaseDiscount | number:'1.2-2' }}</div>
+      </div>
+
+      <div class="border border-black px-2 py-2">
+        <div class="font-bold uppercase">Additional Charges</div>
+        <div class="mt-1 text-[15px] font-bold">{{ additionalChargesAmount | number:'1.2-2' }}</div>
+        <div class="mt-1 text-[10px]">Charge discounts: {{ additionalChargesDiscount | number:'1.2-2' }}</div>
+      </div>
+
+      <div class="border border-black px-2 py-2">
+        <div class="font-bold uppercase">Amount Paid</div>
+        <div class="mt-1 text-[15px] font-bold">{{ totalPayments | number:'1.2-2' }}</div>
+        <div class="mt-1 text-[10px]">Payments posted by Accounting</div>
+      </div>
+
+      <div class="border border-black px-2 py-2">
+        <div class="font-bold uppercase">Balance Due</div>
+        <div class="mt-1 text-[15px] font-bold text-red-500">{{ balanceDue | number:'1.2-2' }}</div>
+        <div class="mt-1 text-[10px]">Parent price plus inclusions less discounts and payments</div>
+      </div>
+    </div>
+
+    <div class="mb-3 text-[11px] text-gray-700">
+      The contract price is billed first. The rows below marked as additional inclusions are the extra charges encoded in Billing.
+    </div>
+
 <table class="w-full border border-black border-collapse text-[12px] ">
 
   <!-- HEADER -->
@@ -78,10 +108,24 @@
     <div class=" "></div>
     <div class="text-right  mt-3 grid grid-cols-2">
         <div>
-            Total Amount: 
+          Contract Net:
         </div>
             <div>
-            {{ totalAmount | number:'1.2-2' }}
+            {{ (contractBaseAmount - contractBaseDiscount) | number:'1.2-2' }}
+        </div>
+
+        <div>
+          Additional Charges Net:
+        </div>
+            <div>
+            {{ (additionalChargesAmount - additionalChargesDiscount) | number:'1.2-2' }}
+        </div>
+
+        <div>
+          Grand Billed:
+        </div>
+            <div>
+            {{ subtotalBeforePayments | number:'1.2-2' }}
         </div>
 
         <div>

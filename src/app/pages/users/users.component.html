@@ -1,0 +1,176 @@
+<p-toast></p-toast>
+
+<section class="users-page">
+	<header class="users-hero">
+		<div class="users-hero__copy">
+			<p class="users-hero__eyebrow">Admin Users</p>
+			<h1>User access editor</h1>
+			<p>
+				Create accounts, assign `roleAccess`, and keep the billing team aligned with the same operational rules used by contracts and payments.
+			</p>
+		</div>
+
+		<div class="users-hero__actions">
+			<input
+				[(ngModel)]="searchTerm"
+				type="search"
+				placeholder="Search account, role, or name"
+				class="users-search"
+			/>
+
+			<button type="button" (click)="startCreate()" class="users-primary-button">
+				New User
+			</button>
+		</div>
+	</header>
+
+	<div class="users-kpi-grid">
+		<article class="users-kpi-card users-kpi-card--plum">
+			<p>Total Accounts</p>
+			<strong>{{ totalUserCount }}</strong>
+			<span>{{ filteredUsers.length }} visible in current filter</span>
+		</article>
+
+		<article class="users-kpi-card users-kpi-card--slate">
+			<p>Admin Access</p>
+			<strong>{{ adminUserCount }}</strong>
+			<span>Full control and analytics access</span>
+		</article>
+
+		<article class="users-kpi-card users-kpi-card--emerald">
+			<p>Billing Team</p>
+			<strong>{{ billingTeamCount }}</strong>
+			<span>{{ billerUserCount }} biller and {{ accountingUserCount }} accounting</span>
+		</article>
+
+		<article class="users-kpi-card users-kpi-card--amber">
+			<p>Positioned Staff</p>
+			<strong>{{ staffedAccountsCount }}</strong>
+			<span>Accounts with assigned positions</span>
+		</article>
+	</div>
+
+	<div class="users-content-grid">
+		<article class="users-panel">
+			<div class="users-panel__header">
+				<div>
+					<p class="users-panel__eyebrow">Accounts</p>
+					<h2>Access roster</h2>
+					<span>{{ filteredUsers.length }} visible of {{ users.length }} total accounts</span>
+				</div>
+
+				<div *ngIf="loading" class="users-loading-dot"></div>
+			</div>
+
+			<div class="users-account-list">
+				<button
+					*ngFor="let user of filteredUsers; trackBy: trackByUser"
+					type="button"
+					(click)="selectUser(user)"
+					class="users-account-card"
+					[ngClass]="{ 'is-active': selectedUser?.id === user.id }"
+				>
+					<div>
+						<div class="users-account-card__title">{{ user.firstName }} {{ user.lastName }}</div>
+						<div class="users-account-card__meta">{{ user.accountNumber || user.username }}</div>
+						<div class="users-account-card__subtext">{{ user.position || 'No position assigned' }}</div>
+					</div>
+
+					<span class="users-role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+						{{ user.role }}
+					</span>
+				</button>
+
+				<div *ngIf="!loading && filteredUsers.length === 0" class="users-empty-state">
+					No users matched the current search.
+				</div>
+			</div>
+		</article>
+
+		<article class="users-panel users-panel--editor">
+			<div class="users-panel__header">
+				<div>
+					<p class="users-panel__eyebrow">Editor</p>
+					<h2>{{ isEditingExistingUser ? 'Edit user account' : 'Create new account' }}</h2>
+					<span>{{ isEditingExistingUser ? 'Update access and profile details for the selected account.' : 'Create a new account for staff access.' }}</span>
+				</div>
+
+				<div *ngIf="loadingUser" class="users-loading-dot"></div>
+			</div>
+
+			<div class="users-access-preview">
+				<div>
+					<p class="users-panel__eyebrow">Selected Role</p>
+					<h3>{{ selectedRoleLabel }}</h3>
+					<span>{{ selectedRoleHint }}</span>
+				</div>
+				<div class="users-access-preview__badge">
+					<span>roleAccess</span>
+					<strong>{{ selectedRoleAccess ?? 'N/A' }}</strong>
+				</div>
+			</div>
+
+			<form [formGroup]="form" class="users-form" (ngSubmit)="saveUser()">
+				<div class="users-form__field users-form__field--full">
+					<label>Account Number</label>
+					<input formControlName="accountNumber" type="text" />
+				</div>
+
+				<div class="users-form__grid">
+					<div class="users-form__field">
+						<label>First Name</label>
+						<input formControlName="firstName" type="text" />
+					</div>
+
+					<div class="users-form__field">
+						<label>Last Name</label>
+						<input formControlName="lastName" type="text" />
+					</div>
+				</div>
+
+				<div class="users-form__field users-form__field--full">
+					<label>Position</label>
+					<input formControlName="position" type="text" />
+				</div>
+
+				<div class="users-form__field users-form__field--full">
+					<label>Company Role</label>
+					<select formControlName="companyRole" title="Company Role">
+						<option *ngFor="let role of roleOptions" [value]="role.value">{{ role.label }}</option>
+					</select>
+					<p>{{ selectedRoleHint }}</p>
+				</div>
+
+				<div class="users-form__field users-form__field--full">
+					<label>Password {{ isEditingExistingUser ? '(optional)' : '' }}</label>
+					<input formControlName="password" type="text" />
+					<p>{{ isEditingExistingUser ? 'Leave blank to keep the existing password.' : 'Set the initial password for this account.' }}</p>
+				</div>
+
+				<div class="users-role-matrix">
+					<div class="users-role-matrix__item">
+						<strong>Admin</strong>
+						<span>`roleAccess` 3: dashboard, contracts, payments, users</span>
+					</div>
+					<div class="users-role-matrix__item">
+						<strong>Biller</strong>
+						<span>`roleAccess` 1: contracts and additional charges</span>
+					</div>
+					<div class="users-role-matrix__item">
+						<strong>Accounting</strong>
+						<span>`roleAccess` 2: payments, collections, statement review</span>
+					</div>
+				</div>
+
+				<div class="users-form__actions">
+					<button type="button" (click)="startCreate()" class="users-secondary-button">
+						Reset
+					</button>
+					<button type="submit" [disabled]="saving" class="users-primary-button">
+						{{ saving ? 'Saving...' : (isEditingExistingUser ? 'Save Changes' : 'Create User') }}
+					</button>
+				</div>
+			</form>
+		</article>
+	</div>
+</section>

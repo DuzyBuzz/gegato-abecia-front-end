@@ -7,9 +7,92 @@ import { User } from '../models/user.model';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
+  private static readonly ROLE_ACCESS_MAP: Record<number, string> = {
+    1: 'Biller',
+    2: 'Accounting',
+    3: 'Admin',
+  };
+
   private api = `${environment.api}/ua_control`;
 
   constructor(private http: HttpClient) {}
+
+  getHomeRoute(role: string | null = this.getRole()): string {
+    const normalizedRole = this.normalizeRole(role);
+
+    switch (normalizedRole) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'accounting':
+        return '/accounting/deceased';
+      case 'biller':
+        return '/billing/deceased';
+      default:
+        return '/login';
+    }
+  }
+
+  canManageFuneralContracts(): boolean {
+    return this.hasRole(['Admin', 'Biller']);
+  }
+
+  canAccessPayments(): boolean {
+    return this.hasRole(['Admin', 'Biller', 'Accounting']);
+  }
+
+  canManagePayments(): boolean {
+    return this.hasRole(['Admin', 'Accounting']);
+  }
+
+  canManageCharges(): boolean {
+    return this.hasRole(['Admin', 'Biller']);
+  }
+
+  isBiller(): boolean {
+    return this.hasRole(['Biller']);
+  }
+
+  isAccounting(): boolean {
+    return this.hasRole(['Accounting']);
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole(['Admin']);
+  }
+
+  getOperationsBaseRoute(): string {
+    if (this.isAdmin()) {
+      return '/admin';
+    }
+
+    if (this.isAccounting()) {
+      return '/accounting';
+    }
+
+    return '/billing';
+  }
+
+  getProfileRoute(): string {
+    return `${this.getOperationsBaseRoute()}/profile`;
+  }
+
+  getContractBillingRoute(contractId: number | string): string {
+    return `${this.getOperationsBaseRoute()}/forms/contracts/billing/${contractId}`;
+  }
+
+  getContractPaymentsRoute(contractId: number | string): string {
+    return `${this.getOperationsBaseRoute()}/forms/contracts/payments/${contractId}`;
+  }
+
+  getContractFinanceRoute(contractId: number | string): string {
+    return this.isBiller()
+      ? this.getContractBillingRoute(contractId)
+      : this.getContractPaymentsRoute(contractId);
+  }
+
+  getContractFinanceLabel(): string {
+    return this.isBiller() ? 'Billing' : 'Payments';
+  }
 
   login(username: string, password: string): Observable<User> {
     const normalizedUsername = username.trim();
@@ -64,6 +147,7 @@ export class AuthService {
 
   private mapAuthUser(userRecord: any, fallbackUsername: string): User {
     const resolvedId = this.toNumber(userRecord?.id ?? userRecord?.userId) ?? 0;
+    const roleAccess = this.toNumber(userRecord?.roleAccess) ?? undefined;
     const accountNumber = this.cleanString(userRecord?.accountNumber)
       || this.cleanString(userRecord?.username)
       || this.cleanString(userRecord?.userName)
@@ -79,10 +163,11 @@ export class AuthService {
       accountNumber,
       firstName: this.cleanString(userRecord?.firstName) || '',
       lastName: this.cleanString(userRecord?.lastName) || '',
-      role: this.mapRole(companyRole),
+      role: this.mapRole(roleAccess, companyRole),
       companyRole,
       password: this.cleanString(userRecord?.password) || undefined,
       position: this.cleanString(userRecord?.position) || undefined,
+      roleAccess,
     };
   }
 
@@ -95,7 +180,11 @@ export class AuthService {
     return candidates.includes(normalizedUsername);
   }
 
-  private mapRole(role: string | undefined): string {
+  private mapRole(roleAccess: number | undefined, role: string | undefined): string {
+    if (typeof roleAccess === 'number' && AuthService.ROLE_ACCESS_MAP[roleAccess]) {
+      return AuthService.ROLE_ACCESS_MAP[roleAccess];
+    }
+
     const normalizedRole = (role || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
 
     switch (normalizedRole) {
@@ -108,6 +197,9 @@ export class AuthService {
       case 'STAFF':
       case 'COLLECTOR':
         return 'Biller';
+      case 'ACCOUNTING':
+      case 'ACCOUNTANT':
+        return 'Accounting';
       case 'USER':
         return 'User';
       default:
@@ -148,7 +240,7 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(user) as User;
+      return this.normalizeStoredUser(JSON.parse(user) as User);
     } catch (error) {
       console.error('[AuthService] Failed to parse stored user:', error);
       this.logout();
@@ -165,9 +257,20 @@ export class AuthService {
   }
 
   hasRole(allowedRoles: string[]): boolean {
-    const role = this.getRole();
-    return role
-      ? allowedRoles.some((allowedRole) => allowedRole.toLowerCase() === role.toLowerCase())
+    const normalizedRole = this.normalizeRole(this.getRole());
+    return normalizedRole
+      ? allowedRoles.some((allowedRole) => this.normalizeRole(allowedRole) === normalizedRole)
       : false;
+  }
+
+  private normalizeRole(role: string | null | undefined): string {
+    return String(role ?? '').trim().toLowerCase();
+  }
+
+  private normalizeStoredUser(user: User): User {
+    return {
+      ...user,
+      role: this.mapRole(user.roleAccess, user.companyRole || user.role),
+    };
   }
 }

@@ -234,10 +234,12 @@ export class ScheduleComponent implements OnInit {
     const deceasedName = this.buildDeceasedName(contract);
     const status: BurialEventDetails['status'] = 'Scheduled';
     const burialDateString = this.convertTimestampToDateString(contract.dateOfBurial);
-    const legacyPrice = this.toNumber(contract.price);
+    const contractPrice = this.toNumber(contract.price) ?? 0;
+    const contractDiscount = this.toNumber(contract.discount) ?? 0;
     const chargeItems = this.buildChargeItems(charges);
     const totalCharges = chargeItems.reduce((sum, charge) => sum + charge.amount, 0);
-    const amount = chargeItems.length > 0 ? totalCharges : legacyPrice;
+    const contractBaseAmount = contractPrice - contractDiscount;
+    const totalBilled = contractBaseAmount + totalCharges;
 
     return {
       id: contract.id || `burial-${index}`,
@@ -255,7 +257,12 @@ export class ScheduleComponent implements OnInit {
         driver: contract.burialDriver || 'Unassigned',
         contactNo: contract.contactNo || 'Not provided',
         status,
-        amount,
+        contractPrice,
+        contractDiscount,
+        contractBaseAmount,
+        additionalChargesTotal: totalCharges,
+        totalBilled,
+        amount: totalBilled,
         chargeCount: chargeItems.length,
         chargeItems,
         deliveryRemarks: contract.deliveryRemarks,

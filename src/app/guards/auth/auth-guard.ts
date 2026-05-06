@@ -42,9 +42,9 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
 
   if (!auth.hasRole(allowedRoles)) {
     console.warn(`[roleGuard] User not authorized for this route - redirecting to login`);
-    
-    // Always redirect to login for unauthorized access
-    router.navigate(['/login']);
+
+    const redirectTo = route.data['redirectTo'] as string | undefined;
+    router.navigateByUrl(redirectTo || auth.getHomeRoute());
     
     return false;
   }

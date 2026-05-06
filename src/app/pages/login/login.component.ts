@@ -97,15 +97,9 @@ submit() {
     })
   ).subscribe({
     next: (user) => {
-      let redirectPath: string | null = null;
+      const redirectPath = this.auth.getHomeRoute(user.role);
 
-      if (user.role === 'Admin') {
-        redirectPath = '/admin/dashboard';
-      } else if (user.role === 'Biller') {
-        redirectPath = '/billing/deceased';
-      }
-
-      if (!redirectPath) {
+      if (redirectPath === '/login') {
         this.auth.logout();
         this.setErrorMessage('This account does not have access to the application.');
         return;

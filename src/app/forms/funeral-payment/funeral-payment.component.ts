@@ -22,6 +22,7 @@ import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
+import { AuthService } from '../../services/auth.service';
 
 export interface PaymentRow extends FuneralPayment {
   uiKey?: string;
@@ -82,6 +83,7 @@ export class FuneralPaymentComponent implements OnInit {
     private funeralPaymentsService: FuneralPaymentsService,
     private funeralChargesService: FuneralChargesService,
     private funeralContractService: FuneralContractService,
+    private auth: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private route: ActivatedRoute,
@@ -96,6 +98,21 @@ export class FuneralPaymentComponent implements OnInit {
 
       if (!id || id <= 0) {
         console.error('Invalid contractId');
+        return;
+      }
+
+      if (this.auth.isBiller()) {
+        void this.router.navigateByUrl(this.auth.getContractBillingRoute(id));
+        return;
+      }
+
+      if (!this.canViewBilling) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Access denied',
+          detail: 'You do not have access to this payment record.',
+        });
+        void this.router.navigateByUrl(this.auth.getHomeRoute());
         return;
       }
 
@@ -155,7 +172,7 @@ export class FuneralPaymentComponent implements OnInit {
         this.applyChargesResponse(res);
       },
       error: () => {
-        this.charges = [this.buildNewChargeRow()];
+        this.charges = this.canEditCharges ? [this.buildNewChargeRow()] : [];
         this.refreshChargeTable();
       }
     });
@@ -168,6 +185,11 @@ cancelRow(row: PaymentRow): void {
 
   // ================= CHARGES CRUD =================
   addCharge(): void {
+    if (!this.canEditCharges) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     this.createNewCharge();
   }
 
@@ -192,11 +214,21 @@ cancelRow(row: PaymentRow): void {
   }
 
   editCharge(charge: ChargeRow): void {
+    if (!this.canEditCharges) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     charge._backup = { ...charge };
     charge.isEditing = true;
   }
 
   saveCharge(charge: ChargeRow): void {
+    if (!this.canEditCharges) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     const isNew = !charge.id;
     this.confirmationService.confirm({
       header: isNew ? 'Save New Charge' : 'Save Charge Changes',
@@ -246,6 +278,11 @@ cancelRow(row: PaymentRow): void {
   }
 
   deleteCharge(index: number): void {
+    if (!this.canEditCharges) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     const charge = this.charges[index];
     const label = charge?.description || `#${index + 1}`;
 
@@ -300,6 +337,11 @@ cancelRow(row: PaymentRow): void {
   }
 
   cancelCharge(charge: ChargeRow): void {
+    if (!this.canEditCharges) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     if (!charge.id && !charge._backup) {
       this.charges = this.charges.filter(currentCharge => currentCharge !== charge);
       this.refreshChargeTable();
@@ -323,15 +365,28 @@ cancelRow(row: PaymentRow): void {
     return this.charges.reduce((sum, c) => sum + this.getChargeAmount(c), 0);
   }
 
+  getContractPrice(): number {
+    return Number(this.FuneralContract?.price) || 0;
+  }
+
+  getContractDiscount(): number {
+    return Number(this.FuneralContract?.discount) || 0;
+  }
+
   getGrandTotal(): number {
-    return this.getTotalCharges();
+    return this.getContractPrice() - this.getContractDiscount() + this.getTotalCharges();
   }
 
   getNetAmount(): number {
-    return this.getTotalCharges();
+    return this.getGrandTotal();
   }
   // ================= CRUD =================
   addRow(): void {
+    if (!this.canEditPayments) {
+      this.showPaymentAccessDenied();
+      return;
+    }
+
     this.createNewRow();
   }
 
@@ -355,11 +410,21 @@ cancelRow(row: PaymentRow): void {
   }
 
 editRow(row: PaymentRow): void {
+  if (!this.canEditPayments) {
+    this.showPaymentAccessDenied();
+    return;
+  }
+
   row._backup = { ...row }; // clone original
   row.isEditing = true;
 }
 
   saveRow(row: PaymentRow): void {
+    if (!this.canEditPayments) {
+      this.showPaymentAccessDenied();
+      return;
+    }
+
     const isNew = !row.id;
     this.confirmationService.confirm({
       header: isNew ? 'Save New Payment' : 'Save Payment Changes',
@@ -410,6 +475,11 @@ editRow(row: PaymentRow): void {
   }
 
   deleteRow(index: number): void {
+    if (!this.canEditPayments) {
+      this.showPaymentAccessDenied();
+      return;
+    }
+
     const row = this.rows[index];
     const label = row?.controlNumber || `#${index + 1}`;
 
@@ -469,8 +539,8 @@ editRow(row: PaymentRow): void {
   }
 
   private computeBalance(): void {
-    const chargesTotal = this.getTotalCharges();
-    this.balanceRemaining = Math.max(0, chargesTotal - this.totalPaid);
+    const totalDue = this.getGrandTotal();
+    this.balanceRemaining = Math.max(0, totalDue - this.totalPaid);
   }
 
   private getToday(): string {
@@ -499,8 +569,21 @@ editRow(row: PaymentRow): void {
     this.router.navigate(['/print/statement-of-account', this.serviceId]);
   }
 
+  openContract(): void {
+    if (!this.serviceId) {
+      return;
+    }
+
+    this.router.navigate([`${this.auth.getOperationsBaseRoute()}/forms/contracts/funeral-contract/${this.serviceId}`]);
+  }
+
   // ================= CONTRACT EDIT MODE =================
   startEdit(): void {
+    if (!this.canEditRemarks) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     if (!this.FuneralContract) return;
 
     this.editedContract = {
@@ -510,6 +593,11 @@ editRow(row: PaymentRow): void {
   }
 
   saveEdit(): void {
+    if (!this.canEditRemarks) {
+      this.showChargeAccessDenied();
+      return;
+    }
+
     if (!this.editedContract) return;
 
     this.confirmationService.confirm({
@@ -561,6 +649,38 @@ editRow(row: PaymentRow): void {
   cancelEdit(): void {
     this.editMode = false;
     this.editedContract = {};
+  }
+
+  get canViewBilling(): boolean {
+    return this.auth.canManagePayments();
+  }
+
+  get canEditPayments(): boolean {
+    return this.auth.canManagePayments();
+  }
+
+  get canEditCharges(): boolean {
+    return this.auth.canManageCharges();
+  }
+
+  get canEditRemarks(): boolean {
+    return this.auth.canManageFuneralContracts();
+  }
+
+  private showChargeAccessDenied(): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Read only',
+      detail: 'Accounting users can view charges but cannot edit funeral charges or remarks.',
+    });
+  }
+
+  private showPaymentAccessDenied(): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Read only',
+      detail: 'Payment updates are restricted to Accounting and Admin users.',
+    });
   }
 
   private nextPaymentKey(): string {
@@ -657,7 +777,7 @@ editRow(row: PaymentRow): void {
 
     this.charges = mappedCharges.length > 0
       ? [...mappedCharges, ...draftCharges]
-      : (draftCharges.length > 0 ? draftCharges : [this.buildNewChargeRow()]);
+      : (draftCharges.length > 0 ? draftCharges : (this.canEditCharges ? [this.buildNewChargeRow()] : []));
 
     this.refreshChargeTable();
   }

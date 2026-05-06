@@ -87,19 +87,27 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       this.messageService.add({
         severity: 'info',
         summary: 'Create Contract First',
-        detail: 'Please save the contract first before adding payment information',
+        detail: 'Please save the contract first before opening billing or payment details',
         life: 3000,
       });
       return;
     }
 
-const role = this.auth.getRole();
+    if (!this.auth.canAccessPayments()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Access denied',
+        detail: 'You do not have access to the billing screen.',
+        life: 3000,
+      });
+      return;
+    }
 
-if (role === 'Admin') {
-  this.router.navigate([`/admin/payments/${this.contractId}`]); // ⚠️ doesn't exist yet
-} else {
-  this.router.navigate([`/billing/forms/contracts/payments/${this.contractId}`]);
-}
+    this.router.navigateByUrl(this.auth.getContractFinanceRoute(this.contractId));
+  }
+
+  get billingActionLabel(): string {
+    return this.auth.getContractFinanceLabel();
   }
 
   printFuneralServiceContract(): void {
@@ -181,6 +189,8 @@ if (role === 'Admin') {
       type: [''],
       contractDate: [''],
       dueDate: [''],
+      price: [0],
+      discount: [0],
       checkedBy: [''],
 
       // ========== SECTION 2: DECEASED INFORMATION ==========
@@ -299,6 +309,8 @@ if (role === 'Admin') {
     // Preload all combobox collections IMMEDIATELY in parallel
     this.preloadComboboxes();
 
+    this.applyFormAccess();
+
 
   }
 
@@ -332,6 +344,7 @@ ngAfterViewInit() {
   this.setupIntersectionObserver();
 }
   ngOnInit(): void {
+    this.applyFormAccess();
     
     // Capture contractId from route parameters if in edit mode
     this.activatedRoute.params.subscribe(params => {
@@ -429,6 +442,7 @@ private async loadContractData(id: number): Promise<void> {
 
         // 🔥 PATCH ALL DATA (service mapper already converted dates to yyyy-MM-dd strings)
         this.form.patchValue(data, { emitEvent: false });
+        this.applyFormAccess();
         this.updateAgeFromDOB();
         console.log('✅ FORM AFTER PATCH (verify dates populated):');
         console.log('  - contractDate:', this.form.get('contractDate')?.value);
@@ -493,6 +507,7 @@ async loadDataFromSelected(funeralService: FuneralContract): Promise<void> {
 
     // 🔥 PATCH ALL DATA (mapper already converted dates to yyyy-MM-dd strings)
     this.form.patchValue(data, { emitEvent: false });
+    this.applyFormAccess();
 this.updateAgeFromDOB();
     console.log('✅ FORM AFTER PATCH (verify dates populated):');
     console.log('  - contractDate:', this.form.get('contractDate')?.value);
@@ -619,6 +634,14 @@ scrollToSection(sectionId: number): void {
     return this.isEditMode ? 'Update Contract' : 'Create Contract';
   }
 
+  get canEditContract(): boolean {
+    return this.auth.canManageFuneralContracts();
+  }
+
+  get canAccessPayments(): boolean {
+    return this.auth.canAccessPayments();
+  }
+
 
   onPrintSelect(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
@@ -652,7 +675,27 @@ scrollToSection(sectionId: number): void {
     (event.target as HTMLSelectElement).value = '';
   }
 
+  private applyFormAccess(): void {
+    if (this.canEditContract) {
+      this.form.enable({ emitEvent: false });
+      this.form.get('age')?.disable({ emitEvent: false });
+      return;
+    }
+
+    this.form.disable({ emitEvent: false });
+  }
+
 submitContract(): void {
+  if (!this.canEditContract) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Read only',
+      detail: 'Accounting users can view funeral contracts but cannot edit them.',
+      life: 3000
+    });
+    return;
+  }
+
   if (this.form.invalid) {
     const invalidFields = this.getInvalidFields();
     const fieldLabels = invalidFields

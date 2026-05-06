@@ -3,6 +3,34 @@
   display: contents;
 }
 
+.schedule-page {
+  background: radial-gradient(circle at top right, #dbeafe 0%, transparent 42%), #f8fafc;
+}
+
+.schedule-page__header {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.schedule-calendar-card {
+  box-shadow: 0 20px 35px -30px rgba(15, 23, 42, 0.3);
+}
+
+.schedule-dialog {
+  border: 1px solid #e2e8f0;
+}
+
+.schedule-billing-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.schedule-billing-card {
+  min-height: 7.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 // Smooth animations
 @keyframes fadeIn {
   from {
@@ -32,6 +60,14 @@
 
   .text-xs {
     font-size: 0.675rem;
+  }
+
+  .schedule-billing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-billing-card {
+    min-height: 0;
   }
 }
 

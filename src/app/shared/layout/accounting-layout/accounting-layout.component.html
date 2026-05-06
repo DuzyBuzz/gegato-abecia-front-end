@@ -1,0 +1,59 @@
+<div class="operations-shell">
+	<div class="operations-shell__glow operations-shell__glow--top"></div>
+	<div class="operations-shell__glow operations-shell__glow--bottom"></div>
+
+	<header class="operations-header">
+		<div class="operations-header__brand">
+			<img src="assets/images/gegato-logo.jpg" class="operations-header__logo" alt="Logo" />
+			<div>
+				<p class="operations-header__eyebrow">{{ workspaceEyebrow }}</p>
+				<h1 class="operations-header__title">{{ workspaceTitle }}</h1>
+				<p class="operations-header__subtitle">{{ workspaceDescription }}</p>
+			</div>
+		</div>
+
+		<div class="operations-header__actions">
+			<nav class="operations-quick-nav" aria-label="Workspace navigation">
+				<a [routerLink]="operationsBaseRoute + '/deceased'" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Records</a>
+				<a [routerLink]="operationsBaseRoute + '/schedule'" routerLinkActive="is-active">Schedule</a>
+				<a [routerLink]="profileRoute" routerLinkActive="is-active">Profile</a>
+			</nav>
+
+			<div class="operations-user-menu-wrap user-menu">
+				<button type="button" class="operations-user" (click)="toggleUserMenu()">
+					<div class="operations-user__avatar">{{ getUserInitials(currentUser.name) }}</div>
+					<div class="operations-user__text">
+						<p>{{ formatUserName(currentUser.name) }}</p>
+						<span>{{ roleLabel }}</span>
+					</div>
+					<span class="material-icons operations-user__chevron">expand_more</span>
+				</button>
+
+				<div *ngIf="userMenuOpen" class="operations-user-menu">
+					<div class="operations-user-menu__header">
+						<p>{{ currentUser.name }}</p>
+						<span>{{ roleLabel }}</span>
+					</div>
+
+					<button type="button" class="operations-user-menu__action" (click)="openProfile()">
+						<span class="material-icons">person</span>
+						<span>Profile</span>
+					</button>
+
+					<button type="button" class="operations-user-menu__action operations-user-menu__action--danger" (click)="logout()">
+						<span class="material-icons">logout</span>
+						<span>Logout</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="operations-main">
+
+
+		<div class="operations-main__content">
+			<router-outlet></router-outlet>
+		</div>
+	</main>
+</div>

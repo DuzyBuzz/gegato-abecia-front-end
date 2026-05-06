@@ -7,7 +7,7 @@
     <!-- HEADER -->
     <div class="px-5 py-4 border-b border-blue-600 flex justify-between items-center">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800">Contract Billing</h2>
+        <h2 class="text-lg font-semibold text-gray-800">Funeral Contract Payments</h2>
 
       </div>
 
@@ -34,6 +34,21 @@
                 class="p-button-secondary p-button-sm">
         </button> -->
 <button 
+  (click)="openContract()"
+  class="inline-flex items-center gap-2
+   px-4 py-2
+   text-sm font-medium
+   text-gray-700
+   border border-gray-300
+   rounded-md
+   hover:bg-gray-100
+   transition">
+
+  <i class="pi pi-file-edit text-sm"></i>
+  View Contract
+
+</button>
+<button 
   (click)="printStatement()"
   class="inline-flex items-center gap-2
          px-4 py-2
@@ -54,19 +69,33 @@
 
     <!-- SUMMARY -->
     <div class="px-5 pt-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Charge Lines</div>
+          <div class="text-[11px] uppercase text-gray-400">Contract Price</div>
           <div class="text-sm font-semibold text-slate-700">
-            {{ charges.length }}
+            ₱{{ getContractPrice() | number:'1.2-2' }}
           </div>
         </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Total Charges</div>
+          <div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
+          <div class="text-sm font-semibold text-amber-600">
+            ₱{{ getContractDiscount() | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Additional Charges</div>
           <div class="text-sm font-semibold text-emerald-600">
             ₱{{ getTotalCharges() | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+          <div class="text-[11px] uppercase text-gray-400">Total Due</div>
+          <div class="text-sm font-semibold text-slate-700">
+            ₱{{ getGrandTotal() | number:'1.2-2' }}
           </div>
         </div>
 
@@ -111,7 +140,7 @@
         </td>
 
         <!-- BILLING REMARKS (ROWSPAN) -->
-        <td rowspan="2" class="w-[360px] align-top border-l border-gray-200 bg-white p-0">
+        <td rowspan="3" class="w-[360px] align-top border-l border-gray-200 bg-white p-0">
           <div class="h-full p-3 flex flex-col">
 
             <!-- HEADER -->
@@ -124,7 +153,7 @@
 
               <div class="flex gap-2">
                 <button
-                  *ngIf="!editMode"
+                  *ngIf="!editMode && canEditRemarks"
                   (click)="startEdit()"
                   class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
                 >
@@ -192,6 +221,23 @@
 <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td> <td class="px-3 py-2 text-gray-800">{{ FuneralContract?.baranggay && FuneralContract?.municipality ? FuneralContract?.baranggay + ', ' + FuneralContract?.municipality : FuneralContract?.baranggay || FuneralContract?.municipality || '—' }}</td>
       </tr>
 
+      <tr>
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contract Price</td>
+        <td class="px-3 py-2 text-gray-800 font-semibold">
+          ₱{{ getContractPrice() | number:'1.2-2' }}
+        </td>
+
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contract Discount</td>
+        <td class="px-3 py-2 text-amber-700 font-semibold">
+          ₱{{ getContractDiscount() | number:'1.2-2' }}
+        </td>
+
+        <td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Net Contract</td>
+        <td class="px-3 py-2 text-gray-800 font-semibold">
+          ₱{{ getContractPrice() - getContractDiscount() | number:'1.2-2' }}
+        </td>
+      </tr>
+
     </tbody>
   </table>
 </div>
@@ -210,6 +256,9 @@
         </button>
       </div>
 <ng-container *ngIf="isChargesSectionVisible">
+<div *ngIf="!canEditCharges" class="border-b border-gray-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+  Charges are view-only for Accounting users.
+</div>
 <div class="max-h-[320px] overflow-auto rounded-lg border border-gray-300">
 <table class="w-full text-sm">
 
@@ -232,7 +281,7 @@
 
       <td class="px-2 py-1 border-r relative">
         <app-select-helper
-          *ngIf="charge.isEditing"
+          *ngIf="charge.isEditing && canEditCharges"
           [(ngModel)]="charge.chargeType"
           [ngModelOptions]="{ standalone: true }"
           comboboxName="chargeTypes"
@@ -244,7 +293,7 @@
 
       <td class="px-2 py-1 border-r relative">
         <app-select-helper
-          *ngIf="charge.isEditing"
+          *ngIf="charge.isEditing && canEditCharges"
           [(ngModel)]="charge.description"
           [ngModelOptions]="{ standalone: true }"
           comboboxName="chargeDescriptions"
@@ -255,7 +304,7 @@
       </td>
 
       <td class="px-2 py-1 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing"
+        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
                        [(ngModel)]="charge.quantity"
                        [min]="0"
                        [useGrouping]="false"
@@ -265,7 +314,7 @@
       </td>
 
       <td class="px-2 py-1 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing"
+        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
                        [(ngModel)]="charge.unitPrice"
                        mode="currency"
                        currency="PHP">
@@ -276,7 +325,7 @@
       </td>
 
       <td class="px-2 py-1 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing"
+        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
                        [(ngModel)]="charge.discount"
                        mode="currency"
                        currency="PHP"
@@ -293,6 +342,7 @@
         <div class="flex justify-center gap-2">
           <button *ngIf="charge.isEditing"
                   (click)="saveCharge(charge)"
+              [disabled]="!canEditCharges"
                   class="inline-flex items-center justify-center
                          w-9 h-9
                          rounded-md
@@ -304,6 +354,7 @@
           </button>
 
           <button *ngIf="!charge.isEditing"
+              [disabled]="!canEditCharges"
                   (click)="editCharge(charge)"
                   class="inline-flex items-center justify-center
                          w-9 h-9
@@ -317,7 +368,9 @@
             <i class="pi pi-pencil text-sm"></i>
           </button>
 
-          <button (click)="deleteCharge(i)"
+            <button
+              *ngIf="canEditCharges"
+              (click)="deleteCharge(i)"
                   class="inline-flex items-center justify-center
                          w-9 h-9
                          rounded-md
@@ -332,6 +385,7 @@
 
           <button *ngIf="charge.isEditing"
                   (click)="cancelCharge(charge)"
+              [disabled]="!canEditCharges"
                   class="inline-flex items-center justify-center
                          w-9 h-9
                          rounded-md
@@ -351,7 +405,7 @@
 
   <tfoot>
     <tr>
-      <td colspan="7" class="p-2">
+      <td colspan="7" class="p-2" *ngIf="canEditCharges">
         <button
           (click)="addCharge()"
           class="w-full flex items-center justify-center gap-2
@@ -363,6 +417,9 @@
           <i class="pi pi-plus text-sm"></i>
           Add New Charge
         </button>
+      </td>
+      <td colspan="7" class="p-2 text-center text-sm text-gray-500" *ngIf="!canEditCharges">
+        Charges can only be encoded by a Biller.
       </td>
     </tr>
   </tfoot>
@@ -388,6 +445,9 @@
         <p class="text-xs text-gray-500">
         </p>
       </div>
+<div *ngIf="!canEditPayments" class="border-b border-gray-200 bg-sky-50 px-5 py-3 text-sm text-sky-800">
+  Payments are view-only for Biller users.
+</div>
 <div class="max-h-[320px] overflow-auto rounded-lg border border-gray-300">
 <table class="w-full text-sm">
 
@@ -474,6 +534,7 @@
     <!-- SAVE -->
     <button *ngIf="row.isEditing"
             (click)="saveRow(row)"
+          [disabled]="!canEditPayments"
             class="inline-flex items-center justify-center
                    w-9 h-9
                    rounded-md
@@ -488,6 +549,7 @@
     <!-- EDIT -->
     <button *ngIf="!row.isEditing"
             (click)="editRow(row)"
+          [disabled]="!canEditPayments"
             class="inline-flex items-center justify-center
                    w-9 h-9
                    rounded-md
@@ -502,7 +564,8 @@
     </button>
 
     <!-- DELETE -->
-<button (click)="deleteRow(i)"
+<button *ngIf="canEditPayments"
+  (click)="deleteRow(i)"
         class="inline-flex items-center justify-center
                w-9 h-9
                rounded-md
@@ -518,6 +581,7 @@
   <!-- CANCEL -->
   <button *ngIf="row.isEditing"
           (click)="cancelRow(row)"
+      [disabled]="!canEditPayments"
           class="inline-flex items-center justify-center
                  w-9 h-9
                  rounded-md
@@ -539,7 +603,7 @@
   <!-- 🔥 FULL WIDTH ADD BUTTON -->
   <tfoot>
     <tr>
-      <td colspan="8" class="p-2">
+      <td colspan="8" class="p-2" *ngIf="canEditPayments">
 <button 
   (click)="addRow()"
   class="w-full flex items-center justify-center gap-2
@@ -553,6 +617,9 @@
   Add New Payment
 
 </button>
+      </td>
+      <td colspan="8" class="p-2 text-center text-sm text-gray-500" *ngIf="!canEditPayments">
+        Payment changes are restricted to Accounting users.
       </td>
     </tr>
   </tfoot>

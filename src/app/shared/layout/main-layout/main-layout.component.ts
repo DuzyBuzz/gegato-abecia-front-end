@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 interface DisplayUser {
@@ -14,13 +14,11 @@ interface DisplayUser {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterModule],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
 export class MainLayout implements OnInit {
-  showContractModal = true;
-  expandedMenu: string | null = null;
   sidebarExpanded = true;
   isUserMenuOpen = false;
   currentUser: DisplayUser = { name: 'User', role: 'Guest' };
@@ -44,29 +42,8 @@ export class MainLayout implements OnInit {
     }
   }
 
-  toggle(menu: string) {
-    this.expandedMenu = this.expandedMenu === menu ? null : menu;
-  }
-
-  isOpen(menu: string): boolean {
-    return this.expandedMenu === menu;
-  }
-
   toggleSidebar() {
     this.sidebarExpanded = !this.sidebarExpanded;
-
-    // collapse child menus when sidebar collapses
-    if (!this.sidebarExpanded) {
-      this.expandedMenu = null;
-    }
-  }
-
-  openModal() {
-    this.showContractModal = true;
-  }
-
-  closeModal() {
-    this.showContractModal = false;
   }
 
   toggleUserMenu(): void {
@@ -81,6 +58,11 @@ export class MainLayout implements OnInit {
     this.isUserMenuOpen = false;
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  openProfile(): void {
+    this.isUserMenuOpen = false;
+    this.router.navigate(['/admin/profile']);
   }
 
   @HostListener('document:click', ['$event'])

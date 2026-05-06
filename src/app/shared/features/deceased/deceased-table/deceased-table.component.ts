@@ -6,6 +6,7 @@ import { FuneralContract } from '../../../../models/funeral-contract.model';
 import { FuneralContractService } from '../../../../services/funeral-contract.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-deceased-table',
@@ -107,7 +108,8 @@ export class DeceasedTableComponent implements OnInit {
   constructor(
     private funeralService: FuneralContractService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -150,10 +152,12 @@ onRowSelected(row: FuneralContract): void {
     return;
   }
 
-  this.router.navigate([
-    '/billing/forms/contracts/funeral-contract',
-    row.id
-  ]);
+  const baseRoute = this.auth.getOperationsBaseRoute();
+  const targetPath = this.auth.isAdmin() || this.auth.canManageFuneralContracts()
+    ? [`${baseRoute}/forms/contracts/funeral-contract`, row.id]
+    : [`${baseRoute}/forms/contracts/payments`, row.id];
+
+  this.router.navigate(targetPath);
 }
 onSearch(searchValue: string): void {
 

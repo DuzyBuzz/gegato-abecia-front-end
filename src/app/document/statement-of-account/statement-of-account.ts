@@ -21,6 +21,7 @@ interface StatementItem {
   discount?: number;
   payment?: number;
   paymentDate?: string;
+  kind?: 'contract' | 'charge' | 'payment';
 }
 interface DisplayUser {
   name: string;
@@ -126,12 +127,18 @@ dateNow: Date = new Date();
         this.selectedContract = contract;
         this.mapContract(contract);
 
+        const contractItem = this.buildContractItem(contract);
+        if (contractItem) {
+          this.items = [...this.items, contractItem];
+        }
+
         // Add charges to items
         const chargesArray: ContractCharges[] = Array.isArray(charges) ? charges : (charges ? [charges] : []);
         const chargeItems: StatementItem[] = chargesArray.map(c => ({
-          description: `${c.chargeType || 'Charge'} - ${c.description || ''}`,
+          description: `Additional Inclusion - ${c.chargeType || 'Charge'}${c.description ? ' - ' + c.description : ''}`,
           amount: this.calculateChargeAmount(c),
-          discount: Number(c.discount) || 0
+          discount: Number(c.discount) || 0,
+          kind: 'charge'
         }));
 
         this.items = [...this.items, ...chargeItems];
@@ -142,9 +149,10 @@ dateNow: Date = new Date();
           : (payments ? [payments] : []);
 
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
-          description: p.description  || '',
+          description: `Payment - ${p.description || p.controlNumber || 'Collection'}`,
           payment: Number(p.amount || 0),
-          paymentDate: this.formatPaymentDate(p.dateIssued)
+          paymentDate: this.formatPaymentDate(p.dateIssued),
+          kind: 'payment'
         }));
 
         this.items = [...this.items, ...paymentItems];
@@ -206,6 +214,22 @@ dateNow: Date = new Date();
     this.items = [];
   }
 
+  private buildContractItem(contract: FuneralContract): StatementItem | null {
+    const amount = Number(contract.price) || 0;
+    const discount = Number(contract.discount) || 0;
+
+    if (amount <= 0 && discount <= 0) {
+      return null;
+    }
+
+    return {
+      description: `Contract Price - ${contract.type || 'Base Service'}`,
+      amount,
+      discount,
+      kind: 'contract',
+    };
+  }
+
   // ======================================================
   // 🔥 CALCULATE CHARGE AMOUNT
   // ======================================================
@@ -243,12 +267,40 @@ dateNow: Date = new Date();
     return this.items.reduce((sum, i) => sum + (i.amount || 0), 0);
   }
 
+  get contractBaseAmount(): number {
+    return this.items
+      .filter((item) => item.kind === 'contract')
+      .reduce((sum, item) => sum + (item.amount || 0), 0);
+  }
+
+  get contractBaseDiscount(): number {
+    return this.items
+      .filter((item) => item.kind === 'contract')
+      .reduce((sum, item) => sum + (item.discount || 0), 0);
+  }
+
+  get additionalChargesAmount(): number {
+    return this.items
+      .filter((item) => item.kind === 'charge')
+      .reduce((sum, item) => sum + (item.amount || 0), 0);
+  }
+
+  get additionalChargesDiscount(): number {
+    return this.items
+      .filter((item) => item.kind === 'charge')
+      .reduce((sum, item) => sum + (item.discount || 0), 0);
+  }
+
   get totalDiscount(): number {
     return this.items.reduce((sum, i) => sum + (i.discount || 0), 0);
   }
 
   get totalPayments(): number {
     return this.items.reduce((sum, i) => sum + (i.payment || 0), 0);
+  }
+
+  get subtotalBeforePayments(): number {
+    return this.totalAmount - this.totalDiscount;
   }
 
   get balanceDue(): number {

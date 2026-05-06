@@ -35,6 +35,11 @@ export interface BurialEventDetails {
   driver?: string;
   contactNo?: string;
   status: 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
+  contractPrice?: number | null;
+  contractDiscount?: number | null;
+  contractBaseAmount?: number | null;
+  additionalChargesTotal?: number | null;
+  totalBilled?: number | null;
   amount?: number | null;
   chargeCount?: number;
   chargeItems?: BurialEventChargeLine[];

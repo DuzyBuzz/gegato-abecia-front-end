@@ -9,7 +9,10 @@ import { FuneralContractEntry } from './forms/funeral-contract-entry/funeral-con
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
 import { BillingLayoutComponent } from './shared/layout/billing-layout/billing-layout.component';
+import { AccountingLayoutComponent } from './shared/layout/accounting-layout/accounting-layout.component';
+import { FuneralBillingComponent } from './forms/funeral-billing/funeral-billing.component';
 import { FuneralPaymentComponent } from './forms/funeral-payment/funeral-payment.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 import { StatementOfAccount } from './document/statement-of-account/statement-of-account';
 import { FuneralServiceContractPrinting } from './document/funeral-service-contract-printing/funeral-service-contract-printing';
 import { AuthorityToCremateRemainsPrinting } from './document/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
@@ -55,6 +58,10 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['Admin'] }
       },
+      {
+        path: 'profile',
+        component: ProfileComponent
+      },
 
       {
         path: 'deceased',
@@ -64,6 +71,33 @@ export const routes: Routes = [
       {
         path: 'schedule',
         component: ScheduleComponent
+      },
+
+      {
+        path: 'forms',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral-contract/new',
+                component: FuneralContractEntry
+              },
+              {
+                path: 'funeral-contract/:contractId',
+                component: FuneralContractEntry
+              },
+              {
+                path: 'billing/:contractId',
+                component: FuneralBillingComponent
+              },
+              {
+                path: 'payments/:contractId',
+                component: FuneralPaymentComponent
+              }
+            ]
+          }
+        ]
       },
 
       // DOCUMENT ENTRY FORMS
@@ -110,9 +144,13 @@ export const routes: Routes = [
         path: 'deceased',
         component: DeceasedComponent
       },
-            {
+      {
         path: 'schedule',
         component: ScheduleComponent
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent
       },
 
       // DOCUMENT ENTRY FORMS
@@ -124,15 +162,27 @@ export const routes: Routes = [
             children: [
                 {
                   path: 'funeral-contract/new',
-                  component: FuneralContractEntry
+                    component: FuneralContractEntry,
+                    canActivate: [roleGuard],
+                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'funeral-contract/:contractId',
-                  component: FuneralContractEntry
+                    component: FuneralContractEntry,
+                    canActivate: [roleGuard],
+                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
+                },
+                {
+                  path: 'billing/:contractId',
+                    component: FuneralBillingComponent,
+                    canActivate: [roleGuard],
+                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'payments/:contractId',
-                  component: FuneralPaymentComponent
+                    component: FuneralPaymentComponent,
+                    canActivate: [roleGuard],
+                    data: { roles: ['Accounting'], redirectTo: '/billing/deceased' }
                 }
             ]
           },
@@ -141,6 +191,66 @@ export const routes: Routes = [
       },
 
 
+    ]
+  },
+
+  {
+    path: 'accounting',
+    component: AccountingLayoutComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' },
+    children: [
+      {
+        path: '',
+        redirectTo: 'deceased',
+        pathMatch: 'full'
+      },
+      {
+        path: 'deceased',
+        component: DeceasedComponent
+      },
+      {
+        path: 'schedule',
+        component: ScheduleComponent
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent
+      },
+      {
+        path: 'forms',
+        children: [
+          {
+            path: 'contracts',
+            children: [
+              {
+                path: 'funeral-contract/new',
+                component: FuneralContractEntry,
+                canActivate: [roleGuard],
+                data: { roles: ['Biller'], redirectTo: '/accounting/deceased' }
+              },
+              {
+                path: 'funeral-contract/:contractId',
+                component: FuneralContractEntry,
+                canActivate: [roleGuard],
+                data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' }
+              },
+              {
+                path: 'billing/:contractId',
+                component: FuneralBillingComponent,
+                canActivate: [roleGuard],
+                data: { roles: ['Biller'], redirectTo: '/accounting/deceased' }
+              },
+              {
+                path: 'payments/:contractId',
+                component: FuneralPaymentComponent,
+                canActivate: [roleGuard],
+                data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' }
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
 

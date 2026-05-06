@@ -24,11 +24,25 @@ export class DeceasedComponent {
     private auth: AuthService
   ) {}
 
+  get canManageContracts(): boolean {
+    return this.auth.canManageFuneralContracts();
+  }
+
+  get scheduleRoute(): string {
+    return `${this.auth.getOperationsBaseRoute()}/schedule`;
+  }
+
+  get newContractRoute(): string {
+    return `${this.auth.getOperationsBaseRoute()}/forms/contracts/funeral-contract/new`;
+  }
+
   openNewFuneralContract(): void {
+    if (!this.canManageContracts) {
+      return;
+    }
+
     this.selectedContract = null; // Clear selection for new contract
-  this.router.navigate([
-    '/billing/forms/contracts/funeral-contract/new'
-  ]);
+    this.router.navigate([this.newContractRoute]);
   }
 
   onContractSelected(contract: FuneralContract): void {
@@ -38,10 +52,11 @@ export class DeceasedComponent {
   }
 
   onContractRowSelected(contract: FuneralContract): void {
-    const userRole = this.auth.getRole();
-    const path = userRole === 'Admin'
-      ? `/admin/documents/contracts/funeral/${contract.id}`
-      : `/billing/documents/contracts/funeral/${contract.id}`;
+    const baseRoute = this.auth.getOperationsBaseRoute();
+    const path = this.auth.isAdmin() || this.auth.canManageFuneralContracts()
+      ? `${baseRoute}/forms/contracts/funeral-contract/${contract.id}`
+      : `${baseRoute}/forms/contracts/payments/${contract.id}`;
+
     this.router.navigateByUrl(path);
   }
 }

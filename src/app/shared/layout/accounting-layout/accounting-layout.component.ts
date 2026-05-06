@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 interface DisplayUser {
@@ -13,16 +13,16 @@ interface DisplayUser {
 }
 
 @Component({
-  selector: 'app-billing-layout',
+  selector: 'app-accounting-layout',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './billing-layout.component.html',
-  styleUrl: './billing-layout.component.scss',
+  templateUrl: './accounting-layout.component.html',
+  styleUrl: './accounting-layout.component.scss',
 })
-export class BillingLayoutComponent implements OnInit {
+export class AccountingLayoutComponent implements OnInit {
   currentUser: DisplayUser = {
     name: 'User',
-    role: 'Biller'
+    role: 'Accounting'
   };
 
   userMenuOpen = false;
@@ -38,7 +38,7 @@ export class BillingLayoutComponent implements OnInit {
 
       this.currentUser = {
         name: fullName || authUser.username || 'User',
-        role: authUser.role || 'Biller',
+        role: authUser.role || 'Accounting',
         companyRole: authUser.companyRole,
         firstName: authUser.firstName,
         lastName: authUser.lastName,
@@ -104,23 +104,19 @@ export class BillingLayoutComponent implements OnInit {
   }
 
   get workspaceEyebrow(): string {
-    return this.roleLabel === 'Accounting' ? 'Accounting Workspace' : 'Billing Workspace';
+    return 'Accounting Workspace';
   }
 
   get workspaceTitle(): string {
-    return this.roleLabel === 'Accounting' ? 'Accounting Workspace' : 'Biller Workspace';
+    return 'Accounting Workspace';
   }
 
   get workspaceDescription(): string {
-    return this.roleLabel === 'Accounting'
-      ? 'Review contract records, collections, and statements inside a consistent contract-style workspace.'
-      : 'Encode contracts, manage additional charges, and coordinate case records in the same layout used across operations.';
+    return 'Review contract records, collections, and statement activity inside a shared operations workspace.';
   }
 
   get workspaceChipLabel(): string {
-    return this.roleLabel === 'Accounting'
-      ? 'Collections, payment posting, and statement review'
-      : 'Contract intake, charge encoding, and case coordination';
+    return 'Collections, payment posting, and statement review';
   }
 
   getUserInitials(name: string): string {

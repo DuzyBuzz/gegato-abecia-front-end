@@ -1,11 +1,13 @@
-// users.model.ts
 export interface User {
-  userId: number;      
+  id?: number;
+  userId?: number;
   firstName: string;
   lastName: string;
   username: string;
+  accountNumber?: string;
   password?: string;
   position?: string;
   role: string;
-  createdAt?: string | Date;
+  companyRole?: string;
+  roleAccess?: number;
 }

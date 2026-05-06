@@ -1,0 +1,31 @@
+app-select-helper,
+app-auto-complete-helper {
+	position: relative;
+	z-index: 50;
+
+	::ng-deep {
+		.p-select,
+		.p-autocomplete {
+			z-index: 50 !important;
+		}
+
+		.p-autocomplete-panel,
+		.p-select-overlay,
+		.p-dropdown-panel {
+			z-index: 9999 !important;
+		}
+	}
+}
+
+td {
+	position: relative;
+	overflow: visible !important;
+}
+
+::ng-deep {
+	.p-autocomplete-panel,
+	.p-select-overlay,
+	.p-dropdown-panel {
+		z-index: 9999 !important;
+	}
+}

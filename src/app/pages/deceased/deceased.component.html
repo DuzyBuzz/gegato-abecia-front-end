@@ -10,18 +10,18 @@
 
 <ng-template #end>
   <div class="flex gap-2">
-    
     <p-button
       label="Schedules"
       icon="pi pi-calendar"
       severity="secondary"
-      routerLink="/billing/schedule"
+      [routerLink]="scheduleRoute"
     ></p-button>
 
     <p-button
-      label="New Funeral Contract"
+      *ngIf="canManageContracts"
+      label="Create Contract"
       icon="pi pi-plus"
-      severity="success"
+      severity="primary"
       (onClick)="openNewFuneralContract()"
     ></p-button>
 
