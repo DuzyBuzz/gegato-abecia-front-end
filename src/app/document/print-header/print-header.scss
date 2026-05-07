@@ -27,7 +27,7 @@
 
   @page {
     size: letter portrait;
-    margin: 0.35in 0.5in 0.4in;
+    margin: 0;
   }
 
   html, body {
@@ -55,7 +55,7 @@
   .print-page {
     width: auto;
     min-height: 0;
-    padding: 0;
+    padding: 0.35in 0.5in 0.4in;
     margin: 0 !important;
     position: static;
     break-after: auto;

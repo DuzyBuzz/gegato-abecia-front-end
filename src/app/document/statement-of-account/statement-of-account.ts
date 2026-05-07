@@ -39,6 +39,8 @@ interface DisplayUser {
 })
 export class StatementOfAccount implements OnInit, OnDestroy {
 
+  private readonly originalDocumentTitle = document.title;
+
   contractId: number | null = null;
   selectedContract: FuneralContract | null = null;
 
@@ -168,8 +170,7 @@ dateNow: Date = new Date();
         // 🔥 PRINT AFTER EVERYTHING IS RENDERED (increased timeout)
         setTimeout(() => {
           console.log('🖨️ Triggering print now');
-          window.onafterprint = () => this.goBack();
-          window.print();
+          this.printDocument(true);
         }, 500);
       },
       error: (err) => {
@@ -177,7 +178,7 @@ dateNow: Date = new Date();
         this.setFallbackData();
 
         setTimeout(() => {
-          window.print();
+          this.printDocument();
         }, 500);
       }
     });
@@ -222,8 +223,15 @@ dateNow: Date = new Date();
       return null;
     }
 
+    const casketOrUrn = [
+      contract.casket,
+      contract.urnType,
+      contract.urnDescription,
+      contract.type
+    ].find((value) => !!String(value || '').trim());
+
     return {
-      description: `Contract Price - ${contract.type || 'Base Service'}`,
+      description: `Casket/Urn - ${casketOrUrn || 'Not specified'}`,
       amount,
       discount,
       kind: 'contract',
@@ -311,6 +319,7 @@ dateNow: Date = new Date();
   // 🔥 CLEANUP
   // ======================================================
   ngOnDestroy(): void {
+    document.title = this.originalDocumentTitle;
     window.onafterprint = null;
   }
 
@@ -336,5 +345,25 @@ dateNow: Date = new Date();
       day: '2-digit',
       year: 'numeric'
     });
+  }
+
+  print(): void {
+    this.printDocument();
+  }
+
+  private printDocument(goBackAfterPrint = false): void {
+    const previousTitle = document.title || this.originalDocumentTitle;
+    document.title = '';
+
+    window.onafterprint = () => {
+      document.title = previousTitle;
+      window.onafterprint = null;
+
+      if (goBackAfterPrint) {
+        this.goBack();
+      }
+    };
+
+    window.print();
   }
 }

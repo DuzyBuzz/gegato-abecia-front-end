@@ -41,6 +41,19 @@ const FIELD_LABELS: { [key: string]: string } = {
   municipality: 'City/Municipality',
 };
 
+const SECTION_FIELDS: Record<number, string[]> = {
+  1: ['contractNo', 'contractDate', 'dueDate', 'type'],
+  2: ['firstName', 'lastName', 'dateOfBirth', 'dateOfDeath', 'gender', 'religion', 'placeOfDeath'],
+  3: ['contractee', 'relationshipToDeceased', 'contactNo', 'addressLine1', 'municipality'],
+  4: ['dateOfTransfer', 'transferAddress', 'dateOfBurial', 'massTime', 'church', 'cementary'],
+  5: ['deliveryDate', 'deliveryDriver', 'deliveryHelper', 'deliveryStatus'],
+  6: ['dateEmblamed', 'timeFinished', 'embalmedBy', 'finishedBy'],
+  7: ['autopsy', 'autopsyDate', 'autopsyBy'],
+  8: ['idType', 'claimIdNumber', 'issuedAt', 'issuedOn'],
+  9: ['baranggayCaptain', 'cityDocsCompletion', 'cleared', 'supSigBurial'],
+  10: ['remarks', 'billingRemarks']
+};
+
 @Component({
   selector: 'app-funeral-contract-entry',
   standalone: true,
@@ -57,6 +70,19 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
   contractId: number | null = null;
   currentSection = 1;
   private intersectionObserver: IntersectionObserver | null = null;
+  documentsMenuOpen = false;
+  expandedSections: { [key: number]: boolean } = {
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
+    6: false,
+    7: false,
+    8: false,
+    9: false,
+    10: false
+  };
   
   @Input() set selectedContract(contract: any) {
     if (contract) {
@@ -72,8 +98,8 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     { id: 1, name: 'Contract ' },
     { id: 2, name: 'Deceased ' },
     { id: 3, name: 'Contractee ' },
-    { id: 4, name: 'Delivery' },
-    { id: 5, name: 'Transfer & Burial/Cremation' },
+    { id: 4, name: 'Transfer & Burial/Cremation' },
+    { id: 5, name: 'Delivery' },
     { id: 6, name: 'Embalming & Makeup' },
     { id: 7, name: 'Medical' },
     { id: 8, name: 'Identification ' },
@@ -638,8 +664,66 @@ scrollToSection(sectionId: number): void {
     return this.auth.canManageFuneralContracts();
   }
 
+  get isBillerUser(): boolean {
+    return this.auth.isBiller();
+  }
+
+  get canEditCompactSections(): boolean {
+    return this.isBillerUser;
+  }
+
   get canAccessPayments(): boolean {
     return this.auth.canAccessPayments();
+  }
+
+  get workflowTotalSections(): number {
+    return this.sections.length;
+  }
+
+  get workflowCompletedSections(): number {
+    return this.sections.filter((section) => this.getSectionStatusLabel(section.id) === 'Completed').length;
+  }
+
+  get workflowProgressPercent(): number {
+    const totalSections = this.workflowTotalSections;
+    if (!totalSections) {
+      return 0;
+    }
+
+    const totalRatio = this.sections.reduce((sum, section) => {
+      return sum + this.getSectionCompletionRatio(section.id);
+    }, 0);
+
+    return Math.round((totalRatio / totalSections) * 100);
+  }
+
+  get deliveryStatusLabel(): string {
+    const status = this.normalizeDeliveryStatus(this.form.get('deliveryStatus')?.value);
+
+    switch (status) {
+      case 'completed':
+        return 'Completed';
+      case 'scheduled':
+        return 'Scheduled';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return 'Scheduled';
+    }
+  }
+
+  get deliveryStatusClass(): string {
+    const status = this.normalizeDeliveryStatus(this.form.get('deliveryStatus')?.value);
+
+    switch (status) {
+      case 'completed':
+        return 'contract-entry-header__status-pill--completed';
+      case 'cancelled':
+        return 'contract-entry-header__status-pill--cancelled';
+      case 'scheduled':
+      default:
+        return 'contract-entry-header__status-pill--scheduled';
+    }
   }
 
 
@@ -676,7 +760,7 @@ scrollToSection(sectionId: number): void {
   }
 
   private applyFormAccess(): void {
-    if (this.canEditContract) {
+    if (this.canEditCompactSections) {
       this.form.enable({ emitEvent: false });
       this.form.get('age')?.disable({ emitEvent: false });
       return;
@@ -686,33 +770,23 @@ scrollToSection(sectionId: number): void {
   }
 
 submitContract(): void {
-  if (!this.canEditContract) {
+  if (!this.canEditCompactSections) {
     this.messageService.add({
       severity: 'warn',
       summary: 'Read only',
-      detail: 'Accounting users can view funeral contracts but cannot edit them.',
+      detail: 'Only billers can expand and edit compact funeral contract sections.',
       life: 3000
     });
     return;
   }
 
   if (this.form.invalid) {
-    const invalidFields = this.getInvalidFields();
-    const fieldLabels = invalidFields
-      .map(field => FIELD_LABELS[field] || field)
-      .sort();
-    
-    const detailMessage = fieldLabels.length > 0
-      ? `Please fill in the following required fields:\n${fieldLabels.map(label => `• ${label}`).join('\n')}`
-      : 'Please complete required fields.';
-
     console.log('FORM VALUE:', this.form.value);
-    console.log('INVALID FIELDS:', invalidFields);
     
     this.messageService.add({
       severity: 'error',
-      summary: 'Missing Required Fields',
-      detail: detailMessage,
+      summary: 'Invalid Form',
+      detail: 'Please review and correct invalid fields before saving.',
       life: 5000
     });
     return;
@@ -764,8 +838,7 @@ submitContract(): void {
   }
 
   isFieldRequired(fieldName: string): boolean {
-    const field = this.form.get(fieldName);
-    return !!(field && field.hasError('required'));
+    return false;
   }
 
 
@@ -773,9 +846,6 @@ submitContract(): void {
     const field = this.form.get(fieldName);
     if (!field) return '';
 
-    if (field.hasError('required')) {
-      return 'This field is required';
-    }
     if (field.hasError('email')) {
       return 'Please provide a valid email address';
     }
@@ -799,10 +869,215 @@ submitContract(): void {
     const invalidFields: string[] = [];
     Object.keys(this.form.controls).forEach(key => {
       const control = this.form.get(key);
-      if (control && control.invalid && control.hasError('required')) {
+      if (control && control.invalid) {
         invalidFields.push(key);
       }
     });
     return invalidFields;
+  }
+
+  toggleDocumentsMenu(): void {
+    this.documentsMenuOpen = !this.documentsMenuOpen;
+  }
+
+  toggleSection(sectionId: number): void {
+    if (!this.isBillerUser) {
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(this.expandedSections, sectionId)) {
+      this.expandedSections[sectionId] = !this.expandedSections[sectionId];
+    }
+  }
+
+  getSectionSummary(sectionId: number): string {
+    const value = this.form.getRawValue();
+
+    switch (sectionId) {
+      case 1:
+        return [
+          value.contractNo || 'No contract number',
+          value.contractDate ? `Contract date ${this.formatDate(value.contractDate)}` : 'Contract date not set',
+          value.dueDate ? `Due ${this.formatDate(value.dueDate)}` : 'No due date'
+        ].join(' • ');
+      case 2:
+        return [
+          this.fullName || 'Deceased details not entered',
+          value.dateOfDeath ? `Died ${this.formatDate(value.dateOfDeath)}` : 'No date of death',
+          value.placeOfDeath || 'Place of death not set'
+        ].join(' • ');
+      case 3:
+        return [
+          value.contractee || 'No contractee',
+          value.relationshipToDeceased || 'Relationship not set',
+          value.contactNo || 'No contact number'
+        ].join(' • ');
+      case 4:
+        return [
+          value.transferAddress || 'No wake location',
+          value.dateOfBurial ? `Burial ${this.formatDate(value.dateOfBurial)}` : 'No burial date',
+          value.church || value.cementary || 'Venue not set'
+        ].join(' • ');
+      case 5:
+        return [
+          `Delivery ${this.deliveryStatusLabel}`,
+          value.deliveryDate ? this.formatDate(value.deliveryDate) : 'No delivery date',
+          value.deliveryDriver || 'No driver assigned'
+        ].join(' • ');
+      case 6:
+        return [
+          value.embalmedBy || 'No embalmer assigned',
+          value.dateEmblamed ? `Embalmed ${this.formatDate(value.dateEmblamed)}` : 'No embalming date',
+          value.finishedBy || 'No finisher assigned'
+        ].join(' • ');
+      case 7:
+        return [
+          `Autopsy ${value.autopsy || 'not specified'}`,
+          value.autopsyDate ? this.formatDate(value.autopsyDate) : 'No autopsy date',
+          value.autopsyBy || 'No medical officer'
+        ].join(' • ');
+      case 8:
+        return [
+          value.idType || 'No ID type',
+          value.claimIdNumber || 'No claim ID number',
+          value.issuedOn ? `Issued ${this.formatDate(value.issuedOn)}` : 'Issue date not set'
+        ].join(' • ');
+      case 9:
+        return [
+          value.cityDocsCompletion ? 'City documents complete' : 'City documents pending',
+          value.cleared ? 'Cleared' : 'Not cleared',
+          value.baranggayCaptain || 'No barangay captain listed'
+        ].join(' • ');
+      case 10:
+        return value.remarks || value.billingRemarks || 'No remarks recorded';
+      default:
+        return 'Summary unavailable.';
+    }
+  }
+
+  getSectionStatusLabel(sectionId: number): 'Completed' | 'Scheduled' | 'Cancelled' | 'Not Started' {
+    if (sectionId === 5) {
+      const deliveryStatus = this.normalizeDeliveryStatus(this.form.get('deliveryStatus')?.value);
+
+      switch (deliveryStatus) {
+        case 'completed':
+          return 'Completed';
+        case 'cancelled':
+          return 'Cancelled';
+        case 'scheduled':
+          return 'Scheduled';
+        default:
+          return this.getSectionCompletionRatio(sectionId) > 0 ? 'Scheduled' : 'Not Started';
+      }
+    }
+
+    const completionRatio = this.getSectionCompletionRatio(sectionId);
+
+    if (completionRatio === 0) {
+      return 'Not Started';
+    }
+
+    if (completionRatio >= 0.74) {
+      return 'Completed';
+    }
+
+    return 'Scheduled';
+  }
+
+  getSectionStatusClass(sectionId: number): string {
+    const status = this.getSectionStatusLabel(sectionId);
+
+    switch (status) {
+      case 'Completed':
+        return 'contract-entry-section__badge--completed';
+      case 'Cancelled':
+        return 'contract-entry-section__badge--cancelled';
+      case 'Scheduled':
+        return 'contract-entry-section__badge--scheduled';
+      default:
+        return 'contract-entry-section__badge--not-started';
+    }
+  }
+
+  getWorkflowStepClass(sectionId: number): string {
+    const status = this.getSectionStatusLabel(sectionId);
+
+    switch (status) {
+      case 'Completed':
+        return 'contract-entry-workflow__step--completed';
+      case 'Cancelled':
+        return 'contract-entry-workflow__step--cancelled';
+      case 'Scheduled':
+        return 'contract-entry-workflow__step--scheduled';
+      default:
+        return '';
+    }
+  }
+
+  private getSectionCompletionRatio(sectionId: number): number {
+    const fields = SECTION_FIELDS[sectionId] ?? [];
+    if (!fields.length) {
+      return 0;
+    }
+
+    const value = this.form.getRawValue() as Record<string, unknown>;
+    const completedFields = fields.filter((field) => this.hasMeaningfulValue(value[field])).length;
+
+    return completedFields / fields.length;
+  }
+
+  private normalizeDeliveryStatus(status: unknown): 'completed' | 'scheduled' | 'cancelled' | 'unknown' {
+    const normalized = String(status || '').trim().toLowerCase();
+
+    if (!normalized) {
+      return 'unknown';
+    }
+
+    if (normalized.includes('complete')) {
+      return 'completed';
+    }
+
+    if (normalized.includes('cancel')) {
+      return 'cancelled';
+    }
+
+    if (normalized.includes('schedule')) {
+      return 'scheduled';
+    }
+
+    return 'unknown';
+  }
+
+  private formatDate(value: string | null | undefined): string {
+    if (!value) {
+      return 'Not set';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  private hasMeaningfulValue(value: unknown): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return !Number.isNaN(value) && value !== 0;
+    }
+
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+
+    return value !== null && value !== undefined;
   }
 }

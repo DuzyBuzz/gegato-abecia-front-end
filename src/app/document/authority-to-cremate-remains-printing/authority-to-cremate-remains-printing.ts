@@ -15,6 +15,8 @@ import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 })
 export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
 
+  private readonly originalDocumentTitle = document.title;
+
   contract: any = {};
   contractId: number | null = null;
   selectedContract: FuneralContract | null = null;
@@ -92,8 +94,7 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
         // 🔥 PRINT AFTER EVERYTHING IS RENDERED
         setTimeout(() => {
           console.log('🖨️ Triggering print now');
-          window.onafterprint = () => this.goBack();
-          window.print();
+          this.printDocument(true);
         }, 500);
       },
       error: (err) => {
@@ -180,6 +181,7 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // Prevent memory leaks
+    document.title = this.originalDocumentTitle;
     window.onafterprint = null;
   }
 
@@ -191,6 +193,22 @@ export class AuthorityToCremateRemainsPrinting implements OnInit, OnDestroy {
   }
 
   print(): void {
+    this.printDocument();
+  }
+
+  private printDocument(goBackAfterPrint = false): void {
+    const previousTitle = document.title || this.originalDocumentTitle;
+    document.title = '';
+
+    window.onafterprint = () => {
+      document.title = previousTitle;
+      window.onafterprint = null;
+
+      if (goBackAfterPrint) {
+        this.goBack();
+      }
+    };
+
     window.print();
   }
 

@@ -164,7 +164,7 @@ export const routes: Routes = [
                   path: 'funeral-contract/new',
                     component: FuneralContractEntry,
                     canActivate: [roleGuard],
-                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
+                    data: { roles: ['Admin'], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'funeral-contract/:contractId',

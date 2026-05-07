@@ -65,6 +65,7 @@ export class FuneralBillingComponent implements OnInit {
   pricingEditMode = false;
   serviceDetailsEditMode = false;
   isChargesSectionVisible = true;
+  isPaymentsSectionVisible = false;
   loading = false;
   totalPaid = 0;
   balanceRemaining = 0;

@@ -36,6 +36,10 @@ export class AuthService {
     return this.hasRole(['Admin', 'Biller']);
   }
 
+  canCreateFuneralContracts(): boolean {
+    return this.hasRole(['Admin']);
+  }
+
   canAccessPayments(): boolean {
     return this.hasRole(['Admin', 'Biller', 'Accounting']);
   }

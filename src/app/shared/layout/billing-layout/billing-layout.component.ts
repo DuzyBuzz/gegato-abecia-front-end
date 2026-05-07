@@ -113,8 +113,8 @@ export class BillingLayoutComponent implements OnInit {
 
   get workspaceDescription(): string {
     return this.roleLabel === 'Accounting'
-      ? 'Review contract records, collections, and statements inside a consistent contract-style workspace.'
-      : 'Encode contracts, manage additional charges, and coordinate case records in the same layout used across operations.';
+      ? ''
+      : '';
   }
 
   get workspaceChipLabel(): string {

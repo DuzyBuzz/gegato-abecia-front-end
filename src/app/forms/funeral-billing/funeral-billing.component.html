@@ -1,19 +1,18 @@
-<div class="p-6 bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
+<div class="p-4 bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
 	<p-toast></p-toast>
 	<p-confirmDialog></p-confirmDialog>
 
 	<div class="h-full bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden">
-		<div class="px-5 py-4 border-b border-emerald-600 flex justify-between items-center">
+		<div class="px-4 py-3 border-b border-emerald-600 flex justify-between items-center gap-3">
 			<div>
 				<h2 class="text-lg font-semibold text-gray-800">Funeral Contract Billing</h2>
-				<p class="text-xs text-gray-500 mt-1">Biller workspace for the contract price, additional charges, and billing remarks.</p>
 			</div>
 
-			<div class="flex gap-2">
+			<div class="flex flex-wrap gap-2">
 				<button
 					type="button"
 					(click)="openContract()"
-					class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+					class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
 				>
 					<i class="pi pi-file-edit text-sm"></i>
 					View Contract
@@ -23,7 +22,7 @@
 					*ngIf="canOpenPayments"
 					type="button"
 					(click)="openPayments()"
-					class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+					class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
 				>
 					<i class="pi pi-credit-card text-sm"></i>
 					Open Payments
@@ -32,7 +31,7 @@
 				<button
 					type="button"
 					(click)="printStatement()"
-					class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+					class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition"
 				>
 					<i class="pi pi-print text-sm"></i>
 					Print Statement
@@ -40,34 +39,34 @@
 			</div>
 		</div>
 
-		<div class="px-5 pt-4">
-			<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+		<div class="px-4 pt-3">
+			<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Contract Price</div>
 					<div class="text-sm font-semibold text-slate-700">₱{{ getContractPrice() | number:'1.2-2' }}</div>
 				</div>
 
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
 					<div class="text-sm font-semibold text-amber-600">₱{{ getContractDiscount() | number:'1.2-2' }}</div>
 				</div>
 
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Additional Charges</div>
 					<div class="text-sm font-semibold text-emerald-600">₱{{ getTotalCharges() | number:'1.2-2' }}</div>
 				</div>
 
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Total Billed</div>
 					<div class="text-sm font-semibold text-slate-700">₱{{ getGrandTotal() | number:'1.2-2' }}</div>
 				</div>
 
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Total Paid</div>
 					<div class="text-sm font-semibold text-blue-600">₱{{ totalPaid | number:'1.2-2' }}</div>
 				</div>
 
-				<div class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm">
+				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
 					<div class="text-[11px] uppercase text-gray-400">Balance Due</div>
 					<div class="text-sm font-bold"
 							 [class.text-green-600]="balanceRemaining <= 0"
@@ -78,23 +77,23 @@
 			</div>
 		</div>
 
-		<div class="px-5 py-3 border-t border-gray-200">
+		<div class="px-4 py-2.5 border-t border-gray-200">
 			<table class="w-full text-sm">
 				<tbody class="divide-y">
 					<tr>
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[120px]">Deceased</td>
-						<td class="px-3 py-2 font-semibold text-gray-800">
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[110px]">Deceased</td>
+						<td class="px-2.5 py-2 font-semibold text-gray-800">
 							{{ ((FuneralContract?.firstName || '') + ' ' + (FuneralContract?.lastName || '')).trim() || '—' }}
 						</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[120px]">Contract #</td>
-						<td class="px-3 py-2 text-gray-800">{{ FuneralContract?.contractNo || '—' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[110px]">Contract #</td>
+						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.contractNo || '—' }}</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs w-[100px]">Contractee</td>
-						<td class="px-3 py-2 text-gray-800">{{ FuneralContract?.contractee || '—' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[96px]">Contractee</td>
+						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.contractee || '—' }}</td>
 
-						<td rowspan="3" class="w-[360px] align-top border-l border-gray-200 bg-white p-0">
-							<div class="h-full p-3 flex flex-col">
+						<td rowspan="3" class="w-[320px] align-top border-l border-gray-200 bg-white p-0">
+							<div class="h-full p-2.5 flex flex-col">
 								<div class="flex items-start justify-between gap-3">
 									<div>
 										<div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
@@ -131,12 +130,12 @@
 									</div>
 								</div>
 
-								<div class="mt-3 flex-1 flex">
+								<div class="mt-2 flex-1 flex">
 									<textarea
 										*ngIf="editMode"
 										[(ngModel)]="editedContract.billingRemarks"
 										[ngModelOptions]="{ standalone: true }"
-										rows="5"
+										rows="4"
 										class="w-full flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
 										placeholder="Add billing remarks here"
 									></textarea>
@@ -153,27 +152,27 @@
 					</tr>
 
 					<tr>
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
-						<td class="px-3 py-2 text-gray-800">{{ FuneralContract?.dueDate | date:'MMMM dd, yyyy' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
+						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.dueDate | date:'MMMM dd, yyyy' }}</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Service Type</td>
-						<td class="px-3 py-2 text-gray-800">{{ FuneralContract?.type || '—' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Service Type</td>
+						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.type || '—' }}</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
-						<td class="px-3 py-2 text-gray-800">
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
+						<td class="px-2.5 py-2 text-gray-800">
 							{{ FuneralContract?.baranggay && FuneralContract?.municipality ? FuneralContract?.baranggay + ', ' + FuneralContract?.municipality : FuneralContract?.baranggay || FuneralContract?.municipality || '—' }}
 						</td>
 					</tr>
 
 					<tr>
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contract Price</td>
-						<td class="px-3 py-2 text-gray-800 font-semibold">₱{{ getContractPrice() | number:'1.2-2' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Contract Price</td>
+						<td class="px-2.5 py-2 text-gray-800 font-semibold">₱{{ getContractPrice() | number:'1.2-2' }}</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Contract Discount</td>
-						<td class="px-3 py-2 text-amber-700 font-semibold">₱{{ getContractDiscount() | number:'1.2-2' }}</td>
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Contract Discount</td>
+						<td class="px-2.5 py-2 text-amber-700 font-semibold">₱{{ getContractDiscount() | number:'1.2-2' }}</td>
 
-						<td class="px-3 py-2 bg-gray-50 text-gray-500 text-xs">Latest Payment</td>
-						<td class="px-3 py-2 text-gray-800">
+						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Latest Payment</td>
+						<td class="px-2.5 py-2 text-gray-800">
 							{{ latestPayment?.dateIssued ? (latestPayment?.dateIssued | date:'MMMM dd, yyyy') : 'No payment posted yet' }}
 						</td>
 					</tr>
@@ -181,19 +180,17 @@
 			</table>
 		</div>
 
-		<div class="flex-1 min-h-0 px-4 pb-4">
-			<div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-				<div class="px-5 py-4 border-b border-slate-200 bg-white/70">
-					<h3 class="text-base font-semibold text-gray-800">Billing Setup</h3>
-					<p class="text-xs text-gray-500 mt-1">Manage contract pricing, service type, and casket/urn details in one grouped section.</p>
+		<div class="flex-1 min-h-0 px-3 pb-3">
+			<div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+				<div class="px-4 py-3 border-b border-slate-200 bg-white/70">
+					<h3 class="text-base font-semibold text-gray-800">Billing</h3>
 				</div>
 
-				<div class="p-4 bg-slate-50/70">
+				<div class="p-3 bg-slate-50/70">
 					<div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-						<div class="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-4">
+						<div class="px-4 py-3 border-b border-slate-200 flex items-start justify-between gap-3">
 							<div>
-								<h3 class="text-base font-semibold text-gray-800">Contract Pricing Initialization</h3>
-								<p class="text-xs text-gray-500 mt-1">Set the contract price here first. The charges table below is only for additional inclusions.</p>
+								<h3 class="text-base font-semibold text-gray-800">Contract Pricing </h3>
 							</div>
 
 							<div class="flex gap-2">
@@ -228,8 +225,8 @@
 							</div>
 						</div>
 
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-3 px-5 py-4 bg-white/80">
-							<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-2 px-4 py-3 bg-white/80">
+							<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 								<div class="text-[11px] uppercase text-gray-400">Contract Price</div>
 								<input
 									*ngIf="billingSetupEditMode && canEditPricing; else parentContractPriceReadOnly"
@@ -246,7 +243,7 @@
 								<!-- <p class="mt-2 text-xs text-gray-500">This is the base service amount before any add-on charges.</p> -->
 							</div>
 
-							<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+							<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 								<div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
 								<input
 									*ngIf="billingSetupEditMode && canEditPricing; else contractDiscountReadOnly"
@@ -263,7 +260,7 @@
 								<!-- <p class="mt-2 text-xs text-gray-500">Use this only for the main contract discount, not for charge-level deductions.</p> -->
 							</div>
 
-							<div class="rounded-lg border border-emerald-200 px-4 py-3 bg-emerald-50">
+							<div class="rounded-lg border border-emerald-200 px-3 py-2.5 bg-emerald-50">
 								<div class="text-[11px] uppercase text-emerald-700">Net Contract Base</div>
 								<div class="mt-1 text-lg font-semibold text-emerald-800">₱{{ getNetContractBase() | number:'1.2-2' }}</div>
 								<!-- <p class="mt-2 text-xs text-emerald-700">Additional inclusions from the charges table will be added on top of this base amount.</p> -->
@@ -275,8 +272,8 @@
 						<h3 class="text-base font-semibold text-gray-800">Service and Casket / Urn Details</h3>
 						<p class="text-xs text-gray-500 mt-1">Type of service and Section 4 fields are managed here in Billing.</p>
 					</div> -->
-                    				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 px-5 py-4 bg-white/80">
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+	                    				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 px-4 py-3 bg-white/80">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Type of Service</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else serviceTypeReadOnly"
@@ -290,7 +287,7 @@
 						</ng-template>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Casket</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else casketReadOnly"
@@ -304,7 +301,7 @@
 						</ng-template>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Casket Availability</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else casketAvailableReadOnly"
@@ -318,7 +315,7 @@
 						</ng-template>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Uniform</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else uniformReadOnly"
@@ -332,7 +329,7 @@
 						</ng-template>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Urn Type</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else urnTypeReadOnly"
@@ -346,7 +343,7 @@
 						</ng-template>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white md:col-span-2 xl:col-span-1">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white md:col-span-2 xl:col-span-1">
 						<div class="text-[11px] uppercase text-gray-400">Urn Description</div>
 						<app-select-helper
 							*ngIf="billingSetupEditMode && canEditServiceDetails; else urnDescriptionReadOnly"
@@ -366,10 +363,9 @@
 				</div>
 			</div>
 
-			<div class="px-5 py-4 border-b border-gray-200 bg-white flex justify-between items-center">
+			<div class="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center gap-3">
 				<div>
-					<h2 class="text-lg font-semibold text-gray-800">Charges</h2>
-					<p class="text-xs text-gray-500 mt-1">Encode only the additional inclusions here. The contract price is initialized above.</p>
+					<h2 class="text-lg font-semibold text-gray-800">Additional Charges</h2>
 				</div>
 
 				<button
@@ -384,12 +380,12 @@
 
 			<ng-container *ngIf="isChargesSectionVisible">
 				<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-					<div class="px-4 py-3 border-b border-gray-200 bg-slate-50/80 flex items-center justify-between">
-						<div class="text-sm font-semibold text-gray-800">Additional Charges List</div>
+					<div class="px-3 py-2.5 border-b border-gray-200 bg-slate-50/80 flex items-center justify-between gap-3">
+						<!-- <div class="text-sm font-semibold text-gray-800">Additional Charges List</div> -->
 						<div class="text-xs text-gray-500">{{ charges.length }} item{{ charges.length === 1 ? '' : 's' }}</div>
 					</div>
 
-					<div class="max-h-[340px] overflow-auto">
+					<div class="max-h-[300px] overflow-auto">
 						<table class="w-full text-sm">
 							<thead class="bg-slate-800">
 								<tr class="text-xs uppercase tracking-wide text-slate-100 border-b border-slate-700">
@@ -528,41 +524,50 @@
 				</div>
 			</ng-container>
 
-			<div *ngIf="!isChargesSectionVisible" class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-6 text-center text-sm text-gray-500">
+			<div *ngIf="!isChargesSectionVisible" class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-center text-sm text-gray-500">
 				Charges breakdown is hidden.
 			</div>
 		</div>
 
-		<div class="px-4 pb-4">
+		<div class="px-3 pb-3">
 			<div class="rounded-xl border border-gray-200 bg-slate-50 overflow-hidden">
-				<div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
+				<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
 					<div>
-						<h3 class="text-base font-semibold text-gray-800">Accounting Collections Snapshot</h3>
-						<p class="text-xs text-gray-500 mt-1">Read-only payment visibility for the billing team.</p>
+						<h3 class="text-base font-semibold text-gray-800">Accounting Collections Snapshot <span class="text-xs text-gray-400">Read-only</span></h3>
 					</div>
-					<div class="text-xs text-gray-500">{{ paymentCount }} payment{{ paymentCount === 1 ? '' : 's' }} posted</div>
+					<div class="flex items-center gap-2">
+						<div class="text-xs text-gray-500">{{ paymentCount }} payment{{ paymentCount === 1 ? '' : 's' }} posted</div>
+						<button
+							type="button"
+							(click)="isPaymentsSectionVisible = !isPaymentsSectionVisible"
+							class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
+						>
+							<i class="pi" [ngClass]="isPaymentsSectionVisible ? 'pi-eye-slash' : 'pi-eye'"></i>
+							{{ isPaymentsSectionVisible ? 'Hide Payments' : 'Show Payments' }}
+						</button>
+					</div>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-3 px-5 py-4 border-b border-gray-200 bg-white/80">
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-2 px-4 py-3 border-b border-gray-200 bg-white/80">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Total Paid</div>
 						<div class="mt-1 text-sm font-semibold text-blue-600">₱{{ totalPaid | number:'1.2-2' }}</div>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Latest Payment Date</div>
 						<div class="mt-1 text-sm font-semibold text-gray-800">
 							{{ latestPayment?.dateIssued ? (latestPayment?.dateIssued | date:'MMMM dd, yyyy') : 'No payments yet' }}
 						</div>
 					</div>
 
-					<div class="rounded-lg border border-gray-200 px-4 py-3 bg-white">
+					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Collections Owner</div>
 						<div class="mt-1 text-sm font-semibold text-gray-800">Accounting</div>
 					</div>
 				</div>
 
-				<div class="max-h-[240px] overflow-auto bg-white">
+				<div *ngIf="isPaymentsSectionVisible; else paymentsHiddenState" class="max-h-[220px] overflow-auto bg-white">
 					<table class="w-full text-sm" *ngIf="recentPayments.length > 0; else noPayments">
 						<thead class="bg-slate-700 text-gray-100 text-xs uppercase">
 							<tr>
@@ -588,6 +593,10 @@
 		</div>
 	</div>
 </div>
+
+<ng-template #paymentsHiddenState>
+	<div class="px-4 py-4 bg-white text-center text-sm text-gray-500">Payment records are hidden.</div>
+</ng-template>
 
 <ng-template #noPayments>
 	<div class="px-5 py-8 text-center text-sm text-gray-500">No payments have been posted yet.</div>

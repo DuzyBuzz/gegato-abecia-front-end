@@ -37,6 +37,8 @@
     "@tauri-apps/api": "^2.10.0",
     "dotenv": "^17.3.1",
     "firebase": "^9.22.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.3",

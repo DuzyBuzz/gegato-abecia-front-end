@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralPayment } from '../../models/funeral-payment.model';
@@ -72,7 +71,7 @@ interface RecentPaymentItem {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

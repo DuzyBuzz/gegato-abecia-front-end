@@ -33,13 +33,18 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
     }
   ],
   template: `
-<div class="flex items-center gap-2 w-full" #selectElement tabindex="0">
+<div
+  class="flex items-center gap-2 w-full select-helper"
+  [ngClass]="wrapperClass"
+  [style.width]="controlWidth || null"
+  #selectElement
+  tabindex="0">
   <p-select
     [(ngModel)]="selectedValue"
     [options]="dropdownOptions"
     optionLabel="label"
     optionValue="value"
-    styleClass="w-full"
+    [styleClass]="selectStyleClass"
     appendTo="body"
     [ngClass]="{'ng-invalid ng-touched': isInvalid}"
     placeholder="Select"
@@ -104,7 +109,70 @@ import { ComboboxFirestoreService } from '../../../services/combobox-firestore.s
   </ng-template>
 
 </p-dialog>
-`
+`,
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
+    }
+
+    .select-helper {
+      width: 100%;
+    }
+
+    :host ::ng-deep .select-helper__control {
+      width: 100%;
+    }
+
+    :host ::ng-deep .select-helper__control .p-select {
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    :host ::ng-deep .select-helper__control .p-select-label {
+      padding-top: 0;
+      padding-bottom: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    :host ::ng-deep .select-helper__control .p-select-dropdown {
+      width: 2rem;
+    }
+
+    :host ::ng-deep .select-helper__control--sm .p-select {
+      min-height: 32px;
+    }
+
+    :host ::ng-deep .select-helper__control--sm .p-select-label {
+      min-height: 32px;
+      font-size: 12px;
+      padding-left: 9px;
+      padding-right: 9px;
+    }
+
+    :host ::ng-deep .select-helper__control--md .p-select {
+      min-height: 38px;
+    }
+
+    :host ::ng-deep .select-helper__control--md .p-select-label {
+      min-height: 38px;
+      font-size: 13px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    :host ::ng-deep .select-helper__control--lg .p-select {
+      min-height: 44px;
+    }
+
+    :host ::ng-deep .select-helper__control--lg .p-select-label {
+      min-height: 44px;
+      font-size: 14px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+  `]
 })
 export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDestroy {
 
@@ -112,6 +180,8 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
   @Input() allowDefaultSelection = false;
   @Input() searchable = true;
   @Input() isInvalid = false;
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() controlWidth: string | null = null;
   private _comboboxName = '';
   private _hasLoaded = false;
   private _isLoading = false;
@@ -137,6 +207,14 @@ export class SelectHelperComponent implements ControlValueAccessor, OnInit, OnDe
 
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
+
+  get wrapperClass(): string {
+    return `select-helper--${this.size}`;
+  }
+
+  get selectStyleClass(): string {
+    return `w-full select-helper__control select-helper__control--${this.size}`;
+  }
 
   constructor(
     private combo: ComboboxFirestoreService,

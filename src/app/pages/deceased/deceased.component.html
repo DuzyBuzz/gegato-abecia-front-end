@@ -2,7 +2,7 @@
   <!-- LEFT -->
   <ng-template #start>
     <h2 class="text-3xl font-bold text-gray-700">
-      Deceased List
+      Funeral Contracts
     </h2>
   </ng-template>
 
@@ -10,15 +10,10 @@
 
 <ng-template #end>
   <div class="flex gap-2">
-    <p-button
-      label="Schedules"
-      icon="pi pi-calendar"
-      severity="secondary"
-      [routerLink]="scheduleRoute"
-    ></p-button>
+
 
     <p-button
-      *ngIf="canManageContracts"
+      *ngIf="canCreateContracts"
       label="Create Contract"
       icon="pi pi-plus"
       severity="primary"
