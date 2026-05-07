@@ -7,6 +7,7 @@ import { FuneralContractService } from '../../services/funeral-contract.service'
 import { FuneralPaymentsService } from '../../services/funeral-payments.service';
 import { User } from '../../shared/features/users/users.model';
 import { UserService } from '../../shared/features/users/users.service';
+import { RoleAccess, resolveRoleAccess } from '../../utils/role-access.util';
 
 interface DistributionItem {
   label: string;
@@ -171,9 +172,9 @@ export class DashboardComponent implements OnInit {
     this.overdueContracts = contracts.filter((contract) => this.isOverdue(contract)).length;
     this.upcomingServices = contracts.filter((contract) => this.hasUpcomingService(contract, 7)).length;
     this.totalUsers = users.length;
-    this.adminUsers = users.filter((user) => user.role === 'Admin').length;
-    this.billerUsers = users.filter((user) => user.role === 'Biller').length;
-    this.accountingUsers = users.filter((user) => user.role === 'Accounting').length;
+    this.adminUsers = users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Admin).length;
+    this.billerUsers = users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Biller).length;
+    this.accountingUsers = users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Accounting).length;
     this.clearedPaymentRate = this.paymentCount > 0
       ? (payments.filter((payment) => payment.checkCleared).length / this.paymentCount) * 100
       : 0;

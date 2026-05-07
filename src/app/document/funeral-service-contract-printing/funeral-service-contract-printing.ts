@@ -10,6 +10,7 @@ import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { getRoleLabel } from '../../utils/role-access.util';
 
 @Component({
   selector: 'app-funeral-service-contract-printing',
@@ -78,7 +79,7 @@ export class FuneralServiceContractPrinting implements OnInit, OnDestroy {
 
       this.currentUser = {
         name: fullName || authUser.username || 'Officer in Charge',
-        role: authUser.role || 'Biller'
+        role: getRoleLabel(authUser.roleAccess)
       };
     }
 

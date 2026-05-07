@@ -52,4 +52,17 @@
       <router-outlet></router-outlet>
     </div>
   </main>
+
+  <p-dialog
+    header="Profile"
+    [(visible)]="profileDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+		[style]="{ width: 'min(700px, 97vw)', maxHeight: '94vh' }"
+    [contentStyle]="{ overflow: 'auto' }"
+  >
+    <ng-container *ngComponentOutlet="profileComponent"></ng-container>
+  </p-dialog>
 </div>

@@ -30,14 +30,15 @@ export class MainLayout implements OnInit {
     if (authUser) {
       const firstName = authUser.firstName || '';
       const lastName = authUser.lastName || '';
+      const position = (authUser as any).position as string | undefined;
       const fullName = `${firstName} ${lastName}`.trim();
       
       this.currentUser = {
         name: fullName || authUser.username || 'User',
-        role: authUser.role || 'User',
+        role: this.auth.getRole() || 'User',
         firstName: authUser.firstName,
         lastName: authUser.lastName,
-        position: authUser.position
+        position,
       };
     }
   }

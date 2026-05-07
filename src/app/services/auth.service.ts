@@ -3,29 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { User } from '../models/user.model';
+import { RoleAccess, getRoleLabel, isAllowedRoleAccess, resolveRoleAccess } from '../utils/role-access.util';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-
-  private static readonly ROLE_ACCESS_MAP: Record<number, string> = {
-    1: 'Biller',
-    2: 'Accounting',
-    3: 'Admin',
-  };
-
   private api = `${environment.api}/ua_control`;
 
   constructor(private http: HttpClient) {}
 
-  getHomeRoute(role: string | null = this.getRole()): string {
-    const normalizedRole = this.normalizeRole(role);
-
-    switch (normalizedRole) {
-      case 'admin':
+  getHomeRoute(roleAccess: number | null = this.getRoleAccess()): string {
+    switch (resolveRoleAccess(roleAccess)) {
+      case RoleAccess.Admin:
         return '/admin/dashboard';
-      case 'accounting':
+      case RoleAccess.Accounting:
         return '/accounting/deceased';
-      case 'biller':
+      case RoleAccess.Biller:
         return '/billing/deceased';
       default:
         return '/login';
@@ -33,47 +25,47 @@ export class AuthService {
   }
 
   canManageFuneralContracts(): boolean {
-    return this.hasRole(['Admin', 'Biller']);
+    return this.hasRoleAccess([RoleAccess.Admin, RoleAccess.Biller]);
   }
 
   canCreateFuneralContracts(): boolean {
-    return this.hasRole(['Admin']);
+    return this.hasRoleAccess([RoleAccess.Admin, RoleAccess.Biller]);
   }
 
   canAccessPayments(): boolean {
-    return this.hasRole(['Admin', 'Biller', 'Accounting']);
+    return this.hasRoleAccess([RoleAccess.Admin, RoleAccess.Biller, RoleAccess.Accounting]);
   }
 
   canManagePayments(): boolean {
-    return this.hasRole(['Admin', 'Accounting']);
+    return this.hasRoleAccess([RoleAccess.Admin, RoleAccess.Accounting]);
   }
 
   canManageCharges(): boolean {
-    return this.hasRole(['Admin', 'Biller']);
+    return this.hasRoleAccess([RoleAccess.Admin, RoleAccess.Biller]);
   }
 
   isBiller(): boolean {
-    return this.hasRole(['Biller']);
+    return this.hasRoleAccess([RoleAccess.Biller]);
   }
 
   isAccounting(): boolean {
-    return this.hasRole(['Accounting']);
+    return this.hasRoleAccess([RoleAccess.Accounting]);
   }
 
   isAdmin(): boolean {
-    return this.hasRole(['Admin']);
+    return this.hasRoleAccess([RoleAccess.Admin]);
   }
 
   getOperationsBaseRoute(): string {
-    if (this.isAdmin()) {
-      return '/admin';
+    switch (this.getRoleAccess()) {
+      case RoleAccess.Admin:
+        return '/admin';
+      case RoleAccess.Accounting:
+        return '/accounting';
+      case RoleAccess.Biller:
+      default:
+        return '/billing';
     }
-
-    if (this.isAccounting()) {
-      return '/accounting';
-    }
-
-    return '/billing';
   }
 
   getProfileRoute(): string {
@@ -151,14 +143,14 @@ export class AuthService {
 
   private mapAuthUser(userRecord: any, fallbackUsername: string): User {
     const resolvedId = this.toNumber(userRecord?.id ?? userRecord?.userId) ?? 0;
-    const roleAccess = this.toNumber(userRecord?.roleAccess) ?? undefined;
+    const companyRole = this.cleanString(userRecord?.companyRole)
+      || this.cleanString(userRecord?.role)
+      || undefined;
+    const roleAccess = resolveRoleAccess(this.toNumber(userRecord?.roleAccess), companyRole);
     const accountNumber = this.cleanString(userRecord?.accountNumber)
       || this.cleanString(userRecord?.username)
       || this.cleanString(userRecord?.userName)
       || fallbackUsername;
-    const companyRole = this.cleanString(userRecord?.companyRole)
-      || this.cleanString(userRecord?.role)
-      || undefined;
 
     return {
       id: resolvedId,
@@ -167,10 +159,7 @@ export class AuthService {
       accountNumber,
       firstName: this.cleanString(userRecord?.firstName) || '',
       lastName: this.cleanString(userRecord?.lastName) || '',
-      role: this.mapRole(roleAccess, companyRole),
-      companyRole,
       password: this.cleanString(userRecord?.password) || undefined,
-      position: this.cleanString(userRecord?.position) || undefined,
       roleAccess,
     };
   }
@@ -182,37 +171,6 @@ export class AuthService {
       .filter((value): value is string => !!value);
 
     return candidates.includes(normalizedUsername);
-  }
-
-  private mapRole(roleAccess: number | undefined, role: string | undefined): string {
-    if (typeof roleAccess === 'number' && AuthService.ROLE_ACCESS_MAP[roleAccess]) {
-      return AuthService.ROLE_ACCESS_MAP[roleAccess];
-    }
-
-    const normalizedRole = (role || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-
-    switch (normalizedRole) {
-      case 'ADMIN':
-      case 'ADMINISTRATOR':
-        return 'Admin';
-      case 'SUPER_USER':
-      case 'SUPERUSER':
-      case 'BILLER':
-      case 'STAFF':
-      case 'COLLECTOR':
-        return 'Biller';
-      case 'ACCOUNTING':
-      case 'ACCOUNTANT':
-        return 'Accounting';
-      case 'USER':
-        return 'User';
-      default:
-        if (!role) {
-          return 'User';
-        }
-
-        return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-    }
   }
 
   private cleanString(value: unknown): string | null {
@@ -257,24 +215,45 @@ export class AuthService {
   }
 
   getRole(): string | null {
-    return this.currentUser?.role ?? null;
+    const user = this.currentUser;
+
+    if (!user) {
+      return null;
+    }
+
+    return getRoleLabel(user.roleAccess);
   }
 
-  hasRole(allowedRoles: string[]): boolean {
-    const normalizedRole = this.normalizeRole(this.getRole());
-    return normalizedRole
-      ? allowedRoles.some((allowedRole) => this.normalizeRole(allowedRole) === normalizedRole)
-      : false;
+  getRoleAccess(): RoleAccess | null {
+    const user = this.currentUser;
+
+    if (!user) {
+      return null;
+    }
+
+    const legacyRole = (user as any).companyRole || (user as any).role;
+    return resolveRoleAccess(user.roleAccess, legacyRole) ?? null;
   }
 
-  private normalizeRole(role: string | null | undefined): string {
-    return String(role ?? '').trim().toLowerCase();
+  hasRoleAccess(allowedRoleAccess: number[]): boolean {
+    return isAllowedRoleAccess(this.getRoleAccess(), allowedRoleAccess);
+  }
+
+  hasRole(allowedRoles: Array<string | number>): boolean {
+    const allowedRoleAccess = allowedRoles
+      .map((allowedRole) => resolveRoleAccess(allowedRole, String(allowedRole)))
+      .filter((allowedRole): allowedRole is RoleAccess => allowedRole !== undefined);
+
+    return this.hasRoleAccess(allowedRoleAccess);
   }
 
   private normalizeStoredUser(user: User): User {
+    const legacyRole = (user as any).companyRole || (user as any).role;
+    const roleAccess = resolveRoleAccess(user.roleAccess, legacyRole);
+
     return {
       ...user,
-      role: this.mapRole(user.roleAccess, user.companyRole || user.role),
+      roleAccess,
     };
   }
 }

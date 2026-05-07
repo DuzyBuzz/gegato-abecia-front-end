@@ -14,6 +14,7 @@ import { FuneralChargesService } from '../../services/funeral-charges.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
+import { getRoleLabel } from '../../utils/role-access.util';
 
 interface StatementItem {
   description: string;
@@ -87,7 +88,7 @@ dateNow: Date = new Date();
       
       this.currentUser = {
         name: fullName || authUser.username || 'User',
-        role: authUser.role || 'Biller',
+        role: getRoleLabel(authUser.roleAccess),
         firstName: authUser.firstName,
         lastName: authUser.lastName
       };

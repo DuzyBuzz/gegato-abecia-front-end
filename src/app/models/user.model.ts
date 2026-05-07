@@ -5,10 +5,7 @@ export interface User {
   accountNumber?: string;
   firstName: string;
   lastName: string;
-  role: string;
-  companyRole?: string;
   password?: string;
-  position?: string;
   roleAccess?: number;
 }
 // complete api response example for reference:

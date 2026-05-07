@@ -19,7 +19,8 @@ export class AuthInterceptor implements HttpInterceptor {
     if (user) {
       const resolvedUserId = user.userId ?? user.id;
       const headers: Record<string, string> = {
-        'X-User-Role': String(user.role || ''),
+        'X-User-Role': String(this.auth.getRole() || ''),
+        'X-User-Role-Access': String(this.auth.getRoleAccess() ?? ''),
         'X-Username': String(user.accountNumber || user.username || ''),
       };
 

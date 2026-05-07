@@ -17,6 +17,7 @@ import { StatementOfAccount } from './document/statement-of-account/statement-of
 import { FuneralServiceContractPrinting } from './document/funeral-service-contract-printing/funeral-service-contract-printing';
 import { AuthorityToCremateRemainsPrinting } from './document/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
 import { CremationCertificate } from './document/cremation-certificate/cremation-certificate';
+import { RoleAccess } from './utils/role-access.util';
 
 export const routes: Routes = [
 
@@ -38,7 +39,7 @@ export const routes: Routes = [
     path: 'admin',
     component: MainLayout,
     canActivate: [roleGuard],
-    data: { roles: ['Admin'], redirectTo: '/admin/dashboard' },
+    data: { roleAccess: [RoleAccess.Admin], redirectTo: '/admin/dashboard' },
     children: [
 
       {
@@ -56,7 +57,7 @@ export const routes: Routes = [
         path: 'users',
         component: UsersComponent,
         canActivate: [roleGuard],
-        data: { roles: ['Admin'] }
+        data: { roleAccess: [RoleAccess.Admin] }
       },
       {
         path: 'profile',
@@ -132,7 +133,7 @@ export const routes: Routes = [
     path: 'billing',
     component: BillingLayoutComponent,
     canActivate: [roleGuard],
-    data: { roles: ['Biller'], redirectTo: '/billing/deceased' },
+    data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' },
     children: [
 
       {
@@ -164,25 +165,25 @@ export const routes: Routes = [
                   path: 'funeral-contract/new',
                     component: FuneralContractEntry,
                     canActivate: [roleGuard],
-                    data: { roles: ['Admin'], redirectTo: '/billing/deceased' }
+                    data: { roleAccess: [RoleAccess.Admin, RoleAccess.Biller], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'funeral-contract/:contractId',
                     component: FuneralContractEntry,
                     canActivate: [roleGuard],
-                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
+                    data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'billing/:contractId',
                     component: FuneralBillingComponent,
                     canActivate: [roleGuard],
-                    data: { roles: ['Biller'], redirectTo: '/billing/deceased' }
+                    data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
                 },
                 {
                   path: 'payments/:contractId',
                     component: FuneralPaymentComponent,
                     canActivate: [roleGuard],
-                    data: { roles: ['Accounting'], redirectTo: '/billing/deceased' }
+                    data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/billing/deceased' }
                 }
             ]
           },
@@ -198,7 +199,7 @@ export const routes: Routes = [
     path: 'accounting',
     component: AccountingLayoutComponent,
     canActivate: [roleGuard],
-    data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' },
+    data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/accounting/deceased' },
     children: [
       {
         path: '',
@@ -227,25 +228,25 @@ export const routes: Routes = [
                 path: 'funeral-contract/new',
                 component: FuneralContractEntry,
                 canActivate: [roleGuard],
-                data: { roles: ['Biller'], redirectTo: '/accounting/deceased' }
+                data: { roleAccess: [RoleAccess.Biller], redirectTo: '/accounting/deceased' }
               },
               {
                 path: 'funeral-contract/:contractId',
                 component: FuneralContractEntry,
                 canActivate: [roleGuard],
-                data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' }
+                data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/accounting/deceased' }
               },
               {
                 path: 'billing/:contractId',
                 component: FuneralBillingComponent,
                 canActivate: [roleGuard],
-                data: { roles: ['Biller'], redirectTo: '/accounting/deceased' }
+                data: { roleAccess: [RoleAccess.Biller], redirectTo: '/accounting/deceased' }
               },
               {
                 path: 'payments/:contractId',
                 component: FuneralPaymentComponent,
                 canActivate: [roleGuard],
-                data: { roles: ['Accounting'], redirectTo: '/accounting/deceased' }
+                data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/accounting/deceased' }
               }
             ]
           }

@@ -97,7 +97,7 @@ submit() {
     })
   ).subscribe({
     next: (user) => {
-      const redirectPath = this.auth.getHomeRoute(user.role);
+      const redirectPath = this.auth.getHomeRoute(user.roleAccess ?? null);
 
       if (redirectPath === '/login') {
         this.auth.logout();

@@ -2,20 +2,20 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { DialogModule } from 'primeng/dialog';
+import { ProfileComponent } from '../../../pages/profile/profile.component';
 
 interface DisplayUser {
   name: string;
   role: string;
-  companyRole?: string;
   firstName?: string;
   lastName?: string;
-  position?: string;
 }
 
 @Component({
   selector: 'app-accounting-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DialogModule],
   templateUrl: './accounting-layout.component.html',
   styleUrl: './accounting-layout.component.scss',
 })
@@ -26,6 +26,8 @@ export class AccountingLayoutComponent implements OnInit {
   };
 
   userMenuOpen = false;
+  profileDialogVisible = false;
+  readonly profileComponent = ProfileComponent;
 
   constructor(private router: Router, private auth: AuthService) {}
 
@@ -38,11 +40,9 @@ export class AccountingLayoutComponent implements OnInit {
 
       this.currentUser = {
         name: fullName || authUser.username || 'User',
-        role: authUser.role || 'Accounting',
-        companyRole: authUser.companyRole,
+        role: this.auth.getRole() || 'Accounting',
         firstName: authUser.firstName,
         lastName: authUser.lastName,
-        position: authUser.position,
       };
     }
   }
@@ -52,55 +52,7 @@ export class AccountingLayoutComponent implements OnInit {
   }
 
   get roleLabel(): string {
-    const mappedStoredRole = this.mapDisplayRole(this.currentUser.role);
-    if (mappedStoredRole) {
-      return mappedStoredRole;
-    }
-
-    const mappedCompanyRole = this.mapDisplayRole(this.currentUser.companyRole);
-    if (mappedCompanyRole) {
-      return mappedCompanyRole;
-    }
-
-    if (this.auth.isAdmin()) {
-      return 'Admin';
-    }
-
-    if (this.auth.isAccounting()) {
-      return 'Accounting';
-    }
-
-    if (this.auth.isBiller()) {
-      return 'Biller';
-    }
-
-    return this.currentUser.role || 'User';
-  }
-
-  private mapDisplayRole(value: string | undefined): string | null {
-    const normalized = String(value || '').trim().toLowerCase().replace(/[_-]+/g, ' ');
-
-    if (!normalized) {
-      return null;
-    }
-
-    if (normalized.includes('accounting') || normalized.includes('accountant')) {
-      return 'Accounting';
-    }
-
-    if (normalized.includes('admin')) {
-      return 'Admin';
-    }
-
-    if (normalized.includes('biller') || normalized.includes('staff') || normalized.includes('collector') || normalized.includes('super user')) {
-      return 'Biller';
-    }
-
-    return null;
-  }
-
-  get profileRoute(): string {
-    return this.auth.getProfileRoute();
+    return this.auth.getRole() || this.currentUser.role || 'User';
   }
 
   get workspaceEyebrow(): string {
@@ -152,7 +104,7 @@ export class AccountingLayoutComponent implements OnInit {
 
   openProfile(): void {
     this.userMenuOpen = false;
-    this.router.navigateByUrl(this.profileRoute);
+    this.profileDialogVisible = true;
   }
 
   @HostListener('document:click', ['$event'])

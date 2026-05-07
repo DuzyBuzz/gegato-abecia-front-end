@@ -1,4 +1,102 @@
 <p-toast></p-toast>
 
 <section class="profile-page">
-  <header class="profile-hero">
+  <div class="profile-header">
+    <div>
+      <h2>{{ profileName }}</h2>
+      <p>{{ roleLabel }}</p>
+    </div>
+    <button type="button" class="profile-secondary-button" (click)="toggleEditProfile()">
+      {{ editingProfile ? 'Cancel' : 'Edit' }}
+    </button>
+  </div>
+
+  <div class="profile-panel">
+    <form [formGroup]="profileForm" class="profile-form" (ngSubmit)="saveProfile()">
+      <div class="profile-form__grid" *ngIf="editingProfile; else readonlyProfile">
+        <div class="profile-form__field">
+          <label>Username</label>
+          <input type="text" formControlName="username" />
+        </div>
+        <div class="profile-form__field">
+          <label>Role</label>
+          <input type="text" [value]="roleLabel" readonly />
+        </div>
+        <div class="profile-form__field">
+          <label>First Name</label>
+          <input type="text" formControlName="firstName" />
+        </div>
+        <div class="profile-form__field">
+          <label>Last Name</label>
+          <input type="text" formControlName="lastName" />
+        </div>
+      </div>
+
+      <ng-template #readonlyProfile>
+        <div class="profile-readonly-grid">
+          <div>
+            <label>Username</label>
+            <p>{{ currentUser?.username || 'N/A' }}</p>
+          </div>
+          <div>
+            <label>Role</label>
+            <p>{{ roleLabel }}</p>
+          </div>
+          <div>
+            <label>First Name</label>
+            <p>{{ currentUser?.firstName || 'N/A' }}</p>
+          </div>
+          <div>
+            <label>Last Name</label>
+            <p>{{ currentUser?.lastName || 'N/A' }}</p>
+          </div>
+        </div>
+      </ng-template>
+
+      <div class="profile-form__actions" *ngIf="editingProfile">
+        <button type="submit" class="profile-primary-button" [disabled]="loading">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="profile-panel">
+    <form [formGroup]="form" class="profile-form" (ngSubmit)="changePassword()">
+      <div class="profile-form__grid">
+        <div class="profile-form__field">
+          <label>Current Password</label>
+          <div class="profile-password-field">
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="currentPassword" />
+            <button type="button" class="profile-password-toggle" (click)="togglePasswordVisibility('current')">
+              <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-form__field">
+          <label>New Password</label>
+          <div class="profile-password-field">
+            <input [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword" />
+            <button type="button" class="profile-password-toggle" (click)="togglePasswordVisibility('new')">
+              <span class="material-icons">{{ showNewPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-form__field">
+          <label>Confirm Password</label>
+          <div class="profile-password-field">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" />
+            <button type="button" class="profile-password-toggle" (click)="togglePasswordVisibility('confirm')">
+              <span class="material-icons">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <p class="profile-error-text" *ngIf="passwordsMismatch">Passwords do not match.</p>
+        </div>
+      </div>
+
+      <div class="profile-form__actions">
+        <button type="submit" class="profile-primary-button" [disabled]="loading">Change Password</button>
+      </div>
+    </form>
+  </div>
+</section>

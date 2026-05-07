@@ -28,6 +28,10 @@ export class DeceasedComponent {
     return this.auth.canManageFuneralContracts();
   }
 
+  get canCreateContracts(): boolean {
+    return Number((this.auth.currentUser as any)?.roleAccess) === 1;
+  }
+
   get scheduleRoute(): string {
     return `${this.auth.getOperationsBaseRoute()}/schedule`;
   }
@@ -37,7 +41,7 @@ export class DeceasedComponent {
   }
 
   openNewFuneralContract(): void {
-    if (!this.canManageContracts) {
+    if (!this.canCreateContracts) {
       return;
     }
 

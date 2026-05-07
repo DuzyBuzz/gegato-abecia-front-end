@@ -45,8 +45,8 @@ const SECTION_FIELDS: Record<number, string[]> = {
   1: ['contractNo', 'contractDate', 'dueDate', 'type'],
   2: ['firstName', 'lastName', 'dateOfBirth', 'dateOfDeath', 'gender', 'religion', 'placeOfDeath'],
   3: ['contractee', 'relationshipToDeceased', 'contactNo', 'addressLine1', 'municipality'],
-  4: ['dateOfTransfer', 'transferAddress', 'dateOfBurial', 'massTime', 'church', 'cementary'],
-  5: ['deliveryDate', 'deliveryDriver', 'deliveryHelper', 'deliveryStatus'],
+  4: ['deliveryDate', 'deliveryDriver', 'deliveryHelper', 'deliveryStatus'],
+  5: ['dateOfTransfer', 'transferAddress', 'dateOfBurial', 'massTime', 'church', 'cementary'],
   6: ['dateEmblamed', 'timeFinished', 'embalmedBy', 'finishedBy'],
   7: ['autopsy', 'autopsyDate', 'autopsyBy'],
   8: ['idType', 'claimIdNumber', 'issuedAt', 'issuedOn'],
@@ -98,8 +98,8 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     { id: 1, name: 'Contract ' },
     { id: 2, name: 'Deceased ' },
     { id: 3, name: 'Contractee ' },
-    { id: 4, name: 'Transfer & Burial/Cremation' },
-    { id: 5, name: 'Delivery' },
+    { id: 4, name: 'Delivery' },
+    { id: 5, name: 'Transfer & Burial/Cremation' },
     { id: 6, name: 'Embalming & Makeup' },
     { id: 7, name: 'Medical' },
     { id: 8, name: 'Identification ' },
@@ -914,15 +914,15 @@ submitContract(): void {
         ].join(' • ');
       case 4:
         return [
-          value.transferAddress || 'No wake location',
-          value.dateOfBurial ? `Burial ${this.formatDate(value.dateOfBurial)}` : 'No burial date',
-          value.church || value.cementary || 'Venue not set'
-        ].join(' • ');
-      case 5:
-        return [
           `Delivery ${this.deliveryStatusLabel}`,
           value.deliveryDate ? this.formatDate(value.deliveryDate) : 'No delivery date',
           value.deliveryDriver || 'No driver assigned'
+        ].join(' • ');
+      case 5:
+        return [
+          value.transferAddress || 'No wake location',
+          value.dateOfBurial ? `Burial ${this.formatDate(value.dateOfBurial)}` : 'No burial date',
+          value.church || value.cementary || 'Venue not set'
         ].join(' • ');
       case 6:
         return [
@@ -956,7 +956,7 @@ submitContract(): void {
   }
 
   getSectionStatusLabel(sectionId: number): 'Completed' | 'Scheduled' | 'Cancelled' | 'Not Started' {
-    if (sectionId === 5) {
+    if (sectionId === 4) {
       const deliveryStatus = this.normalizeDeliveryStatus(this.form.get('deliveryStatus')?.value);
 
       switch (deliveryStatus) {

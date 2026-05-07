@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
+import { getRoleLabel } from '../../utils/role-access.util';
 
 @Component({
   selector: 'app-profile',
@@ -65,7 +66,7 @@ export class ProfileComponent implements OnInit {
   }
 
   get roleLabel(): string {
-    return this.currentUser?.role || 'User';
+    return getRoleLabel(this.currentUser?.roleAccess);
   }
 
   get profileName(): string {
@@ -146,7 +147,7 @@ export class ProfileComponent implements OnInit {
       accountNumber: user.accountNumber,
       firstName: user.firstName,
       lastName: user.lastName,
-      companyRole: user.companyRole
+      companyRole: this.mapCompanyRoleFromRoleAccess(user.roleAccess)
     };
 
     this.http.post(`${this.api}/save`, payload).subscribe({
@@ -210,7 +211,7 @@ export class ProfileComponent implements OnInit {
       username: this.profileForm.get('username')?.value,
       firstName: this.profileForm.get('firstName')?.value,
       lastName: this.profileForm.get('lastName')?.value,
-      companyRole: this.currentUser.companyRole,
+      companyRole: this.mapCompanyRoleFromRoleAccess(this.currentUser.roleAccess),
       password: this.currentUser.password
     };
 
@@ -237,5 +238,17 @@ export class ProfileComponent implements OnInit {
         });
       }
     });
+  }
+
+  private mapCompanyRoleFromRoleAccess(roleAccess: number | undefined): string {
+    switch (roleAccess) {
+      case 3:
+        return 'SUPER_USER';
+      case 2:
+        return 'ACCOUNTING';
+      case 1:
+      default:
+        return 'BILLER';
+    }
   }
 }

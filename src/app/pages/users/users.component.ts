@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../shared/features/users/users.model';
 import { UserService } from '../../shared/features/users/users.service';
+import { RoleAccess, getRoleLabel, normalizeCompanyRole, resolveRoleAccess } from '../../utils/role-access.util';
 
 @Component({
   selector: 'app-users',
@@ -18,9 +19,9 @@ import { UserService } from '../../shared/features/users/users.service';
 })
 export class UsersComponent implements OnInit {
   readonly roleOptions = [
-    { label: 'Admin', value: 'SUPER_USER', hint: 'Full access to contracts, payments, dashboard, and users' },
-    { label: 'Biller', value: 'BILLER', hint: 'Can encode funeral contracts and charges' },
-    { label: 'Accounting', value: 'ACCOUNTING', hint: 'Can manage payment entries and collections' },
+    { label: 'Admin', value: 'SUPER_USER', roleAccess: RoleAccess.Admin, hint: 'Full access to contracts, payments, dashboard, and users' },
+    { label: 'Biller', value: 'BILLER', roleAccess: RoleAccess.Biller, hint: 'Can encode funeral contracts and charges' },
+    { label: 'Accounting', value: 'ACCOUNTING', roleAccess: RoleAccess.Accounting, hint: 'Can manage payment entries and collections' },
     { label: 'User', value: 'USER', hint: 'Limited access account' },
   ];
 
@@ -95,15 +96,15 @@ export class UsersComponent implements OnInit {
   }
 
   get adminUserCount(): number {
-    return this.users.filter((user) => user.role === 'Admin').length;
+    return this.users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Admin).length;
   }
 
   get billerUserCount(): number {
-    return this.users.filter((user) => user.role === 'Biller').length;
+    return this.users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Biller).length;
   }
 
   get accountingUserCount(): number {
-    return this.users.filter((user) => user.role === 'Accounting').length;
+    return this.users.filter((user) => resolveRoleAccess(user.roleAccess, user.companyRole || user.role) === RoleAccess.Accounting).length;
   }
 
   get billingTeamCount(): number {
@@ -285,16 +286,7 @@ export class UsersComponent implements OnInit {
   }
 
   private mapRoleLabel(companyRole: string): string {
-    switch (companyRole) {
-      case 'SUPER_USER':
-        return 'Admin';
-      case 'ACCOUNTING':
-        return 'Accounting';
-      case 'BILLER':
-        return 'Biller';
-      default:
-        return 'User';
-    }
+    return getRoleLabel(undefined, normalizeCompanyRole(companyRole));
   }
 
   private syncSessionUser(user: User): void {
@@ -320,16 +312,7 @@ export class UsersComponent implements OnInit {
   }
 
   private mapRoleAccess(companyRole: string): number | undefined {
-    switch (companyRole) {
-      case 'BILLER':
-        return 1;
-      case 'ACCOUNTING':
-        return 2;
-      case 'SUPER_USER':
-        return 3;
-      default:
-        return undefined;
-    }
+    return resolveRoleAccess(undefined, companyRole);
   }
 
 }

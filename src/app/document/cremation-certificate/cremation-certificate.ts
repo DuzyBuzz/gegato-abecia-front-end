@@ -6,6 +6,7 @@ import { FuneralContract } from '../../models/funeral-contract.model';
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { AuthService } from '../../services/auth.service';
 import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
+import { getRoleLabel } from '../../utils/role-access.util';
 
 @Component({
   selector: 'app-cremation-certificate',
@@ -77,7 +78,7 @@ export class CremationCertificate implements OnInit, OnDestroy {
       
       this.currentUser = {
         name: fullName || authUser.username || 'Officer in Charge',
-        role: authUser.role || 'Biller'
+        role: getRoleLabel(authUser.roleAccess)
       };
     }
 
