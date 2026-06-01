@@ -8,8 +8,13 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private auth: AuthService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip token injection for external URLs
-    if (!req.url.includes('localhost') && !req.url.includes('gegato-abecia')) {
+    // Skip token injection for external URLs that are not our API
+    const isOwnApi =
+      req.url.startsWith('/api') ||
+      req.url.includes('localhost') ||
+      req.url.includes('gegato-abecia');
+
+    if (!isOwnApi) {
       return next.handle(req);
     }
 

@@ -1,230 +1,136 @@
-@use 'sass:color';
-
-// Color Palette
-$color-primary: #2563eb;
-$color-primary-dark: #1d4ed8;
-$color-primary-light: #60a5fa;
-$color-secondary: #0f172a;
-$color-white: #ffffff;
-$color-bg-light: #f8fafc;
-$color-bg-lighter: #eef2f7;
-$color-text-dark: #1e293b;
-$color-text-medium: #475569;
-$color-text-light: #64748b;
-$color-border: #cbd5e1;
-$color-border-light: #e2e8f0;
-$color-completed: #059669;
-$color-in-progress: #2563eb;
-$color-not-started: #9ca3af;
-$color-cancelled: #dc2626;
-$color-error: #dc2626;
-$color-success: #16a34a;
-
-// Spacing and Sizing
-$header-height: 90px;
-$sidebar-width: 280px;
-$border-radius: 8px;
-$border-radius-lg: 12px;
-$box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-$box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-// ============================================================
-// MAIN SHELL & LAYOUT
-// ============================================================
+:host {
+  display: block;
+  color: #1f2937;
+  --ce-border: #d1d5db;
+  --ce-muted: #6b7280;
+  --ce-heading: #111827;
+  --ce-accent: #2563eb;
+  --ce-surface: #f8fafc;
+  --ce-bg: #e5e7eb;
+}
 
 .contract-entry-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f3f4f6;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.35rem 0.4rem 0.9rem;
+  background: var(--ce-bg);
 }
-
-// ============================================================
-// HEADER
-// ============================================================
 
 .contract-entry-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  min-height: 64px;
-  padding: 10px 20px;
-  background: $color-white;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 0.65rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.22rem;
+  background: #f3f4f6;
+  border: 1px solid var(--ce-border);
   box-shadow: none;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  flex-wrap: wrap;
-
-  @media (max-width: 1024px) {
-    padding: 12px 24px;
-    flex-direction: column;
-    height: auto;
-    gap: 12px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 12px 16px;
-  }
-}
-
-.contract-entry-header__left {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
-.contract-entry-header__logo-block {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.contract-entry-header__logo {
-  display: none;
-}
-
-.contract-entry-header__branding {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  position: static;
 }
 
 .contract-entry-header__title {
   margin: 0;
-  font-size: 34px;
+  font-size: 3rem;
   font-weight: 700;
-  color: #1f2937;
   line-height: 1;
+  color: #111827;
+}
 
-  @media (max-width: 768px) {
-    font-size: 24px;
-  }
+.contract-entry-header__meta {
+  margin-top: 0.15rem;
+}
+
+.contract-entry-header__number,
+.contract-entry-header__last-updated {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--ce-muted);
 }
 
 .contract-entry-header__meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.contract-entry-header__number {
-  font-size: 12px;
-  font-weight: 500;
-  color: $color-text-light;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
+  gap: 0.35rem;
 }
 
 .contract-entry-header__status-pill {
-  display: inline-block;
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  height: 1.05rem;
+  padding: 0 0.35rem;
+  border: 1px solid #10b981;
   border-radius: 999px;
-  font-size: 10px;
+  background: #d1fae5;
+  color: #047857;
+  font-size: 0.52rem;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: $color-text-light;
-  background: $color-bg-lighter;
-  border: 1px solid $color-border-light;
+  text-transform: uppercase;
+}
 
-  &.contract-entry-header__status-pill--completed {
-    background: rgba($color-completed, 0.12);
-    color: $color-completed;
-    border-color: rgba($color-completed, 0.35);
-  }
+.contract-entry-header__status-pill--completed {
+  border-color: #10b981;
+  background: #d1fae5;
+  color: #047857;
+}
 
-  &.contract-entry-header__status-pill--scheduled {
-    background: rgba($color-primary, 0.12);
-    color: $color-primary;
-    border-color: rgba($color-primary, 0.28);
-  }
+.contract-entry-header__status-pill--scheduled {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+}
 
-  &.contract-entry-header__status-pill--cancelled {
-    background: rgba($color-cancelled, 0.1);
-    color: $color-cancelled;
-    border-color: rgba($color-cancelled, 0.28);
-  }
+.contract-entry-header__status-pill--cancelled {
+  border-color: #ef4444;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .contract-entry-header__center {
-  flex: 1;
   text-align: center;
-  padding: 0 20px;
-
-  @media (max-width: 1024px) {
-    padding: 0;
-    flex: 0 0 100%;
-  }
-}
-
-.contract-entry-header__last-updated {
-  margin: 0;
-  font-size: 12px;
-  color: $color-text-light;
-  font-weight: 500;
 }
 
 .contract-entry-header__actions {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-
-  @media (max-width: 1024px) {
-    flex: 0 0 100%;
-    width: 100%;
-  }
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .contract-entry-header__btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  color: $color-text-dark;
-  font-size: 12px;
+  gap: 0.45rem;
+  height: 1.75rem;
+  padding: 0 0.65rem;
+  border: 1px solid #cfd4dc;
+  border-radius: 0.35rem;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.66rem;
   font-weight: 600;
-  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
 
-  &:hover {
-    background: $color-border;
-    color: $color-text-dark;
-    box-shadow: $box-shadow-sm;
-  }
+.contract-entry-header__btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
 
-  &:active {
-    transform: scale(0.98);
-  }
+.contract-entry-header__btn--primary {
+  background: var(--ce-accent);
+  border-color: var(--ce-accent);
+  color: #ffffff;
+}
 
-  &--primary {
-    background: $color-primary;
-    border-color: $color-primary;
-    color: $color-white;
-    font-weight: 700;
-
-    &:hover {
-      background: $color-primary-dark;
-    }
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 12px;
-    gap: 6px;
-  }
+.contract-entry-header__btn--primary:hover {
+  background: #1e40af;
+  border-color: #1e40af;
 }
 
 .contract-entry-header__dropdown-wrapper {
@@ -233,963 +139,369 @@ $box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
 .contract-entry-header__dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.45rem);
   right: 0;
-  margin-top: 6px;
-  background: $color-white;
-  border: 1px solid $color-border;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow-lg;
-  min-width: 200px;
-  z-index: 100;
-  overflow: hidden;
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px 16px;
-    border: none;
-    background: transparent;
-    color: $color-text-dark;
-    font-size: 13px;
-    font-weight: 500;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background: $color-bg-light;
-      color: $color-primary;
-    }
-
-    &:not(:last-child) {
-      border-bottom: 1px solid $color-border-light;
-    }
-
-    i {
-      font-size: 14px;
-      width: 18px;
-      text-align: center;
-    }
-  }
+  min-width: 12rem;
+  padding: 0.25rem;
+  border-radius: 0.35rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 6px 16px -10px rgba(15, 23, 42, 0.35);
+  z-index: 30;
 }
 
-// ============================================================
-// MAIN LAYOUT
-// ============================================================
+.contract-entry-header__dropdown-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: #334155;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.contract-entry-header__dropdown-menu button:hover {
+  background: #f8fafc;
+}
 
 .contract-entry-layout {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
+  margin-top: 0.35rem;
 }
-
-// ============================================================
-// LEFT SIDEBAR - WORKFLOW
-// ============================================================
-
-.contract-entry-workflow {
-  display: none;
-}
-
-.contract-entry-workflow__header {
-  padding-bottom: 16px;
-  border-bottom: 1px solid $color-border-light;
-}
-
-.contract-entry-workflow__title {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: $color-text-light;
-}
-
-.contract-entry-workflow__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.contract-entry-workflow__step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 12px;
-  background: $color-white;
-  border: 1px solid $color-border-light;
-  border-radius: $border-radius;
-  color: $color-text-medium;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-
-  &:hover {
-    background: #f8fbff;
-    border-color: #bfdbfe;
-    color: $color-primary;
-  }
-
-  &--active {
-    background: $color-primary;
-    border-color: $color-primary;
-    color: $color-white;
-    box-shadow: none;
-  }
-
-  &--completed {
-    border-color: rgba($color-completed, 0.2);
-    background: #f0fdf4;
-    color: $color-completed;
-  }
-
-  &--scheduled {
-    border-color: rgba($color-primary, 0.18);
-    background: #eff6ff;
-    color: $color-primary;
-  }
-
-  &--cancelled {
-    border-color: rgba($color-cancelled, 0.18);
-    background: #fef2f2;
-    color: $color-cancelled;
-  }
-}
-
-.contract-entry-workflow__step-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  width: 28px;
-  height: 28px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 12px;
-
-  .contract-entry-workflow__step--active & {
-    background: rgba($color-white, 0.25);
-  }
-
-  .contract-entry-workflow__step--completed & {
-    background: rgba($color-completed, 0.14);
-  }
-
-  .contract-entry-workflow__step--scheduled & {
-    background: rgba($color-primary, 0.14);
-  }
-
-  .contract-entry-workflow__step--cancelled & {
-    background: rgba($color-cancelled, 0.12);
-  }
-}
-
-.contract-entry-workflow__step-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.contract-entry-workflow__progress {
-  padding: 16px;
-  background: $color-white;
-  border: 1px solid $color-border-light;
-  border-radius: $border-radius;
-}
-
-.contract-entry-workflow__progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.contract-entry-workflow__progress-label {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: $color-text-light;
-}
-
-.contract-entry-workflow__progress-percent {
-  font-size: 13px;
-  font-weight: 700;
-  color: $color-primary-light;
-}
-
-.contract-entry-workflow__progress-bar {
-  width: 100%;
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.contract-entry-workflow__progress-fill {
-  height: 100%;
-  background: $color-primary;
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.contract-entry-workflow__progress-text {
-  margin: 0;
-  font-size: 11px;
-  color: $color-text-light;
-  text-align: center;
-}
-
-.contract-entry-workflow__actions {
-  border-top: 1px solid rgba($color-white, 0.1);
-  padding-top: 16px;
-}
-
-.contract-entry-workflow__actions-title {
-  margin: 0 0 12px 0;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba($color-white, 0.5);
-}
-
-.contract-entry-workflow__action-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 12px;
-  background: rgba($color-primary, 0.1);
-  border: 1px solid rgba($color-primary, 0.3);
-  border-radius: $border-radius;
-  color: $color-primary-light;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-
-  &:hover {
-    background: rgba($color-primary, 0.15);
-    border-color: $color-primary-light;
-    color: $color-white;
-  }
-
-  i {
-    font-size: 14px;
-  }
-
-  span {
-    flex: 1;
-  }
-
-  &:not(:last-child) {
-    margin-bottom: 8px;
-  }
-}
-
-// ============================================================
-// MAIN CONTENT AREA
-// ============================================================
-
-.contract-entry-main {
-  flex: 1;
-  width: 100%;
-  overflow-y: auto;
-  padding: 14px;
-
-  @media (max-width: 1024px) {
-    padding: 12px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 16px;
-  }
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: $color-bg-lighter;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $color-border;
-    border-radius: 4px;
-
-    &:hover {
-      background: $color-border-light;
-    }
-  }
-}
-
-// ============================================================
-// ALERT
-// ============================================================
-
-.contract-entry-alert {
-  padding: 12px 16px;
-  background: rgba($color-in-progress, 0.1);
-  border: 1px solid rgba($color-in-progress, 0.3);
-  border-radius: $border-radius;
-  color: color.adjust($color-in-progress, $lightness: -10%);
-  font-size: 13px;
-  margin-bottom: 20px;
-}
-
-// ============================================================
-// FORM
-// ============================================================
 
 .contract-entry-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: block;
 }
 
-// ============================================================
-// ACCORDION SECTIONS
-
-// ============================================================
-// GRID LAYOUT FOR SECTIONS
-// ============================================================
+.contract-entry-main {
+  max-width: 100%;
+}
 
 .contract-entry-sections-grid {
-  display: block;
-  column-count: 1;
-  column-gap: 12px;
-  margin-bottom: 24px;
-
-  @media (min-width: 768px) {
-    column-count: 2;
-  }
-
-  @media (min-width: 1280px) {
-    column-count: 4;
-  }
-
-  @media (max-width: 768px) {
-    column-count: 1;
-  }
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 0.45rem;
+  row-gap: 0;
+  align-items: start;
+  align-content: start;
 }
 
-// ============================================================
-// ACCORDION SECTIONS
-// ============================================================
+.contract-entry-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
-.contract-entry-section {
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 12px;
-  vertical-align: top;
-  break-inside: avoid;
-  page-break-inside: avoid;
-  background: $color-white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+.contract-entry-column--1 { grid-column: 1; grid-row: 1; }
+.contract-entry-column--2 { grid-column: 2; grid-row: 1; }
+.contract-entry-column--3 { grid-column: 3; grid-row: 1; }
+.contract-entry-column--4 { grid-column: 4; grid-row: 1; }
+
+.contract-entry-card {
+  border: 1px solid var(--ce-border);
+  border-radius: 0.35rem;
+  background: #f3f4f6;
+  box-shadow: none;
   overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-    border-color: #d1d5db;
-  }
-
-  &[data-section="1"] .contract-entry-section__number--1 {
-    color: #2563eb;
-  }
-
-  &[data-section="2"] .contract-entry-section__number--2 {
-    color: #2563eb;
-  }
-
-  &[data-section="3"] .contract-entry-section__number--3 {
-    color: #2563eb;
-  }
-
-  &[data-section="4"] .contract-entry-section__number--4 {
-    color: #2563eb;
-  }
-
-  &[data-section="5"] .contract-entry-section__number--5 {
-    color: #2563eb;
-  }
-
-  &[data-section="6"] .contract-entry-section__number--6 {
-    color: #2563eb;
-  }
-
-  &[data-section="7"] .contract-entry-section__number--7 {
-    color: #2563eb;
-  }
-
-  &[data-section="8"] .contract-entry-section__number--8 {
-    color: #2563eb;
-  }
-
-  &[data-section="9"] .contract-entry-section__number--9 {
-    color: #2563eb;
-  }
-
-  &[data-section="10"] .contract-entry-section__number--10 {
-    color: #2563eb;
-  }
 }
 
 .contract-entry-section__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: $color-white;
-  border-bottom: 1px solid #eff2f5;
-  cursor: default;
-  transition: none;
-
-  &:hover {
-    background: $color-white;
-  }
+  border-bottom: 1px solid #b6c6f7;
+  padding: 0.4rem 0.58rem;
+  background: #f3f4f6;
 }
 
 .contract-entry-section__title-block {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
 }
 
 .contract-entry-section__number {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 14px;
-  width: auto;
-  height: auto;
-  background: transparent;
-  border-radius: 0;
-  color: #2563eb;
-  font-size: 11px;
+  font-size: 0.54rem;
   font-weight: 700;
-  flex-shrink: 0;
+  color: #ffffff;
+  background: #475569;
+}
 
-  &::after {
-    content: ".";
-  }
+.contract-entry-section__number--1,
+.contract-entry-section__number--2,
+.contract-entry-section__number--3,
+.contract-entry-section__number--4,
+.contract-entry-section__number--5,
+.contract-entry-section__number--6,
+.contract-entry-section__number--7,
+.contract-entry-section__number--8,
+.contract-entry-section__number--9,
+.contract-entry-section__number--10 {
+  background: transparent;
+  color: #2563eb;
 }
 
 .contract-entry-section__title {
   margin: 0;
-  font-size: 11px;
+  font-size: 0.76rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: #2563eb;
-  line-height: 1.3;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.contract-entry-section__subtitle {
-  display: none;
-}
-
-.contract-entry-section__actions {
-  display: none;
-}
-
-.contract-entry-section__badge {
-  display: none;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin: 0 12px;
-
-  &--completed {
-    background: rgba($color-completed, 0.1);
-    color: $color-completed;
-    border: 1px solid rgba($color-completed, 0.3);
-  }
-
-  &--in-progress {
-    background: rgba($color-in-progress, 0.1);
-    color: $color-in-progress;
-    border: 1px solid rgba($color-in-progress, 0.3);
-  }
-
-  &--scheduled {
-    background: rgba($color-primary, 0.1);
-    color: $color-primary;
-    border: 1px solid rgba($color-primary, 0.24);
-  }
-
-  &--cancelled {
-    background: rgba($color-cancelled, 0.08);
-    color: $color-cancelled;
-    border: 1px solid rgba($color-cancelled, 0.2);
-  }
-
-  &--not-started {
-    background: rgba($color-not-started, 0.1);
-    color: $color-not-started;
-    border: 1px solid rgba($color-not-started, 0.2);
-  }
-}
-
-.contract-entry-section__lock {
-  display: none;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #f8fafc;
-  border: 1px solid #dbe5f0;
-  color: $color-text-light;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.contract-entry-section__toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: $color-text-light;
-  font-size: 16px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: $color-primary;
-    background: rgba($color-primary, 0.05);
-    border-radius: $border-radius;
-  }
-}
-
-.contract-entry-section__summary {
-  display: none;
-  margin: 0;
-  padding: 14px 20px 18px 76px;
-  color: $color-text-dark;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.7;
-  border-top: 1px solid rgba($color-border-light, 0.8);
-  border-left: 4px solid $color-primary;
-  background: #f8fbff;
 }
 
 .contract-entry-section__content {
-  padding: 10px 12px 12px;
-  animation: none;
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  padding: 0.35rem 0.55rem 0.5rem;
 }
-
-// ============================================================
-// SUBSECTION TITLES
-// ============================================================
 
 .contract-entry-subsection-title {
-  margin: 0 0 10px 0;
-  font-size: 10px;
+  margin: 0.05rem 0 0.3rem;
+  font-size: 0.66rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: $color-primary;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba($color-primary, 0.2);
+  color: #2563eb;
 }
-
-// ============================================================
-// FORM FIELDS
-// ============================================================
 
 .contract-entry-field__label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 10px;
+  margin-bottom: 0.14rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  color: #4b5563;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  color: var(--ce-muted);
 }
 
 .contract-entry-field__input {
   width: 100%;
-  min-height: 32px;
-  padding: 6px 9px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 12px;
-  color: $color-text-dark;
-  background: $color-white;
-  transition: all 0.2s ease;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
-    background: $color-white;
-  }
-
-  &:hover:not(:focus):not(:disabled) {
-    border-color: $color-border-light;
-  }
-
-  &:disabled,
-  &--readonly {
-    background: $color-bg-lighter;
-    color: $color-text-light;
-    cursor: not-allowed;
-    border-color: $color-border-light;
-  }
-
-  &--invalid {
-    border-color: $color-error;
-    background: rgba($color-error, 0.02);
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba($color-error, 0.1);
-    }
-  }
-
-  &::placeholder {
-    color: $color-text-light;
-  }
+  min-height: 1.78rem;
+  border: 1px solid #c7ced8;
+  border-radius: 0.22rem;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  padding: 0.3rem 0.44rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 textarea.contract-entry-field__input {
+  min-height: 2.9rem;
   resize: vertical;
-  min-height: 64px;
-  font-family: inherit;
+}
+
+.contract-entry-field__input::placeholder {
+  color: #94a3b8;
+}
+
+app-select-helper {
+  display: block;
+}
+
+:host ::ng-deep app-select-helper .p-dropdown,
+:host ::ng-deep app-select-helper .p-select {
+  width: 100%;
+  min-height: 1.58rem;
+  border: 1px solid #c7ced8;
+  border-radius: 0.22rem;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+:host ::ng-deep app-select-helper .p-dropdown .p-dropdown-label,
+:host ::ng-deep app-select-helper .p-select .p-select-label {
+  font-size: 0.78rem;
+  line-height: 1.1;
+  padding: 0.38rem 0.44rem;
+  color: #1f2937;
+}
+
+:host ::ng-deep app-select-helper .p-dropdown:not(.p-disabled).p-focus,
+:host ::ng-deep app-select-helper .p-select:not(.p-disabled).p-focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+:host ::ng-deep app-select-helper .p-dropdown-trigger,
+:host ::ng-deep app-select-helper .p-select-dropdown {
+  width: 1.58rem;
+}
+
+.contract-entry-field__input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.contract-entry-field__input--readonly {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.contract-entry-field__input--invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
 .contract-entry-field__error {
   display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  color: $color-error;
-  font-weight: 600;
+  margin-top: 0.25rem;
+  color: #dc2626;
+  font-size: 0.74rem;
 }
 
-// ============================================================
-// CHECKBOXES
-// ============================================================
-
 .contract-entry-checkboxes {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.2rem;
 }
 
 .contract-entry-checkbox {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 0;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: $color-bg-light;
-  }
-
-  input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: $color-primary;
-    flex-shrink: 0;
-  }
-
-  span {
-    font-size: 12px;
-    font-weight: 500;
-    color: $color-text-dark;
-  }
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  color: #334155;
 }
 
-// ============================================================
-// FOOTER
-// ============================================================
-
-.contract-entry-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background: $color-bg-light;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 8px;
-  border-radius: 6px;
+.contract-entry-checkbox input {
+  width: 0.68rem;
+  height: 0.68rem;
 }
 
 .contract-entry-footer__note {
-  font-size: 12px;
-  color: $color-text-light;
-  font-weight: 600;
+  font-size: 0.62rem;
+  color: #64748b;
+  margin-right: 0.75rem;
 }
 
 .contract-entry-footer__submit {
-  padding: 12px 32px;
-  background: $color-primary;
-  color: $color-white;
-  border: none;
-  border-radius: $border-radius;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.95rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &:hover {
-    background: $color-primary-dark;
-    box-shadow: $box-shadow-md;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  &:disabled {
-    background: $color-not-started;
-    cursor: not-allowed;
-  }
 }
 
-// ============================================================
-// GRID LAYOUT HELPER
-// ============================================================
+.contract-entry-footer__submit:hover {
+  background: #1e40af;
+}
 
+/* Fallback utility support in case Tailwind utility classes are unavailable */
 .grid {
   display: grid;
-  gap: 16px;
-
-  @media (max-width: 768px) {
-    gap: 12px;
-  }
+  gap: 0.35rem;
 }
 
-// Responsive grid helpers
-.grid-cols-1 {
-  @media (min-width: 1px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-.grid-cols-2 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (max-width: 639px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-.grid-cols-3 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  @media (max-width: 639px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-.grid-cols-4 {
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  @media (max-width: 767px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-.grid-cols-5 {
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-  @media (max-width: 1023px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-.sm\:grid-cols-2 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.sm\:grid-cols-3 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.sm\:grid-cols-4 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.sm\:grid-cols-5 {
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-.md\:grid-cols-3 {
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-// Spacing utilities
 .gap-4 {
-  gap: 16px;
+  gap: 0.35rem;
 }
 
-.gap-6 {
-  gap: 24px;
+.grid-cols-1 {
+  grid-template-columns: 1fr;
 }
 
 .mt-4 {
-  margin-top: 16px;
+  margin-top: 0.45rem;
 }
 
 .mt-6 {
-  margin-top: 24px;
+  margin-top: 0.7rem;
 }
 
-// Column span helpers
-.sm\:col-span-2 {
-  @media (min-width: 640px) {
+@media (max-width: 1150px) {
+  .contract-entry-sections-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.45rem;
+  }
+
+  .contract-entry-column {
+    gap: 0.45rem;
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .sm\:col-span-2 {
     grid-column: span 2 / span 2;
   }
 }
 
-// ============================================================
-// PRIMENG DROPDOWN OVERRIDE
-// ============================================================
-
-::ng-deep {
-  .p-dropdown {
-    width: 100%;
-
-    .p-dropdown-trigger {
-      background: transparent;
-    }
-
-    .p-dropdown-label {
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-
-    &.ng-invalid.ng-touched {
-      border-color: $color-error;
-    }
+@media (max-width: 1080px) {
+  .contract-entry-header {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
   }
 
-  .p-dropdown-items-wrapper {
-    max-height: 200px;
+  .contract-entry-header__center {
+    text-align: left;
   }
 
-  .p-dropdown-item {
-    font-size: 13px;
-    padding: 10px 12px;
-
-    &:hover {
-      background: rgba($color-primary, 0.1);
-    }
+  .contract-entry-header__actions {
+    justify-content: flex-start;
   }
 }
-
-// ============================================================
-// RESPONSIVE MOBILE
-// ============================================================
 
 @media (max-width: 768px) {
-  .contract-entry-header__actions {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-
-    button {
-      width: 100%;
-    }
+  .contract-entry-shell {
+    padding: 0.45rem;
   }
 
+  .contract-entry-section__content,
   .contract-entry-section__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
   }
 
-  .contract-entry-section__actions {
-    width: 100%;
-    justify-content: space-between;
+  .contract-entry-header {
+    position: static;
   }
 
-  .contract-entry-section__title-block {
-    width: 100%;
+  .contract-entry-checkboxes {
+    grid-template-columns: 1fr;
   }
 
-  .contract-entry-section__badge {
-    margin: 0;
+  .contract-entry-header__title {
+    font-size: 2rem;
   }
 
-  .contract-entry-section__content {
-    padding: 16px;
+  .contract-entry-sections-grid {
+    grid-template-columns: 1fr;
+    row-gap: 0.4rem;
   }
 
-  .contract-entry-section__summary {
-    padding: 0 16px 16px 16px;
-  }
-
-  .contract-entry-footer {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
+  .contract-entry-column {
+    gap: 0.4rem;
   }
 }
-

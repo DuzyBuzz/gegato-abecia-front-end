@@ -13,6 +13,11 @@
       </div>
 
       <div class="operations-header__actions">
+        <nav class="operations-quick-nav" aria-label="Workspace navigation">
+          <a [routerLink]="operationsBaseRoute + '/deceased'" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Records</a>
+          <a [routerLink]="operationsBaseRoute + '/schedule'" routerLinkActive="is-active">Schedule</a>
+        </nav>
+
         <div class="operations-user-menu-wrap user-menu">
           <button type="button" class="operations-user" (click)="toggleUserMenu()">
             <div class="operations-user__avatar">{{ getUserInitials(currentUser.name) }}</div>

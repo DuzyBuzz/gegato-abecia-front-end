@@ -11,7 +11,7 @@ export function mapFuneralPayment(api: any): FuneralPayment {
   console.log('🔄 MAPPER: mapFuneralPayment starting', { apiId: api?.id });
 
   const result = {
-    ...api,
+    id: toNumber(api?.id) ?? undefined,
 
     // ✅ DATE → string (for input[type="date"])
     dateIssued: formatDate(api.dateIssued),
@@ -19,11 +19,14 @@ export function mapFuneralPayment(api: any): FuneralPayment {
 
     // ✅ NUMBERS - safe conversion
     amount: toNumber(api.amount),
+    funeralServiceId: toNumber(api.funeralServiceId ?? api.serviced),
 
     // ✅ STRINGS - clean garbage
     controlNumber: cleanString(api.controlNumber),
     issuedBy: cleanString(api.issuedBy),
-    bank: cleanString(api.bank),
+    paymentType: cleanString(api.paymentType ?? api.bank),
+    orNumber: cleanString(api.orNumber),
+    arNumber: cleanString(api.arNumber),
     accountNumber: cleanString(api.accountNumber),
     description: cleanString(api.description),
     remarks: cleanString(api.remarks),
@@ -49,8 +52,22 @@ export function mapFuneralPayment(api: any): FuneralPayment {
 export function mapFuneralPaymentToApi(form: FuneralPayment): any {
   console.log('🔄 MAPPER: mapFuneralPaymentToApi starting', { id: form.id });
 
+  const funeralServiceId = toNumber(form.funeralServiceId);
   const result = {
-    ...form,
+    id: toNumber(form.id),
+    controlNumber: cleanString(form.controlNumber),
+    issuedBy: cleanString(form.issuedBy),
+    paymentType: cleanString(form.paymentType),
+    orNumber: cleanString(form.orNumber),
+    arNumber: cleanString(form.arNumber),
+    accountNumber: cleanString(form.accountNumber),
+    amount: toNumber(form.amount),
+    description: cleanString(form.description),
+    remarks: cleanString(form.remarks),
+    checkCleared: toBoolean(form.checkCleared),
+    funeralServiceId,
+    // Keep legacy alias for backward compatibility while backend endpoints transition.
+    serviced: funeralServiceId,
 
     // ✅ convert string → timestamp
     dateIssued: toTimestamp(form.dateIssued),

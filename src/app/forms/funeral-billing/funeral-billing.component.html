@@ -40,24 +40,19 @@
 		</div>
 
 		<div class="px-4 pt-3">
-			<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
+			<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
 				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-					<div class="text-[11px] uppercase text-gray-400">Contract Price</div>
+					<div class="text-[11px] uppercase text-gray-400">Casket/Urn Price</div>
 					<div class="text-sm font-semibold text-slate-700">₱{{ getContractPrice() | number:'1.2-2' }}</div>
 				</div>
 
 				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-					<div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
-					<div class="text-sm font-semibold text-amber-600">₱{{ getContractDiscount() | number:'1.2-2' }}</div>
+					<div class="text-[11px] uppercase text-gray-400">Discount</div>
+					<div class="text-sm font-semibold text-amber-600">₱{{ getTotalDiscount() | number:'1.2-2' }}</div>
 				</div>
 
 				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-					<div class="text-[11px] uppercase text-gray-400">Additional Charges</div>
-					<div class="text-sm font-semibold text-emerald-600">₱{{ getTotalCharges() | number:'1.2-2' }}</div>
-				</div>
-
-				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-					<div class="text-[11px] uppercase text-gray-400">Total Billed</div>
+					<div class="text-[11px] uppercase text-gray-400">Grand Billed</div>
 					<div class="text-sm font-semibold text-slate-700">₱{{ getGrandTotal() | number:'1.2-2' }}</div>
 				</div>
 
@@ -181,191 +176,10 @@
 		</div>
 
 		<div class="flex-1 min-h-0 px-3 pb-3">
-			<div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-				<div class="px-4 py-3 border-b border-slate-200 bg-white/70">
-					<h3 class="text-base font-semibold text-gray-800">Billing</h3>
-				</div>
-
-				<div class="p-3 bg-slate-50/70">
-					<div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-						<div class="px-4 py-3 border-b border-slate-200 flex items-start justify-between gap-3">
-							<div>
-								<h3 class="text-base font-semibold text-gray-800">Contract Pricing </h3>
-							</div>
-
-							<div class="flex gap-2">
-								<button
-									*ngIf="!billingSetupEditMode && canEditPricing"
-									type="button"
-									(click)="startBillingSetupEdit()"
-									class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
-								>
-									Edit Billing Setup
-								</button>
-
-								<button
-									*ngIf="billingSetupEditMode"
-									type="button"
-									(click)="saveBillingSetupEdit()"
-									[disabled]="loading"
-									class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 transition"
-								>
-									{{ loading ? 'Saving...' : 'Save Setup' }}
-								</button>
-
-								<button
-									*ngIf="billingSetupEditMode"
-									type="button"
-									(click)="cancelBillingSetupEdit()"
-									[disabled]="loading"
-									class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 transition"
-								>
-									Cancel
-								</button>
-							</div>
-						</div>
-
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-2 px-4 py-3 bg-white/80">
-							<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-								<div class="text-[11px] uppercase text-gray-400">Contract Price</div>
-								<input
-									*ngIf="billingSetupEditMode && canEditPricing; else parentContractPriceReadOnly"
-									type="number"
-									min="0"
-									step="0.01"
-									[(ngModel)]="pricingDraft.price"
-									[ngModelOptions]="{ standalone: true }"
-									class="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-								>
-								<ng-template #parentContractPriceReadOnly>
-									<div class="mt-1 text-lg font-semibold text-slate-700">₱{{ getContractPrice() | number:'1.2-2' }}</div>
-								</ng-template>
-								<!-- <p class="mt-2 text-xs text-gray-500">This is the base service amount before any add-on charges.</p> -->
-							</div>
-
-							<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-								<div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
-								<input
-									*ngIf="billingSetupEditMode && canEditPricing; else contractDiscountReadOnly"
-									type="number"
-									min="0"
-									step="0.01"
-									[(ngModel)]="pricingDraft.discount"
-									[ngModelOptions]="{ standalone: true }"
-									class="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-								>
-								<ng-template #contractDiscountReadOnly>
-									<div class="mt-1 text-lg font-semibold text-amber-600">₱{{ getContractDiscount() | number:'1.2-2' }}</div>
-								</ng-template>
-								<!-- <p class="mt-2 text-xs text-gray-500">Use this only for the main contract discount, not for charge-level deductions.</p> -->
-							</div>
-
-							<div class="rounded-lg border border-emerald-200 px-3 py-2.5 bg-emerald-50">
-								<div class="text-[11px] uppercase text-emerald-700">Net Contract Base</div>
-								<div class="mt-1 text-lg font-semibold text-emerald-800">₱{{ getNetContractBase() | number:'1.2-2' }}</div>
-								<!-- <p class="mt-2 text-xs text-emerald-700">Additional inclusions from the charges table will be added on top of this base amount.</p> -->
-							</div>
-						</div>
-						<!-- <div class="border-t border-slate-200"></div>
-						<div class="px-5 py-4 border-b border-slate-200"> -->
-					<!-- <div>
-						<h3 class="text-base font-semibold text-gray-800">Service and Casket / Urn Details</h3>
-						<p class="text-xs text-gray-500 mt-1">Type of service and Section 4 fields are managed here in Billing.</p>
-					</div> -->
-	                    				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 px-4 py-3 bg-white/80">
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Type of Service</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else serviceTypeReadOnly"
-							[(ngModel)]="serviceDetailsDraft.type"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="type"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #serviceTypeReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700">{{ FuneralContract?.type || 'Not set' }}</div>
-						</ng-template>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Casket</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else casketReadOnly"
-							[(ngModel)]="serviceDetailsDraft.casket"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="casket"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #casketReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700">{{ FuneralContract?.casket || 'Not set' }}</div>
-						</ng-template>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Casket Availability</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else casketAvailableReadOnly"
-							[(ngModel)]="serviceDetailsDraft.casketAvailable"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="casketAvailable"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #casketAvailableReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700">{{ FuneralContract?.casketAvailable || 'Not set' }}</div>
-						</ng-template>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Uniform</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else uniformReadOnly"
-							[(ngModel)]="serviceDetailsDraft.uniform"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="uniform"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #uniformReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700">{{ FuneralContract?.uniform || 'Not set' }}</div>
-						</ng-template>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Urn Type</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else urnTypeReadOnly"
-							[(ngModel)]="serviceDetailsDraft.urnType"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="urnType"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #urnTypeReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700">{{ FuneralContract?.urnType || 'Not set' }}</div>
-						</ng-template>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white md:col-span-2 xl:col-span-1">
-						<div class="text-[11px] uppercase text-gray-400">Urn Description</div>
-						<app-select-helper
-							*ngIf="billingSetupEditMode && canEditServiceDetails; else urnDescriptionReadOnly"
-							[(ngModel)]="serviceDetailsDraft.urnDescription"
-							[ngModelOptions]="{ standalone: true }"
-							comboboxName="urnDescription"
-							[searchable]="true"
-						></app-select-helper>
-						<ng-template #urnDescriptionReadOnly>
-							<div class="mt-1 text-sm font-semibold text-slate-700 whitespace-pre-wrap">{{ FuneralContract?.urnDescription || 'Not set' }}</div>
-						</ng-template>
-					</div>
-				</div>
-				</div>
-
-
-				</div>
-			</div>
 
 			<div class="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center gap-3">
 				<div>
-					<h2 class="text-lg font-semibold text-gray-800">Additional Charges</h2>
+					<h2 class="text-lg font-semibold text-gray-800">Package Enclosions</h2>
 				</div>
 
 				<button
@@ -374,149 +188,98 @@
 					class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
 				>
 					<i class="pi" [ngClass]="isChargesSectionVisible ? 'pi-eye-slash' : 'pi-eye'"></i>
-					{{ isChargesSectionVisible ? 'Hide Charges' : 'Show Charges' }}
+					{{ isChargesSectionVisible ? 'Hide Enclosions' : 'Show Enclosions' }}
 				</button>
 			</div>
+						<div class="px-4 py-3 border-b border-slate-200 bg-slate-50/70">
+							<div class="package-preset-grid">
+								<div>
+									<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">Enclosions Package</div>
+									<select
+										[(ngModel)]="selectedPackageId"
+										[ngModelOptions]="{ standalone: true }"
+										title="Enclosions package preset"
+										class="package-preset-select"
+										[disabled]="isLoadingPackagePresets || !canApplyPackagePreset"
+									>
+										<option [ngValue]="''">Select package preset</option>
+										<option *ngFor="let pkg of packagePresets" [ngValue]="pkg.id">{{ pkg.name }}</option>
+									</select>
+								</div>
 
+								<div class="package-preset-actions">
+									<button
+										type="button"
+										(click)="applySelectedPackagePreset()"
+										[disabled]="!canApplyPackagePreset || !selectedPackageId || isApplyingPackage"
+										class="inline-flex items-center justify-center rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 transition"
+									>
+										{{ isApplyingPackage ? 'Applying...' : 'Apply Package' }}
+									</button>
+								</div>
+							</div>
+
+							<div class="mt-2 text-xs text-gray-500" *ngIf="selectedPackagePreset as selectedPackage">
+								Default discount: ₱{{ selectedPackage.discount | number:'1.2-2' }}
+								<span class="mx-1">|</span>
+								Enclosions: {{ selectedPackage.charges.length }}
+								<span class="mx-1">|</span>
+								{{ selectedPackage.notes || 'No notes' }}
+							</div>
+
+							<div class="mt-1 text-xs text-emerald-700" *ngIf="autoMatchedPackageName">
+								Loaded preset from initialized enclosions: {{ autoMatchedPackageName }}
+							</div>
+
+							<div class="mt-2 text-xs text-amber-700" *ngIf="!canApplyPackagePreset">
+								Only biller and admin can apply package enclosions.
+							</div>
+						</div>
 			<ng-container *ngIf="isChargesSectionVisible">
 				<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
 					<div class="px-3 py-2.5 border-b border-gray-200 bg-slate-50/80 flex items-center justify-between gap-3">
 						<!-- <div class="text-sm font-semibold text-gray-800">Additional Charges List</div> -->
-						<div class="text-xs text-gray-500">{{ charges.length }} item{{ charges.length === 1 ? '' : 's' }}</div>
+						<div class="text-xs text-gray-500">{{ packageEnclosionsRows.length }} item{{ packageEnclosionsRows.length === 1 ? '' : 's' }}</div>
 					</div>
 
-					<div class="max-h-[300px] overflow-auto">
-						<table class="w-full text-sm">
-							<thead class="bg-slate-800">
-								<tr class="text-xs uppercase tracking-wide text-slate-100 border-b border-slate-700">
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-left">Type</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-left">Description</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-right">Qty</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-right">Unit Price</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-right">Discount</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 border-r border-slate-700 text-right">Amount</th>
-									<th class="sticky top-0 z-20 bg-slate-800 px-3 py-2.5 text-center">Actions</th>
+					<div class="xls-wrap">
+						<table class="xls-grid">
+							<thead>
+								<tr>
+									<th class="xls-th--center" style="width:1.8rem">#</th>
+									<th style="min-width:12rem">Description</th>
+									<th class="xls-th--right" style="width:5rem">Qty</th>
+									<th class="xls-th--right" style="width:9rem">Unit Price</th>
+									<th class="xls-th--right" style="width:8rem">Discount</th>
+									<th class="xls-th--right" style="width:9rem">Amount</th>
 								</tr>
 							</thead>
-
-							<tbody class="divide-y divide-gray-200">
-								<tr *ngFor="let charge of charges; let i = index; trackBy: trackByChargeRow" class="hover:bg-slate-50/70 transition-colors">
-								<td class="px-2 py-2 border-r border-gray-200 relative">
-									<app-select-helper
-										*ngIf="charge.isEditing && canEditCharges"
-										[(ngModel)]="charge.chargeType"
-										[ngModelOptions]="{ standalone: true }"
-										comboboxName="chargeTypes"
-										[searchable]="true"
-										class="relative z-50 block"
-									></app-select-helper>
-									<span *ngIf="!charge.isEditing">{{ charge.chargeType || '—' }}</span>
-								</td>
-
-								<td class="px-2 py-2 border-r border-gray-200 relative">
-									<app-select-helper
-										*ngIf="charge.isEditing && canEditCharges"
-										[(ngModel)]="charge.description"
-										[ngModelOptions]="{ standalone: true }"
-										comboboxName="chargeDescriptions"
-										[searchable]="true"
-										class="relative z-50 block"
-									></app-select-helper>
-									<span *ngIf="!charge.isEditing">{{ charge.description || '—' }}</span>
-								</td>
-
-								<td class="px-2 py-2 border-r border-gray-200 text-right">
-									<p-inputNumber
-										*ngIf="charge.isEditing && canEditCharges"
-										[(ngModel)]="charge.quantity"
-										[min]="0"
-										[useGrouping]="false"
-									></p-inputNumber>
-									<span *ngIf="!charge.isEditing">{{ charge.quantity | number:'1.0-0' }}</span>
-								</td>
-
-								<td class="px-2 py-2 border-r border-gray-200 text-right">
-									<p-inputNumber
-										*ngIf="charge.isEditing && canEditCharges"
-										[(ngModel)]="charge.unitPrice"
-										mode="currency"
-										currency="PHP"
-									></p-inputNumber>
-									<span *ngIf="!charge.isEditing" class="font-semibold">₱{{ charge.unitPrice | number:'1.2-2' }}</span>
-								</td>
-
-								<td class="px-2 py-2 border-r border-gray-200 text-right">
-									<p-inputNumber
-										*ngIf="charge.isEditing && canEditCharges"
-										[(ngModel)]="charge.discount"
-										mode="currency"
-										currency="PHP"
-										[min]="0"
-									></p-inputNumber>
-									<span *ngIf="!charge.isEditing">₱{{ charge.discount | number:'1.2-2' }}</span>
-								</td>
-
-								<td class="px-2 py-2 border-r border-gray-200 text-right font-semibold text-emerald-700">
-									₱{{ getChargeAmount(charge) | number:'1.2-2' }}
-								</td>
-
-								<td class="px-2 py-2 text-center">
-									<div class="flex justify-center gap-2">
-										<button
-											*ngIf="charge.isEditing"
-											(click)="saveCharge(charge)"
-											[disabled]="!canEditCharges"
-											class="inline-flex items-center justify-center w-9 h-9 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition"
-										>
-											<i class="pi pi-check text-sm"></i>
-										</button>
-
-										<button
-											*ngIf="!charge.isEditing"
-											[disabled]="!canEditCharges"
-											(click)="editCharge(charge)"
-											class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 bg-white text-amber-600 hover:bg-amber-50 shadow-sm transition"
-										>
-											<i class="pi pi-pencil text-sm"></i>
-										</button>
-
-										<button
-											*ngIf="canEditCharges"
-											(click)="deleteCharge(i)"
-											class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 bg-white text-rose-600 hover:bg-rose-50 shadow-sm transition"
-										>
-											<i class="pi pi-trash text-sm"></i>
-										</button>
-
-										<button
-											*ngIf="charge.isEditing"
-											(click)="cancelCharge(charge)"
-											[disabled]="!canEditCharges"
-											class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 bg-white text-slate-600 hover:bg-slate-100 shadow-sm transition"
-										>
-											<i class="pi pi-times text-sm"></i>
-										</button>
-									</div>
-								</td>
-							</tr>
-							</tbody>
-
-							<tfoot>
-								<tr class="bg-slate-50 border-t border-gray-200">
-									<td colspan="5" class="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 text-right">Total Additional Charges</td>
-									<td class="px-3 py-2 text-right text-sm font-bold text-emerald-700 border-r border-gray-200">₱{{ getTotalCharges() | number:'1.2-2' }}</td>
-									<td class="px-2 py-2"></td>
-								</tr>
-								<tr *ngIf="canEditCharges">
-									<td colspan="7" class="p-2 bg-white">
-										<button
-											(click)="addCharge()"
-											class="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition"
-										>
-											<i class="pi pi-plus text-sm"></i>
-											Add New Charge
-										</button>
+							<tbody>
+								<tr *ngFor="let row of packageEnclosionsRows; let i = index; trackBy: trackByPackageEnclosionsRow"
+									[class.xls-row--editing]="false">
+									<td class="xls-cell--seq">{{ i + 1 }}</td>
+									<td>{{ row.description }}</td>
+									<td class="xls-cell--num">
+										{{ row.quantity | number:'1.0-0' }}
 									</td>
+									<td class="xls-cell--num">
+										<span class="font-semibold">₱{{ row.unitPrice | number:'1.2-2' }}</span>
+									</td>
+									<td class="xls-cell--num">
+										₱{{ row.discount | number:'1.2-2' }}
+									</td>
+									<td class="xls-cell--num" style="color:#047857;font-weight:700">
+										₱{{ row.amount | number:'1.2-2' }}
+									</td>
+								</tr>
+								<tr *ngIf="charges.length === 0">
+									<td colspan="6" class="text-center py-4 text-gray-500">No package enclosions applied yet.</td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr class="xls-totals">
+									<td colspan="5" class="xls-total-label">Total Package Enclosions</td>
+									<td class="xls-cell--num">₱{{ getTotalCharges() | number:'1.2-2' }}</td>
 								</tr>
 							</tfoot>
 						</table>
@@ -525,7 +288,7 @@
 			</ng-container>
 
 			<div *ngIf="!isChargesSectionVisible" class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-center text-sm text-gray-500">
-				Charges breakdown is hidden.
+				Package enclosions breakdown is hidden.
 			</div>
 		</div>
 
@@ -533,7 +296,7 @@
 			<div class="rounded-xl border border-gray-200 bg-slate-50 overflow-hidden">
 				<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
 					<div>
-						<h3 class="text-base font-semibold text-gray-800">Accounting Collections Snapshot <span class="text-xs text-gray-400">Read-only</span></h3>
+						<h3 class="text-base font-semibold text-gray-800">Accounting Collections <span class="text-xs text-gray-400">Read-only</span></h3>
 					</div>
 					<div class="flex items-center gap-2">
 						<div class="text-xs text-gray-500">{{ paymentCount }} payment{{ paymentCount === 1 ? '' : 's' }} posted</div>
@@ -567,24 +330,30 @@
 					</div>
 				</div>
 
-				<div *ngIf="isPaymentsSectionVisible; else paymentsHiddenState" class="max-h-[220px] overflow-auto bg-white">
-					<table class="w-full text-sm" *ngIf="recentPayments.length > 0; else noPayments">
-						<thead class="bg-slate-700 text-gray-100 text-xs uppercase">
+				<div *ngIf="isPaymentsSectionVisible; else paymentsHiddenState" class="xls-wrap">
+					<table class="xls-grid" *ngIf="recentPayments.length > 0; else noPayments">
+						<thead>
 							<tr>
-								<th class="sticky top-0 z-10 bg-slate-700 px-3 py-2 text-left">Control No</th>
-								<th class="sticky top-0 z-10 bg-slate-700 px-3 py-2 text-left">Date</th>
-								<th class="sticky top-0 z-10 bg-slate-700 px-3 py-2 text-left">Bank</th>
-								<th class="sticky top-0 z-10 bg-slate-700 px-3 py-2 text-right">Amount</th>
-								<th class="sticky top-0 z-10 bg-slate-700 px-3 py-2 text-left">Remarks</th>
+								<th class="xls-th--center" style="width:1.8rem">#</th>
+								<th style="width:9rem">Control No</th>
+								<th style="width:9rem">Date</th>
+								<th style="width:9rem">Check Date</th>
+								<th style="width:11rem">Account Number</th>
+								<th style="width:9rem">Payment Type</th>
+								<th class="xls-th--right" style="width:9rem">Amount</th>
+								<th>Remarks</th>
 							</tr>
 						</thead>
-						<tbody class="divide-y divide-gray-200">
-							<tr *ngFor="let payment of recentPayments; trackBy: trackByPaymentRow" class="hover:bg-slate-50">
-								<td class="px-3 py-2 text-gray-700">{{ payment.controlNumber || '—' }}</td>
-								<td class="px-3 py-2 text-gray-700">{{ payment.dateIssued ? (payment.dateIssued | date:'MMM dd, yyyy') : '—' }}</td>
-								<td class="px-3 py-2 text-gray-700">{{ payment.bank || '—' }}</td>
-								<td class="px-3 py-2 text-right font-semibold text-blue-600">₱{{ payment.amount || 0 | number:'1.2-2' }}</td>
-								<td class="px-3 py-2 text-gray-700">{{ payment.remarks || payment.description || '—' }}</td>
+						<tbody>
+							<tr *ngFor="let payment of recentPayments; let i = index; trackBy: trackByPaymentRow">
+								<td class="xls-cell--seq">{{ i + 1 }}</td>
+								<td>{{ payment.controlNumber || '—' }}</td>
+								<td>{{ payment.dateIssued ? (payment.dateIssued | date:'MMM dd, yyyy') : '—' }}</td>
+								<td>{{ payment.checkDate ? (payment.checkDate | date:'MMM dd, yyyy') : (payment.dateIssued ? (payment.dateIssued | date:'MMM dd, yyyy') : '—') }}</td>
+								<td>{{ payment.accountNumber || '—' }}</td>
+								<td>{{ payment.paymentType || '—' }}</td>
+								<td class="xls-cell--num" style="font-weight:700;color:#1d4ed8">₱{{ payment.amount || 0 | number:'1.2-2' }}</td>
+								<td>{{ payment.remarks || payment.description || '—' }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -601,3 +370,97 @@
 <ng-template #noPayments>
 	<div class="px-5 py-8 text-center text-sm text-gray-500">No payments have been posted yet.</div>
 </ng-template>
+<!-- ===================== REQUEST CHANGE DIALOG ===================== -->
+<p-dialog
+  [(visible)]="requestDialogVisible"
+  [modal]="true"
+  [closable]="!submittingRequest"
+	[style]="{ width: '520px' }"
+	styleClass="request-change-dialog"
+	header="Submit Request for Admin Review">
+
+	<div class="flex flex-col gap-4 py-1">
+		<div class="rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3">
+			<div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600">Request Summary</div>
+			<div class="mt-1 text-sm text-slate-700">
+				Choose the change type, describe the requested update, and include a note for the admin reviewer.
+			</div>
+		</div>
+
+		<div>
+			<label class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-600 mb-1">Request Type</label>
+      <select
+        title="Request type"
+        [(ngModel)]="requestDraft.type"
+        [ngModelOptions]="{ standalone: true }"
+				class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+        <option value="" disabled>Select a change type…</option>
+        <option value="price-change">Contract Price Change</option>
+        <option value="discount-change">Contract Discount Change</option>
+				<option value="charge-update">Package Enclosions Update</option>
+				<option value="charge-delete">Package Enclosions Deletion</option>
+        <option value="billing-remarks-change">Billing Remarks Update</option>
+        <option value="contract-correction">Contract Data Correction</option>
+      </select>
+    </div>
+
+    <div *ngIf="requestDraft.type">
+			<label class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-600 mb-1">Current Value</label>
+			<div class="px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-600 shadow-sm">
+        {{ getCurrentValueForRequest() }}
+      </div>
+    </div>
+
+    <div *ngIf="requestDraft.type">
+			<label class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-600 mb-1">New Value</label>
+      <input
+        *ngIf="requestDraft.type === 'price-change' || requestDraft.type === 'discount-change'"
+        type="number"
+        min="0"
+        step="0.01"
+        [(ngModel)]="requestDraft.newValue"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Enter new amount…"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+      <input
+				*ngIf="requestDraft.type === 'billing-remarks-change' || requestDraft.type === 'contract-correction' || requestDraft.type === 'charge-update' || requestDraft.type === 'charge-delete'"
+        type="text"
+        [(ngModel)]="requestDraft.newValue"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Describe the new value…"
+				class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+    </div>
+
+    <div>
+			<label class="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-600 mb-1">Note for Admin</label>
+      <textarea
+        [(ngModel)]="requestDraft.notes"
+        [ngModelOptions]="{ standalone: true }"
+				rows="4"
+				placeholder="Explain why this change is needed and what should be reviewed…"
+				class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
+      ></textarea>
+			<div class="mt-1 text-[11px] text-gray-500">Include enough detail for the admin to approve or reject the request.</div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button
+        type="button"
+        (click)="closeRequestDialog()"
+        [disabled]="submittingRequest"
+        class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition">
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitChangeRequest()"
+				[disabled]="submittingRequest || !requestDraft.type || requestDraft.newValue === null || requestDraft.newValue === '' || !requestDraft.notes || !requestDraft.notes.trim()"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 disabled:opacity-60 transition shadow-sm">
+        <i *ngIf="submittingRequest" class="pi pi-spin pi-spinner text-xs"></i>
+				{{ submittingRequest ? 'Submitting…' : 'Submit for Review' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

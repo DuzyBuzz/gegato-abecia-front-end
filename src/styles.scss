@@ -18,3 +18,18 @@
          hover:bg-white/5
          rounded-md transition;
 }
+
+/* Ensure PrimeNG toasts always appear above fixed headers/sidebars in all shells. */
+:root {
+  --dashboard-toast-top-offset: 6.25rem;
+}
+
+.p-toast {
+  z-index: 12000 !important;
+}
+
+.p-toast-top-right,
+.p-toast-top-left,
+.p-toast-top-center {
+  top: var(--dashboard-toast-top-offset) !important;
+}

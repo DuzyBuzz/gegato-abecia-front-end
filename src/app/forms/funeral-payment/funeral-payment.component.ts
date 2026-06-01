@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -37,6 +38,16 @@ export interface ChargeRow extends ContractCharges {
   _backup?: Partial<ChargeRow>;
 }
 
+interface PackageEnclosionDisplayRow {
+  key: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  amount: number;
+  isSynthetic?: boolean;
+}
+
 @Component({
   selector: 'app-funeral-payment',
   standalone: true,
@@ -69,7 +80,7 @@ export class FuneralPaymentComponent implements OnInit {
   rows: PaymentRow[] = [];
   charges: ChargeRow[] = [];
   loading = false;
-  isChargesSectionVisible = true;
+  isChargesSectionVisible = false;
   private paymentKeyCounter = 0;
   private chargeKeyCounter = 0;
 
@@ -365,12 +376,41 @@ cancelRow(row: PaymentRow): void {
     return this.charges.reduce((sum, c) => sum + this.getChargeAmount(c), 0);
   }
 
+  get packageEnclosionsRows(): PackageEnclosionDisplayRow[] {
+    const detailsRow: PackageEnclosionDisplayRow = {
+      key: 'service-details',
+      description: this.buildPackageEnclosionsSummaryDescription(),
+      quantity: 1,
+      unitPrice: this.getContractPrice(),
+      discount: 0,
+      amount: 0,
+      isSynthetic: true,
+    };
+
+    const chargeRows: PackageEnclosionDisplayRow[] = this.charges.map((charge, index) => ({
+      key: String(charge.uiKey || charge.id || `charge-${index}`),
+      description: String(charge.description || '').trim() || '—',
+      quantity: Number(charge.quantity) || 0,
+      unitPrice: Number(charge.unitPrice) || 0,
+      discount: Number(charge.discount) || 0,
+      amount: this.getChargeAmount(charge),
+      isSynthetic: false,
+    }));
+
+    return [detailsRow, ...chargeRows];
+  }
+
   getContractPrice(): number {
     return Number(this.FuneralContract?.price) || 0;
   }
 
   getContractDiscount(): number {
     return Number(this.FuneralContract?.discount) || 0;
+  }
+
+  getTotalDiscount(): number {
+    const chargeDiscount = this.charges.reduce((sum, charge) => sum + (Number(charge.discount) || 0), 0);
+    return this.getContractDiscount() + chargeDiscount;
   }
 
   getGrandTotal(): number {
@@ -382,7 +422,7 @@ cancelRow(row: PaymentRow): void {
   }
   // ================= CRUD =================
   addRow(): void {
-    if (!this.canEditPayments) {
+    if (!this.canAddPayments) {
       this.showPaymentAccessDenied();
       return;
     }
@@ -391,13 +431,17 @@ cancelRow(row: PaymentRow): void {
   }
 
   private createNewRow(): void {
+    const issuedBy = this.getCurrentUserDisplayName();
+
     this.rows = [...this.rows, {
       uiKey: this.nextPaymentKey(),
       controlNumber: '',
+      orNumber: '',
+      arNumber: '',
       dateIssued: this.getToday(),
       checkDate: this.getToday(),
-      issuedBy: '',
-      bank: '',
+      issuedBy,
+      paymentType: '',
       accountNumber: '',
       amount: 0,
       description: '',
@@ -410,7 +454,7 @@ cancelRow(row: PaymentRow): void {
   }
 
 editRow(row: PaymentRow): void {
-  if (!this.canEditPayments) {
+  if (!this.canModifyExistingPayments) {
     this.showPaymentAccessDenied();
     return;
   }
@@ -419,23 +463,74 @@ editRow(row: PaymentRow): void {
   row.isEditing = true;
 }
 
-  saveRow(row: PaymentRow): void {
-    if (!this.canEditPayments) {
-      this.showPaymentAccessDenied();
+  saveAllPaymentRows(): void {
+    if (!this.hasPendingPaymentChanges) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'No changes',
+        detail: 'There are no payment changes to save.',
+      });
       return;
     }
 
-    const isNew = !row.id;
     this.confirmationService.confirm({
-      header: isNew ? 'Save New Payment' : 'Save Payment Changes',
-      message: isNew
-        ? 'Do you want to save this new payment?'
-        : 'Do you want to save changes to this payment?',
+      header: 'Save Payment Records',
+      message: 'Do you want to save all payment record changes?',
       icon: 'pi pi-check-circle',
-      acceptLabel: 'Save',
+      acceptLabel: 'Save All',
       rejectLabel: 'Cancel',
-      accept: () => this.persistRow(row)
+      accept: () => void this.persistAllPaymentRows(),
     });
+  }
+
+  private async persistAllPaymentRows(): Promise<void> {
+    const pendingRows = this.rows.filter((row) => row.isEditing);
+    if (pendingRows.length === 0) {
+      return;
+    }
+
+    this.loading = true;
+
+    try {
+      for (const row of pendingRows) {
+        const canSave = row.id ? this.canModifyExistingPayments : this.canAddPayments;
+        if (!canSave) {
+          continue;
+        }
+
+        await this.persistRowOnce(row);
+      }
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Saved',
+        detail: 'Payment record changes processed successfully.',
+      });
+
+      this.syncPaymentsSilently();
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to save some payment changes.',
+      });
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private async persistRowOnce(row: PaymentRow): Promise<void> {
+    const payload: FuneralPayment = {
+      ...row,
+      description: '',
+      funeralServiceId: this.serviceId,
+    };
+
+    const res = await firstValueFrom(this.funeralPaymentsService.save(payload));
+    Object.assign(row, this.mapPaymentRow(res, row));
+    row.isEditing = false;
+    row._backup = undefined;
+    this.refreshPaymentTable();
   }
 
   private persistRow(row: PaymentRow): void {
@@ -475,12 +570,14 @@ editRow(row: PaymentRow): void {
   }
 
   deleteRow(index: number): void {
-    if (!this.canEditPayments) {
+    const row = this.rows[index];
+    const canDelete = row?.id ? this.canModifyExistingPayments : this.canAddPayments;
+
+    if (!canDelete) {
       this.showPaymentAccessDenied();
       return;
     }
 
-    const row = this.rows[index];
     const label = row?.controlNumber || `#${index + 1}`;
 
     this.confirmationService.confirm({
@@ -546,6 +643,8 @@ editRow(row: PaymentRow): void {
   private getToday(): string {
     return new Date().toISOString().split('T')[0];
   }
+
+  trackByPackageEnclosionsRow = (_index: number, row: PackageEnclosionDisplayRow): string => row.key;
 
   trackByChargeRow = (_index: number, charge: ChargeRow): string | number => {
     return charge.uiKey || charge.id || _index;
@@ -656,7 +755,19 @@ editRow(row: PaymentRow): void {
   }
 
   get canEditPayments(): boolean {
-    return this.auth.canManagePayments();
+    return this.auth.isAdmin();
+  }
+
+  get canModifyExistingPayments(): boolean {
+    return this.auth.isAdmin() || this.auth.isAccounting();
+  }
+
+  get canAddPayments(): boolean {
+    return this.auth.isAdmin() || this.auth.isAccounting();
+  }
+
+  get hasPendingPaymentChanges(): boolean {
+    return this.rows.some((row) => row.isEditing);
   }
 
   get canEditCharges(): boolean {
@@ -679,8 +790,18 @@ editRow(row: PaymentRow): void {
     this.messageService.add({
       severity: 'warn',
       summary: 'Read only',
-      detail: 'Payment updates are restricted to Accounting and Admin users.',
+      detail: 'Only accounting and admin can manage payment records.',
     });
+  }
+
+  private getCurrentUserDisplayName(): string {
+    const user = this.auth.currentUser;
+    if (!user) {
+      return 'Unknown';
+    }
+
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    return fullName || user.username || user.accountNumber || 'Unknown';
   }
 
   private nextPaymentKey(): string {
@@ -696,14 +817,19 @@ editRow(row: PaymentRow): void {
   private mapPaymentRow(payment: FuneralPayment, existing?: PaymentRow): PaymentRow {
     return {
       uiKey: existing?.uiKey || this.nextPaymentKey(),
+      id: payment.id,
       controlNumber: payment.controlNumber || '',
+      orNumber: payment.orNumber || '',
+      arNumber: payment.arNumber || '',
       dateIssued: payment.dateIssued || '',
-      bank: payment.bank || '',
+      checkDate: payment.checkDate || '',
+      issuedBy: payment.issuedBy || '',
+      paymentType: payment.paymentType || '',
+      accountNumber: payment.accountNumber || '',
       amount: payment.amount || 0,
       description: payment.description || '',
       remarks: payment.remarks || '',
       checkCleared: payment.checkCleared || false,
-      id: payment.id,
       FuneralContractId: this.serviceId,
       isEditing: false
     };
@@ -725,6 +851,29 @@ editRow(row: PaymentRow): void {
       createdAt: charge.createdAt,
       isEditing: false
     };
+  }
+
+  private buildPackageEnclosionsSummaryDescription(): string {
+    const serviceType = this.getSafeContractText(this.FuneralContract?.type, 'Type of service not specified');
+    const casket = this.getSafeContractText(this.FuneralContract?.casket);
+    const urn = this.getSafeContractText(this.FuneralContract?.urnType)
+      || this.getSafeContractText(this.FuneralContract?.urnDescription);
+    const casketAvailability = this.getSafeContractText(this.FuneralContract?.casketAvailable, 'Not specified');
+
+    const selectedContainer = casket
+      ? `${casket}`
+      : (urn ? `Urn: ${urn}` : 'Casket/Urn: Not specified');
+
+    return `${serviceType} - ${selectedContainer} - ${casketAvailability}`;
+  }
+
+  private getSafeContractText(value: unknown, fallback = ''): string {
+    const text = String(value || '').trim();
+    if (!text) {
+      return fallback;
+    }
+
+    return text;
   }
 
   private applyPaymentsResponse(res: FuneralPayment | FuneralPayment[]): void {

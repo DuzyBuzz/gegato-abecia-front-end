@@ -6,9 +6,11 @@ export interface FuneralPayment {
   dateIssued?: Date | string | null;
   checkDate?: Date | string | null;
   issuedBy?: string | null;
+  paymentType?: string | null;
+  orNumber?: string | null;
+  arNumber?: string | null;
   
-  // Bank & Account Details
-  bank?: string | null;
+  // Account Details
   accountNumber?: string | null;
   
   amount?: number | string | null;

@@ -5,7 +5,7 @@
   <div class="h-full bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden">
 
     <!-- HEADER -->
-    <div class="px-4 py-3 border-b border-blue-600 flex justify-between items-center gap-3">
+    <div class="px-4 py-3 border-b border-emerald-600 flex justify-between items-center gap-3">
       <div>
         <h2 class="text-lg font-semibold text-gray-800">Funeral Contract Payments</h2>
 
@@ -69,31 +69,24 @@
 
     <!-- SUMMARY -->
     <div class="px-4 pt-3">
-      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
 
         <div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Contract Price</div>
+          <div class="text-[11px] uppercase text-gray-400">Casket/Urn Price</div>
           <div class="text-sm font-semibold text-slate-700">
             ₱{{ getContractPrice() | number:'1.2-2' }}
           </div>
         </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Contract Discount</div>
+          <div class="text-[11px] uppercase text-gray-400">Discount</div>
           <div class="text-sm font-semibold text-amber-600">
-            ₱{{ getContractDiscount() | number:'1.2-2' }}
+            ₱{{ getTotalDiscount() | number:'1.2-2' }}
           </div>
         </div>
 
         <div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Additional Charges</div>
-          <div class="text-sm font-semibold text-emerald-600">
-            ₱{{ getTotalCharges() | number:'1.2-2' }}
-          </div>
-        </div>
-
-        <div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-          <div class="text-[11px] uppercase text-gray-400">Total Due</div>
+          <div class="text-[11px] uppercase text-gray-400">Grand Billed</div>
           <div class="text-sm font-semibold text-slate-700">
             ₱{{ getGrandTotal() | number:'1.2-2' }}
           </div>
@@ -245,191 +238,63 @@
 <div class="flex-1 min-h-0 px-3 pb-3">
     <!-- HEADER -->
     <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center gap-3">
-        <h2 class="text-lg font-semibold text-gray-800">Charges</h2>
+    <h2 class="text-lg font-semibold text-gray-800">Package Enclosions</h2>
         <button
           type="button"
           (click)="isChargesSectionVisible = !isChargesSectionVisible"
           class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
         >
           <i class="pi" [ngClass]="isChargesSectionVisible ? 'pi-eye-slash' : 'pi-eye'"></i>
-          {{ isChargesSectionVisible ? 'Hide Charges' : 'Show Charges' }}
+          {{ isChargesSectionVisible ? 'Hide Enclosions' : 'Show Enclosions' }}
         </button>
       </div>
 <ng-container *ngIf="isChargesSectionVisible">
-<div *ngIf="!canEditCharges" class="border-b border-gray-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
-  Read-only.
-</div>
-<div class="max-h-[280px] overflow-auto rounded-lg border border-gray-300 bg-white">
-<table class="w-full text-sm">
+  <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div class="px-3 py-2.5 border-b border-gray-200 bg-slate-50/80 flex items-center justify-between gap-3">
+      <div class="text-xs text-gray-500">{{ packageEnclosionsRows.length }} item{{ packageEnclosionsRows.length === 1 ? '' : 's' }}</div>
+    </div>
 
-  <thead class="bg-emerald-600">
-    <tr class="text-xs uppercase text-gray-100 border-b border-gray-300">
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r">Type</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r">Description</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r text-right">Qty</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r text-right">Unit Price</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r text-right">Discount</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 border-r text-right">Amount</th>
-      <th class="sticky top-0 z-20 bg-emerald-600 px-2.5 py-2 text-center">Actions</th>
-    </tr>
-  </thead>
-
-  <tbody class="divide-y divide-gray-200">
-
-    <tr *ngFor="let charge of charges; let i = index; trackBy: trackByChargeRow"
-        class="hover:bg-gray-50">
-
-      <td class="px-2 py-1.5 border-r relative">
-        <app-select-helper
-          *ngIf="charge.isEditing && canEditCharges"
-          [(ngModel)]="charge.chargeType"
-          [ngModelOptions]="{ standalone: true }"
-          comboboxName="chargeTypes"
-          [searchable]="true"
-          class="relative z-50 block"
-        ></app-select-helper>
-        <span *ngIf="!charge.isEditing">{{ charge.chargeType || '—' }}</span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r relative">
-        <app-select-helper
-          *ngIf="charge.isEditing && canEditCharges"
-          [(ngModel)]="charge.description"
-          [ngModelOptions]="{ standalone: true }"
-          comboboxName="chargeDescriptions"
-          [searchable]="true"
-          class="relative z-50 block"
-        ></app-select-helper>
-        <span *ngIf="!charge.isEditing">{{ charge.description || '—' }}</span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
-                       [(ngModel)]="charge.quantity"
-                       [min]="0"
-                       [useGrouping]="false"
-                       inputId="qty">
-        </p-inputNumber>
-        <span *ngIf="!charge.isEditing">{{ charge.quantity | number:'1.0-0' }}</span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
-                       [(ngModel)]="charge.unitPrice"
-                       mode="currency"
-                       currency="PHP">
-        </p-inputNumber>
-        <span *ngIf="!charge.isEditing" class="font-semibold">
-          ₱{{ charge.unitPrice | number:'1.2-2' }}
-        </span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r text-right">
-        <p-inputNumber *ngIf="charge.isEditing && canEditCharges"
-                       [(ngModel)]="charge.discount"
-                       mode="currency"
-                       currency="PHP"
-                       [min]="0">
-        </p-inputNumber>
-        <span *ngIf="!charge.isEditing">₱{{ charge.discount | number:'1.2-2' }}</span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r text-right font-semibold text-emerald-700">
-        ₱{{ getChargeAmount(charge) | number:'1.2-2' }}
-      </td>
-
-      <td class="px-2 py-1.5 text-center">
-        <div class="flex justify-center gap-2">
-          <button *ngIf="charge.isEditing"
-                  (click)="saveCharge(charge)"
-              [disabled]="!canEditCharges"
-                  class="inline-flex items-center justify-center
-                         w-9 h-9
-                         rounded-md
-                         bg-green-600 text-white
-                         hover:bg-green-700
-                         shadow-sm
-                         transition">
-            <i class="pi pi-check text-sm"></i>
-          </button>
-
-          <button *ngIf="!charge.isEditing"
-              [disabled]="!canEditCharges"
-                  (click)="editCharge(charge)"
-                  class="inline-flex items-center justify-center
-                         w-9 h-9
-                         rounded-md
-                         border border-gray-300
-                         bg-white
-                         text-yellow-600
-                         hover:bg-yellow-50
-                         shadow-sm
-                         transition">
-            <i class="pi pi-pencil text-sm"></i>
-          </button>
-
-            <button
-              *ngIf="canEditCharges"
-              (click)="deleteCharge(i)"
-                  class="inline-flex items-center justify-center
-                         w-9 h-9
-                         rounded-md
-                         border border-gray-300
-                         bg-white
-                         text-red-600
-                         hover:bg-red-50
-                         shadow-sm
-                         transition">
-            <i class="pi pi-trash text-sm"></i>
-          </button>
-
-          <button *ngIf="charge.isEditing"
-                  (click)="cancelCharge(charge)"
-              [disabled]="!canEditCharges"
-                  class="inline-flex items-center justify-center
-                         w-9 h-9
-                         rounded-md
-                         border border-gray-300
-                         bg-white
-                         text-red-600
-                         hover:bg-red-50
-                         shadow-sm
-                         transition">
-            <i class="pi pi-times text-sm"></i>
-          </button>
-        </div>
-      </td>
-    </tr>
-
-  </tbody>
-
-  <tfoot>
-    <tr>
-      <td colspan="7" class="p-2" *ngIf="canEditCharges">
-        <button
-          (click)="addCharge()"
-          class="w-full flex items-center justify-center gap-2
-                 px-4 py-2
-                 text-gray-600 text-sm font-medium
-                 rounded-md
-                 hover:bg-gray-300 hover:text-white
-                 transition">
-          <i class="pi pi-plus text-sm"></i>
-          Add New Charge
-        </button>
-      </td>
-      <td colspan="7" class="p-2 text-center text-sm text-gray-500" *ngIf="!canEditCharges">
-        Charges can only be encoded by a Biller.
-      </td>
-    </tr>
-  </tfoot>
-
-</table>
-</div>
+    <div class="xls-wrap">
+      <table class="xls-grid">
+        <thead>
+          <tr>
+            <th class="xls-th--center" style="width:1.8rem">#</th>
+            <th style="min-width:12rem">Description</th>
+            <th class="xls-th--right" style="width:5rem">Qty</th>
+            <th class="xls-th--right" style="width:9rem">Unit Price</th>
+            <th class="xls-th--right" style="width:8rem">Discount</th>
+            <th class="xls-th--right" style="width:9rem">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of packageEnclosionsRows; let i = index; trackBy: trackByPackageEnclosionsRow"
+              [class.xls-row--editing]="false">
+            <td class="xls-cell--seq">{{ i + 1 }}</td>
+            <td>{{ row.description }}</td>
+            <td class="xls-cell--num">{{ row.quantity | number:'1.0-0' }}</td>
+            <td class="xls-cell--num">
+              <span class="font-semibold">₱{{ row.unitPrice | number:'1.2-2' }}</span>
+            </td>
+            <td class="xls-cell--num">₱{{ row.discount | number:'1.2-2' }}</td>
+            <td class="xls-cell--num" style="color:#047857;font-weight:700">₱{{ row.amount | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="charges.length === 0">
+            <td colspan="6" class="text-center py-4 text-gray-500">No package enclosions applied yet.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="xls-totals">
+            <td colspan="5" class="xls-total-label">Total Package Enclosions</td>
+            <td class="xls-cell--num">₱{{ getTotalCharges() | number:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
 </ng-container>
 
 <div *ngIf="!isChargesSectionVisible" class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-center text-sm text-gray-500">
-  Charges breakdown is hidden.
+  Package enclosions breakdown is hidden.
 </div>
     </div>
 
@@ -442,185 +307,141 @@
     <!-- HEADER -->
     <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center gap-3">
         <h2 class="text-lg font-semibold text-gray-800">Payment Records</h2>
-        <p class="text-xs text-gray-500">
-        </p>
+        <div class="flex items-center gap-2">
+          <button
+            *ngIf="canAddPayments || canModifyExistingPayments"
+            type="button"
+            (click)="saveAllPaymentRows()"
+            [disabled]="loading || !hasPendingPaymentChanges"
+            class="inline-flex items-center gap-2 rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 transition"
+          >
+            <i class="pi pi-save text-xs"></i>
+            {{ loading ? 'Saving...' : 'Save Payment Records' }}
+          </button>
+        </div>
       </div>
-<div *ngIf="!canEditPayments" class="border-b border-gray-200 bg-sky-50 px-4 py-2.5 text-sm text-sky-800">
-  Payments are view-only for Biller users.
-</div>
-<div class="max-h-[300px] overflow-auto rounded-lg border border-gray-300 bg-white">
-<table class="w-full text-sm">
+<div class="xls-wrap">
+<table class="xls-grid">
 
-  <thead class="bg-blue-600">
-    <tr class="text-xs uppercase text-gray-100 border-b border-gray-300">
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r">Control No</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r">Date</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r">Bank</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r text-right">Amount</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r">Description</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r">Remarks</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 border-r text-center">Cleared</th>
-      <th class="sticky top-0 z-20 bg-blue-600 px-2.5 py-2 text-center">Actions</th>
+  <thead>
+    <tr>
+      <th class="xls-th--center" style="width:1.8rem">#</th>
+      <th style="width:8rem">Control No</th>
+      <th style="width:7rem">OR No</th>
+      <th style="width:7rem">AR No</th>
+      <th style="width:10rem">Account Number</th>
+      <th style="width:8rem">Date</th>
+      <th style="width:8rem">Check Date</th>
+      <th style="width:10rem">Issued By</th>
+      <th style="width:9rem">Payment Type</th>
+      <th style="min-width:8rem">Remarks</th>
+      <th class="xls-th--center" style="width:6rem">Cleared</th>
+      <th class="xls-th--right" style="width:9rem">Amount</th>
+
+      <th class="xls-th--center" style="width:5.5rem">Actions</th>
     </tr>
   </thead>
 
-  <tbody class="divide-y divide-gray-200">
-
+  <tbody>
     <tr *ngFor="let row of rows; let i = index; trackBy: trackByPaymentRow"
-        class="hover:bg-gray-50">
+        [class.xls-row--editing]="row.isEditing">
+      <td class="xls-cell--seq">{{ i + 1 }}</td>
 
-      <td class="px-2 py-1.5 border-r">
-        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.controlNumber" class="w-full text-xs">
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.controlNumber" class="xls-input">
         <span *ngIf="!row.isEditing">{{ row.controlNumber || '—' }}</span>
       </td>
 
-      <td class="px-2 py-1.5 border-r">
-        <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.dateIssued" class="w-full text-xs border px-1">
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.orNumber" class="xls-input">
+        <span *ngIf="!row.isEditing">{{ row.orNumber || '—' }}</span>
+      </td>
+
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.arNumber" class="xls-input">
+        <span *ngIf="!row.isEditing">{{ row.arNumber || '—' }}</span>
+      </td>
+
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.accountNumber" class="xls-input">
+        <span *ngIf="!row.isEditing">{{ row.accountNumber || '—' }}</span>
+      </td>
+
+      <td>
+        <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.dateIssued" class="xls-input">
         <span *ngIf="!row.isEditing">{{ row.dateIssued }}</span>
       </td>
 
-      <td class="px-2 py-1.5 border-r">
+      <td>
+        <input *ngIf="row.isEditing" type="date" [(ngModel)]="row.checkDate" class="xls-input">
+        <span *ngIf="!row.isEditing">{{ row.checkDate || '—' }}</span>
+      </td>
+
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.issuedBy" class="xls-input" readonly>
+        <span *ngIf="!row.isEditing">{{ row.issuedBy || '—' }}</span>
+      </td>
+
+      <td>
         <app-select-helper
           *ngIf="row.isEditing"
-          [(ngModel)]="row.bank"
+          [(ngModel)]="row.paymentType"
           [ngModelOptions]="{ standalone: true }"
-          comboboxName="banks"
+          comboboxName="paymentTypes"
           [searchable]="true"
           class="relative z-50 block"
         ></app-select-helper>
-        <span *ngIf="!row.isEditing">{{ row.bank || '—' }}</span>
+        <span *ngIf="!row.isEditing">{{ row.paymentType || '—' }}</span>
       </td>
 
-      <td class="px-2 py-1.5 border-r text-right">
+      <td>
+        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.remarks" class="xls-input">
+        <span *ngIf="!row.isEditing">{{ row.remarks || '—' }}</span>
+      </td>
+
+      <td class="xls-cell--center">
+        <p-checkbox *ngIf="row.isEditing" [(ngModel)]="row.checkCleared" binary="true"></p-checkbox>
+        <span *ngIf="!row.isEditing"
+              class="xls-tag"
+              [class.xls-tag--cleared]="row.checkCleared"
+              [class.xls-tag--pending]="!row.checkCleared">
+          {{ row.checkCleared ? 'Cleared' : 'Pending' }}
+        </span>
+      </td>
+
+      <td class="xls-cell--num">
         <p-inputNumber *ngIf="row.isEditing"
                        [(ngModel)]="row.amount"
                        mode="currency"
                        currency="PHP">
         </p-inputNumber>
-
-        <span *ngIf="!row.isEditing" class="font-semibold text-green-700">
-          ₱{{ row.amount | number:'1.2-2' }}
-        </span>
+        <span *ngIf="!row.isEditing" style="font-weight:700;color:#047857">₱{{ row.amount | number:'1.2-2' }}</span>
       </td>
 
-      <td class="px-2 py-1.5 border-r">
-        <app-select-helper
-          *ngIf="row.isEditing"
-          [(ngModel)]="row.description"
-          [ngModelOptions]="{ standalone: true }"
-          comboboxName="paymentDescriptions"
-          [searchable]="true"
-          class="relative z-50 block"
-        ></app-select-helper>
-        <span *ngIf="!row.isEditing">{{ row.description || '—' }}</span>
+      <td class="xls-cell--actions">
+        <div class="xls-actions">
+          <button *ngIf="!row.isEditing" (click)="editRow(row)" [disabled]="!canModifyExistingPayments" class="xls-btn xls-btn--edit"><i class="pi pi-pencil"></i></button>
+          <button *ngIf="canModifyExistingPayments" (click)="deleteRow(i)" class="xls-btn xls-btn--delete"><i class="pi pi-trash"></i></button>
+          <button *ngIf="row.isEditing" (click)="cancelRow(row)" [disabled]="row.id ? !canModifyExistingPayments : !canAddPayments" class="xls-btn xls-btn--cancel"><i class="pi pi-times"></i></button>
+        </div>
       </td>
-
-      <td class="px-2 py-1.5 border-r">
-        <input *ngIf="row.isEditing" pInputText [(ngModel)]="row.remarks" class="w-full text-xs">
-        <span *ngIf="!row.isEditing">{{ row.remarks || '—' }}</span>
-      </td>
-
-      <td class="px-2 py-1.5 border-r text-center">
-        <p-checkbox *ngIf="row.isEditing" [(ngModel)]="row.checkCleared" binary="true"></p-checkbox>
-
-        <p-tag *ngIf="!row.isEditing"
-               [value]="row.checkCleared ? 'CLEARED' : 'PENDING'"
-               [severity]="row.checkCleared ? 'success' : 'secondary'">
-        </p-tag>
-      </td>
-<td class="px-2 py-1.5 text-center">
-  <div class="flex justify-center gap-2">
-
-    <!-- SAVE -->
-    <button *ngIf="row.isEditing"
-            (click)="saveRow(row)"
-          [disabled]="!canEditPayments"
-            class="inline-flex items-center justify-center
-                   w-9 h-9
-                   rounded-md
-                   bg-green-600 text-white
-                   hover:bg-green-700
-                   shadow-sm
-                   transition">
-
-      <i class="pi pi-check text-sm"></i>
-    </button>
-
-    <!-- EDIT -->
-    <button *ngIf="!row.isEditing"
-            (click)="editRow(row)"
-          [disabled]="!canEditPayments"
-            class="inline-flex items-center justify-center
-                   w-9 h-9
-                   rounded-md
-                   border border-gray-300
-                   bg-white
-                   text-yellow-600
-                   hover:bg-yellow-50
-                   shadow-sm
-                   transition">
-
-      <i class="pi pi-pencil text-sm"></i>
-    </button>
-
-    <!-- DELETE -->
-<button *ngIf="canEditPayments"
-  (click)="deleteRow(i)"
-        class="inline-flex items-center justify-center
-               w-9 h-9
-               rounded-md
-               border border-gray-300
-               bg-white
-               text-red-600
-               hover:bg-red-50
-               shadow-sm
-               transition">
-
-  <i class="pi pi-trash text-sm"></i>
-</button>
-  <!-- CANCEL -->
-  <button *ngIf="row.isEditing"
-          (click)="cancelRow(row)"
-      [disabled]="!canEditPayments"
-          class="inline-flex items-center justify-center
-                 w-9 h-9
-                 rounded-md
-                 border border-gray-300
-                 bg-white
-                 text-red-600
-                 hover:bg-red-50
-                 shadow-sm
-                 transition">
-
-    <i class="pi pi-times text-sm"></i>
-  </button>
-  </div>
-</td>
     </tr>
-
   </tbody>
 
-  <!-- 🔥 FULL WIDTH ADD BUTTON -->
   <tfoot>
-    <tr>
-      <td colspan="8" class="p-2" *ngIf="canEditPayments">
-<button 
-  (click)="addRow()"
-  class="w-full flex items-center justify-center gap-2
-         px-4 py-2
-         text-gray-600 text-sm font-medium
-         rounded-md
-         hover:bg-gray-300 hover:text-white
-         transition">
-
-  <i class="pi pi-plus text-sm"></i>
-  Add New Payment
-
-</button>
-      </td>
-      <td colspan="8" class="p-2 text-center text-sm text-gray-500" *ngIf="!canEditPayments">
-        Payment changes are restricted to Accounting users.
-      </td>
+    <tr class="xls-totals">
+      <td colspan="11" class="xls-total-label">Total Payments</td>
+      <td class="xls-cell--num">₱{{ totalPaid | number:'1.2-2' }}</td>
+      <td></td>
+    </tr>
+    <tr *ngIf="canAddPayments" class="xls-add-row">
+      <td colspan="13"><button class="xls-add-btn" (click)="addRow()"><i class="pi pi-plus"></i> Add Row</button></td>
+    </tr>
+    <tr *ngIf="!canAddPayments" class="xls-readonly-note">
+      <td colspan="13">Only Accounting and Admin can add payments.</td>
+    </tr>
+    <tr *ngIf="canAddPayments && !canEditPayments" class="xls-readonly-note">
+      <td colspan="13">Accounting can add, edit, and delete payment records directly.</td>
     </tr>
   </tfoot>
 

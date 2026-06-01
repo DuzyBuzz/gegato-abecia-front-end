@@ -29,3 +29,261 @@ td {
 		z-index: 9999 !important;
 	}
 }
+
+/* ─────────────────────────────────────
+   Excel-like data grid
+   ───────────────────────────────────── */
+.xls-wrap {
+	overflow-x: auto;
+	background: #fff;
+}
+
+.xls-grid {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: auto;
+	font-size: 0.78rem;
+}
+
+.xls-grid thead th {
+	padding: 0.42rem 0.7rem;
+	text-align: left;
+	font-size: 0.67rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #f1f5f9;
+	border-right: 1px solid #334155;
+	background: #1e293b;
+	white-space: nowrap;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+}
+
+.xls-grid thead th:last-child { border-right: 0; }
+.xls-grid thead th.xls-th--right { text-align: right; }
+.xls-grid thead th.xls-th--center { text-align: center; }
+
+.xls-grid tbody tr { border-bottom: 1px solid #e2e8f0; }
+.xls-grid tbody tr:nth-child(even) { background: #f8fafc; }
+.xls-grid tbody tr:hover { background: #eff6ff; }
+.xls-grid tbody tr.xls-row--editing { background: #fefce8 !important; }
+
+.xls-grid td {
+	padding: 0.3rem 0.7rem;
+	border-right: 1px solid #e2e8f0;
+	vertical-align: middle;
+	color: #1e293b;
+}
+
+.xls-grid td:last-child { border-right: 0; }
+
+.xls-cell--seq {
+	text-align: center;
+	font-size: 0.66rem;
+	color: #94a3b8;
+	width: 1.8rem;
+	min-width: 1.8rem;
+	background: #f8fafc;
+}
+
+.xls-cell--num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.xls-cell--center { text-align: center; }
+
+.xls-cell--actions {
+	text-align: center;
+	white-space: nowrap;
+	width: 5.5rem;
+	min-width: 5.5rem;
+}
+
+.xls-input {
+	width: 100%;
+	min-height: 1.45rem;
+	padding: 0.15rem 0.4rem;
+	border: 1px solid #93c5fd;
+	border-radius: 0.2rem;
+	background: #fff;
+	font-size: 0.78rem;
+	color: #1e293b;
+	outline: none;
+	font-family: inherit;
+}
+
+.xls-input:focus {
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.billing-summary-table {
+	table-layout: fixed;
+}
+
+.billing-summary-table__label {
+	width: 12.5%;
+	min-width: 110px;
+}
+
+.billing-summary-table__value {
+	width: 20.8%;
+	min-width: 0;
+}
+
+.billing-summary-table td {
+	word-break: break-word;
+	vertical-align: middle;
+}
+
+.package-preset-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 0.6rem;
+	align-items: end;
+}
+
+.package-preset-select {
+	width: 100%;
+	margin-top: 0.35rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 0.375rem;
+	padding: 0.45rem 0.55rem;
+	font-size: 0.8rem;
+	color: #334155;
+	background: #ffffff;
+}
+
+.package-preset-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+::ng-deep {
+	.xls-row--editing .p-inputnumber-input {
+		min-height: 1.45rem;
+		padding: 0.15rem 0.4rem;
+		font-size: 0.78rem;
+		border: 1px solid #93c5fd;
+		border-radius: 0.2rem;
+	}
+
+	.xls-row--editing app-select-helper .p-select,
+	.xls-row--editing app-select-helper .p-dropdown {
+		border: 1px solid #93c5fd;
+		border-radius: 0.2rem;
+	}
+
+	.xls-row--editing app-select-helper .p-select .p-select-label,
+	.xls-row--editing app-select-helper .p-dropdown .p-dropdown-label {
+		padding: 0.15rem 0.4rem;
+		font-size: 0.78rem;
+	}
+}
+
+.xls-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.xls-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.55rem;
+	height: 1.55rem;
+	border: 1px solid transparent;
+	border-radius: 0.22rem;
+	background: transparent;
+	cursor: pointer;
+	font-size: 0.72rem;
+	line-height: 1;
+	transition: background-color 0.12s, border-color 0.12s;
+}
+
+.xls-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.xls-btn--save   { color: #047857; border-color: #6ee7b7; }
+.xls-btn--save:not(:disabled):hover   { background: #d1fae5; }
+.xls-btn--edit   { color: #b45309; border-color: #fde68a; }
+.xls-btn--edit:not(:disabled):hover   { background: #fef3c7; }
+.xls-btn--delete { color: #b91c1c; border-color: #fca5a5; }
+.xls-btn--delete:not(:disabled):hover { background: #fee2e2; }
+.xls-btn--cancel { color: #475569; border-color: #e2e8f0; }
+.xls-btn--cancel:not(:disabled):hover { background: #f1f5f9; }
+
+.xls-grid tfoot .xls-totals td {
+	background: #f1f5f9;
+	border-top: 2px solid #cbd5e1;
+	padding: 0.45rem 0.7rem;
+	font-weight: 700;
+}
+
+.xls-grid tfoot .xls-totals .xls-total-label {
+	text-align: right;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: #64748b;
+}
+
+.xls-grid tfoot .xls-add-row td {
+	padding: 0;
+	background: #f8fafc;
+	border-top: 1px dashed #cbd5e1;
+}
+
+.xls-add-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	width: 100%;
+	padding: 0.45rem;
+	border: 0;
+	background: transparent;
+	color: #64748b;
+	font-size: 0.76rem;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	transition: background-color 0.12s, color 0.12s;
+}
+
+.xls-add-btn:hover { background: #e2e8f0; color: #1e293b; }
+
+.xls-grid tfoot .xls-readonly-note td {
+	padding: 0.42rem 0.7rem;
+	text-align: center;
+	font-size: 0.76rem;
+	color: #64748b;
+	background: #f8fafc;
+	border-top: 1px dashed #cbd5e1;
+}
+
+.xls-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.1rem 0.45rem;
+	border-radius: 999px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.xls-tag--cleared { background: #d1fae5; color: #065f46; }
+.xls-tag--pending { background: #f1f5f9; color: #475569; }
+
+@media (max-width: 768px) {
+	.package-preset-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.package-preset-actions {
+		justify-content: flex-start;
+	}
+}

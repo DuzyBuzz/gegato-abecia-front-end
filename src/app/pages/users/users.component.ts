@@ -4,15 +4,20 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ToolbarModule } from 'primeng/toolbar';
+import { DialogModule } from 'primeng/dialog';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../shared/features/users/users.model';
 import { UserService } from '../../shared/features/users/users.service';
 import { RoleAccess, getRoleLabel, normalizeCompanyRole, resolveRoleAccess } from '../../utils/role-access.util';
+import { TableHelperComponent } from '../../shared/components/table-helper/table-helper.component';
+import { TableHelperColumn } from '../../shared/components/table-helper/table-helper-column.model';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ToastModule, ToolbarModule, ButtonModule, DialogModule, TableHelperComponent],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   providers: [MessageService]
@@ -31,6 +36,15 @@ export class UsersComponent implements OnInit {
   searchTerm = '';
   users: User[] = [];
   selectedUser: User | null = null;
+  createDialogVisible = false;
+
+  userColumns: TableHelperColumn[] = [
+    { field: 'accountNumber', header: 'Account Number', sortable: true, filterable: true, filterType: 'text', width: '12rem' },
+    { field: 'firstName', header: 'First Name', sortable: true, filterable: true, filterType: 'text', width: '12rem' },
+    { field: 'lastName', header: 'Last Name', sortable: true, filterable: true, filterType: 'text', width: '12rem' },
+    { field: 'position', header: 'Position', sortable: true, filterable: true, filterType: 'text', width: '12rem' },
+    { field: 'role', header: 'Role', sortable: true, filterable: true, filterType: 'text', width: '10rem' },
+  ];
 
   form: ReturnType<FormBuilder['group']>;
 
@@ -80,6 +94,14 @@ export class UsersComponent implements OnInit {
 
       return haystack.includes(normalizedTerm);
     });
+  }
+
+  onUsersSearch(searchValue: string): void {
+    this.searchTerm = searchValue || '';
+  }
+
+  onUserRowSelected(row: User): void {
+    this.selectUser(row);
   }
 
   get isEditingExistingUser(): boolean {
@@ -135,6 +157,20 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  openCreateDialog(): void {
+    this.startCreate();
+    this.createDialogVisible = true;
+  }
+
+  closeCreateDialog(): void {
+    if (this.saving) {
+      return;
+    }
+
+    this.createDialogVisible = false;
+    this.startCreate();
+  }
+
   selectUser(userSummary: User): void {
     const identifier = userSummary.accountNumber || userSummary.username || userSummary.id;
     if (!identifier) {
@@ -142,6 +178,7 @@ export class UsersComponent implements OnInit {
     }
 
     this.loadingUser = true;
+    this.createDialogVisible = false;
     this.userService.getUser(identifier).subscribe({
       next: (user) => {
         this.loadingUser = false;
@@ -226,6 +263,11 @@ export class UsersComponent implements OnInit {
         this.syncSessionUser(mergedUser);
         this.loadUsers();
 
+        if (!wasEditing) {
+          this.createDialogVisible = false;
+          this.startCreate();
+        }
+
         this.messageService.add({
           severity: 'success',
           summary: wasEditing ? 'User updated' : 'User created',
@@ -259,6 +301,10 @@ export class UsersComponent implements OnInit {
 
   trackByUser(_index: number, user: User): number | string {
     return user.id || user.accountNumber || user.username;
+  }
+
+  get showInlineEditor(): boolean {
+    return this.isEditingExistingUser || this.loadingUser;
   }
 
   private loadUsers(): void {

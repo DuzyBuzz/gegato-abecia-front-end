@@ -7,6 +7,7 @@ Funeral Service:
 /find/{pageNo}/{recordsPerPage}
 /find_record/{id:number}
 /find_record/{filter:string (name)}
+/find_summary_report/{from:date}/{to:date} (format is yyyy-mm-dd)
 /save (send FuneralService definition as body)
 /delete/{id:number}
 
@@ -22,11 +23,14 @@ https://gegato-abecia-fh.appspot.com/payments
 
 /find/{pageNo}/{recordsPerPage}
 /find_record_service/{id:funeral_service_id}
-/find_record/{id:number}
 /find_record/{filter:string (name)}
 /find_record_date/{start:date}/{end:date} (format is yyyy-mm-dd)
 /save (send FuneralService definition as body)
 /delete/{id:number}
+
+Notes:
+- Frontend payment retrieval now uses /find_record_service/{funeral_service_id} as canonical lookup.
+- Admin report summary uses /funeralservice/find_summary_report/{from}/{to}.
 
 
 Users

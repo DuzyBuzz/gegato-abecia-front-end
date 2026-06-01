@@ -48,15 +48,15 @@ export class StatementOfAccount implements OnInit, OnDestroy {
   isReady = false; // 🔥 control printing
 
   contract = {
-    dod: 'N/A',
-    checkedBy: 'N/A',
-    contractee: 'N/A',
-    address: 'N/A',
-    deceasedName: 'N/A',
-    deceasedAge: 'N/A',
-    contractNo: 'N/A',
+    dod: '',
+    checkedBy: '',
+    contractee: '',
+    address: '',
+    deceasedName: '',
+    deceasedAge: '',
+    contractNo: '',
     officer: 'Officer in Charge',
-    releasedBy: 'N/A'
+    releasedBy: ''
   };
 
   items: StatementItem[] = [];
@@ -138,7 +138,7 @@ dateNow: Date = new Date();
         // Add charges to items
         const chargesArray: ContractCharges[] = Array.isArray(charges) ? charges : (charges ? [charges] : []);
         const chargeItems: StatementItem[] = chargesArray.map(c => ({
-          description: `Additional Inclusion - ${c.chargeType || 'Charge'}${c.description ? ' - ' + c.description : ''}`,
+          description: String(c.description || '').trim() || 'Package Enclosions - No description',
           amount: this.calculateChargeAmount(c),
           discount: Number(c.discount) || 0,
           kind: 'charge'
@@ -152,7 +152,7 @@ dateNow: Date = new Date();
           : (payments ? [payments] : []);
 
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
-          description: `Payment - ${p.description || p.controlNumber || 'Collection'}`,
+          description: `Payment - OR: ${p.orNumber} || "" | AR: ${p.arNumber}`,
           payment: Number(p.amount || 0),
           paymentDate: this.formatPaymentDate(p.dateIssued),
           kind: 'payment'
@@ -192,7 +192,7 @@ dateNow: Date = new Date();
 
     const fullName = `${contract.firstName || ''} ${contract.middleName || ''} ${contract.lastName || ''}`.trim();
 
-    const address = [
+    const address = String(contract.addressLine1 || '').trim() || [
       contract.baranggay,
       contract.municipality,
       contract.province
@@ -201,15 +201,15 @@ dateNow: Date = new Date();
     const atDeath = deceasedAgeAtDeath(contract.dateOfBirth, contract.dateOfDeath);
 
     this.contract = {
-      dod: contract.dateOfDeath || 'N/A',
-      checkedBy: contract.checkedBy || 'N/A',
-      contractee: contract.contractee || 'N/A',
-      address: address || 'N/A',
-      deceasedName: fullName || 'N/A',
-      deceasedAge: atDeath !== null ? String(atDeath) : 'N/A',
-      contractNo: contract.contractNo || 'N/A',
+      dod: contract.dateOfDeath || '',
+      checkedBy: contract.checkedBy || '',
+      contractee: contract.contractee || '',
+      address: address || '',
+      deceasedName: fullName || '',
+      deceasedAge: atDeath !== null ? String(atDeath) : '',
+      contractNo: contract.contractNo || '',
       officer: contract.checkedBy || 'Officer in Charge',
-      releasedBy: contract.releasedBy || 'N/A'
+      releasedBy: contract.releasedBy || ''
     };
 
     // Initialize items array (charges and payments will be added in loadAllData)
@@ -224,15 +224,17 @@ dateNow: Date = new Date();
       return null;
     }
 
-    const casketOrUrn = [
-      contract.casket,
-      contract.urnType,
-      contract.urnDescription,
-      contract.type
-    ].find((value) => !!String(value || '').trim());
+    const casket = String(contract.casket || '').trim();
+    const urn = String(contract.urnType || contract.urnDescription || '').trim();
+    const casketAvailability = String(contract.casketAvailable || '').trim();
+    const serviceType = String(contract.type || '').trim() || 'Service type not specified';
+
+    const itemLabel = casket ? '' : (urn ? '' : 'Package Enclosions');
+    const itemValue = casket || urn || String(contract.type || '').trim() || 'Not specified';
+    const availabilityText = casketAvailability ? ` -  ${casketAvailability}` : '';
 
     return {
-      description: `Casket/Urn - ${casketOrUrn || 'Not specified'}`,
+      description: `${serviceType} - ${itemLabel}: ${itemValue}${availabilityText}`,
       amount,
       discount,
       kind: 'contract',
@@ -253,15 +255,15 @@ dateNow: Date = new Date();
   // ======================================================
   private setFallbackData(): void {
     this.contract = {
-      dod: 'N/A',
-      checkedBy: 'N/A',
-      contractee: 'N/A',
-      address: 'N/A',
-      deceasedName: 'N/A',
-      deceasedAge: 'N/A',
-      contractNo: 'N/A',
+      dod: '',
+      checkedBy: '',
+      contractee: '',
+      address: '',
+      deceasedName: '',
+      deceasedAge: '',
+      contractNo: '',
       officer: 'Officer in Charge',
-      releasedBy: 'N/A'
+      releasedBy: ''
     };
 
     this.items = [
@@ -298,6 +300,14 @@ dateNow: Date = new Date();
     return this.items
       .filter((item) => item.kind === 'charge')
       .reduce((sum, item) => sum + (item.discount || 0), 0);
+  }
+
+  get packageEnclosionsAmount(): number {
+    return this.additionalChargesAmount;
+  }
+
+  get packageEnclosionsDiscount(): number {
+    return this.additionalChargesDiscount;
   }
 
   get totalDiscount(): number {

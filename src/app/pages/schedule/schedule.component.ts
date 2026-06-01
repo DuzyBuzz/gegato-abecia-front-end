@@ -514,7 +514,11 @@ export class ScheduleComponent implements OnInit {
   /**
    * Open event details modal
    */
-  openEventModal(event: BurialEvent): void {
+  openEventModal(event: BurialEvent, closeDayViewFirst = false): void {
+    if (closeDayViewFirst && this.isDayViewOpen) {
+      this.closeDayView();
+    }
+
     this.selectedEvent = event.extendedProps;
     this.isEventModalOpen = true;
     console.log('📅 Event clicked:', this.selectedEvent);
@@ -590,6 +594,17 @@ export class ScheduleComponent implements OnInit {
     if (this.selectedEvent?.contractId) {
       console.log('📜 Printing Cremation Certificate for contract:', this.selectedEvent.contractId);
       this.router.navigate(['/print/cremation-certificate', this.selectedEvent.contractId]);
+      this.closeEventModal();
+    }
+  }
+
+  /**
+   * Print Event Details and Instructions
+   */
+  printEventDetailsInstructions(): void {
+    if (this.selectedEvent?.contractId) {
+      console.log('📝 Printing Event Details and Instructions for contract:', this.selectedEvent.contractId);
+      this.router.navigate(['/print/event-details-instructions', this.selectedEvent.contractId]);
       this.closeEventModal();
     }
   }

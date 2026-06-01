@@ -370,17 +370,24 @@ Used by frontend for:
 
 - admin dashboard collection analytics
 
-#### GET `/find_record_service/{id}`
+#### GET `/find_by_contract/{contractNumber}`
 
-Returns payment records for one funeral service.
+Returns payment records for one contract number.
 
 Used by frontend for:
 
 - funeral payment screen
+- billing payment summary
 
 Observed behavior:
 
 - may return a single object or an array
+
+#### GET `/find_record_service/{id}`
+
+Legacy lookup by funeral service ID.
+
+Used by frontend as a fallback when `find_by_contract` is unavailable.
 
 #### GET `/find_record/{id}`
 
@@ -422,17 +429,20 @@ Observed documented fields:
 - `dateIssued`
 - `checkDate`
 - `issuedBy`
-- `bank`
+- `paymentType`
 - `accountNumber`
 - `amount`
-- `serviced`
-
-Observed additional fields handled by the frontend:
-
 - `description`
 - `remarks`
 - `checkCleared`
 - `funeralServiceId`
+- `orNumber`
+- `arNumber`
+
+Observed additional fields handled by the frontend:
+
+- legacy alias handling for `bank` -> mapped to `paymentType`
+- legacy relation alias handling for `serviced` -> mapped to `funeralServiceId`
 
 ### 5.3 Payment save format used by the frontend
 
@@ -444,10 +454,12 @@ Example:
 {
 	"id": 45,
 	"controlNumber": "OR-2026-104",
+	"orNumber": "OR-2026-104",
+	"arNumber": "AR-2026-104",
 	"dateIssued": 1777593600000,
 	"checkDate": 1777680000000,
 	"issuedBy": "Accounting",
-	"bank": "BDO",
+	"paymentType": "Check",
 	"accountNumber": "CHK-001",
 	"amount": 5000,
 	"description": "Initial payment",
@@ -457,11 +469,10 @@ Example:
 }
 ```
 
-Field naming caution:
+Compatibility note:
 
-- the old definition file mentions `serviced`
-- the current frontend uses `funeralServiceId`
-- verify which relation field the backend expects in production responses and saves
+- frontend now writes `funeralServiceId` and still supports legacy `serviced` during mapping
+- frontend now writes `paymentType` and still maps legacy `bank` responses
 
 ## 6. Users or Accounts API
 

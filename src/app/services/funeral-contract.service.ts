@@ -8,6 +8,13 @@ import {
   mapFuneralContractToApi
 } from '../mappers/funeral-contract.mapper';
 
+export interface FuneralSummaryReportResponse {
+  starting: string;
+  ending: string;
+  contractSummary: Record<string, unknown>[];
+  paymentSummary: Record<string, unknown>[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -100,4 +107,43 @@ export class FuneralContractService {
         map(res => res.map(mapFuneralContract))
       );
   }
+
+  getSummaryReport(startDate: string, endDate: string): Observable<FuneralSummaryReportResponse> {
+    return this.http
+      .get<any>(`${this.api}/find_summary_report/${startDate}/${endDate}`)
+      .pipe(
+        map((response) => this.mapSummaryReport(response))
+      );
+  }
+
+  private mapSummaryReport(response: any): FuneralSummaryReportResponse {
+    const payload = Array.isArray(response) ? (response[0] || {}) : (response || {});
+
+    const contractSummary = Array.isArray(payload.contractSummary)
+      ? payload.contractSummary
+      : Array.isArray(payload.contract_summary)
+        ? payload.contract_summary
+        : [];
+
+    const paymentSummary = Array.isArray(payload.paymentSummary)
+      ? payload.paymentSummary
+      : Array.isArray(payload.payment_summary)
+        ? payload.payment_summary
+        : [];
+
+    return {
+      starting: String(payload.starting || payload.startDate || startDateFallback(payload) || ''),
+      ending: String(payload.ending || payload.endDate || endDateFallback(payload) || ''),
+      contractSummary,
+      paymentSummary,
+    };
+  }
+}
+
+function startDateFallback(payload: any): string {
+  return String(payload.from || payload.start || '');
+}
+
+function endDateFallback(payload: any): string {
+  return String(payload.to || payload.end || '');
 }

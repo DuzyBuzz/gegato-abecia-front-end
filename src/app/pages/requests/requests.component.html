@@ -1,0 +1,264 @@
+<div class="requests-page">
+  <p-toast></p-toast>
+
+  <section class="requests-hero">
+    <div>
+      <h1>Change Requests</h1>
+      <p>Review and approve submitted changes with confidence. Filter by date and print records when needed for legal evidence.</p>
+    </div>
+    <div class="requests-hero-actions">
+      <span *ngIf="pendingCount > 0" class="pending-pill">
+        <i class="pi pi-clock"></i>
+        {{ pendingCount }} pending
+      </span>
+      <button type="button" class="print-btn" (click)="printFilteredRequests()" [disabled]="!filteredRows.length">
+        <i class="pi pi-print"></i>
+        Print Filtered
+      </button>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span>Total</span>
+      <strong>{{ totalCount }}</strong>
+    </article>
+    <article class="summary-card pending">
+      <span>Pending</span>
+      <strong>{{ pendingCount }}</strong>
+    </article>
+    <article class="summary-card approved">
+      <span>Approved</span>
+      <strong>{{ approvedCount }}</strong>
+    </article>
+    <article class="summary-card rejected">
+      <span>Rejected</span>
+      <strong>{{ rejectedCount }}</strong>
+    </article>
+  </section>
+
+  <section class="filters-panel">
+    <div class="tabs">
+      <button type="button" (click)="setTab('pending')" [class.active]="activeTab === 'pending'">
+        Pending
+      </button>
+      <button type="button" (click)="setTab('all')" [class.active]="activeTab === 'all'">
+        All Requests
+      </button>
+    </div>
+
+    <div class="date-filters" *ngIf="activeTab === 'all'">
+      <label>
+        From
+        <input type="date" [(ngModel)]="dateFrom" (ngModelChange)="applyFilter()" />
+      </label>
+      <label>
+        To
+        <input type="date" [(ngModel)]="dateTo" (ngModelChange)="applyFilter()" />
+      </label>
+      <button type="button" class="clear-filter-btn" (click)="clearDateFilter()" [disabled]="!hasDateFilter">
+        Clear
+      </button>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="state-block loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading requests…</span>
+  </div>
+
+  <div *ngIf="!loading && filteredRows.length === 0" class="state-block empty">
+    <i class="pi pi-inbox"></i>
+    <span>{{ activeTab === 'pending' ? 'No pending requests.' : 'No requests found for the selected date range.' }}</span>
+  </div>
+
+  <section *ngIf="!loading && filteredRows.length > 0" class="requests-table-wrap">
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Contract</th>
+          <th>Change Detail</th>
+          <th>Submitted By</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of filteredRows; trackBy: trackByRequest">
+          <td>
+            <div class="req-type">{{ row.typeLabel }}</div>
+          </td>
+          <td>
+            <div class="contract-no">{{ row.request.contractNo }}</div>
+            <div class="deceased-name" *ngIf="row.request.deceasedName">{{ row.request.deceasedName }}</div>
+          </td>
+          <td>
+            <div class="field-label">{{ row.request.fieldLabel }}</div>
+            <div class="change-values">
+              <span class="old-value">{{ row.oldValueText }}</span>
+              <i class="pi pi-arrow-right"></i>
+              <span class="new-value">{{ row.newValueText }}</span>
+            </div>
+            <div *ngIf="row.request.notes" class="note-line">{{ row.request.notes }}</div>
+          </td>
+          <td>{{ row.request.requestedBy }}</td>
+          <td>{{ row.requestedAtText }}</td>
+          <td>
+            <p-tag [value]="row.statusUpper" [severity]="row.statusSeverity"></p-tag>
+            <div *ngIf="row.request.adminNotes" class="admin-note">{{ row.request.adminNotes }}</div>
+          </td>
+          <td>
+            <div *ngIf="row.request.status === 'pending'" class="action-buttons">
+              <button type="button" class="approve-btn" (click)="openReview(row, 'approve')">
+                <i class="pi pi-check"></i>
+                Approve
+              </button>
+              <button type="button" class="reject-btn" (click)="openReview(row, 'reject')">
+                <i class="pi pi-times"></i>
+                Reject
+              </button>
+            </div>
+            <div *ngIf="row.request.status !== 'pending'" class="review-meta">
+              {{ row.request.reviewedBy || '—' }}
+              <span>{{ row.reviewedAtText }}</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- REVIEW DIALOG -->
+<p-dialog
+  [(visible)]="reviewDialogVisible"
+  [closable]="!applyingAction"
+  [modal]="true"
+  [breakpoints]="{ '960px': '92vw', '640px': '96vw' }"
+  [style]="{ width: '760px', maxWidth: '96vw' }"
+  styleClass="review-request-dialog"
+  [header]="reviewAction === 'approve' ? 'Approve Request' : 'Reject Request'">
+
+  <div *ngIf="selectedRequest" class="request-review-dialog-body">
+    <section class="request-summary-card">
+      <div class="request-summary-header">
+        <span class="request-type-badge">{{ typeLabels[selectedRequest.type] }}</span>
+        <span class="request-status-text">{{ reviewAction === 'approve' ? 'Apply this change to the system' : 'Reject this request' }}</span>
+      </div>
+
+      <div class="request-summary-grid">
+        <div>
+          <span class="summary-label">Contract</span>
+          <strong>{{ selectedRequest.contractNo }}</strong>
+        </div>
+        <div *ngIf="selectedRequest.deceasedName">
+          <span class="summary-label">Deceased</span>
+          <strong>{{ selectedRequest.deceasedName }}</strong>
+        </div>
+        <div>
+          <span class="summary-label">Field</span>
+          <strong>{{ selectedRequest.fieldLabel }}</strong>
+        </div>
+        <div>
+          <span class="summary-label">Submitted By</span>
+          <strong>{{ selectedRequest.requestedBy }}</strong>
+        </div>
+      </div>
+
+      <div class="request-meta-row">
+        <span><i class="pi pi-calendar"></i> {{ reviewRequestedAtText }}</span>
+        <span><i class="pi pi-tag"></i> {{ selectedRequest.status | uppercase }}</span>
+      </div>
+
+      <div *ngIf="selectedRequest.notes" class="request-notes-box">
+        <span class="summary-label">Request Note</span>
+        <p>{{ selectedRequest.notes }}</p>
+      </div>
+    </section>
+
+    <section class="request-change-panel">
+      <div class="request-change-heading">
+        <h3>Change Preview</h3>
+        <p>The values below show what will be replaced if this request is approved.</p>
+      </div>
+
+      <div class="request-change-grid">
+        <div class="value-column">
+          <span class="value-column-label">Current Value</span>
+          <ng-container *ngIf="reviewOldIsObject; else oldValueText">
+            <div class="value-object-card">
+              <div *ngFor="let item of reviewOldEntries; trackBy: trackByValueEntry" class="value-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #oldValueText>
+            <div class="value-text-card value-text-card--old">{{ reviewOldValueText }}</div>
+          </ng-template>
+        </div>
+
+        <div class="change-arrow">
+          <i class="pi pi-arrow-right"></i>
+        </div>
+
+        <div class="value-column">
+          <span class="value-column-label">New Value</span>
+          <ng-container *ngIf="reviewNewIsObject; else newValueText">
+            <div class="value-object-card value-object-card--new">
+              <div *ngFor="let item of reviewNewEntries; trackBy: trackByValueEntry" class="value-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #newValueText>
+            <div class="value-text-card value-text-card--new">{{ reviewNewValueText }}</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div *ngIf="reviewAction === 'approve'" class="review-warning-box">
+        <i class="pi pi-info-circle"></i>
+        <span>Approving will automatically apply this change to the system.</span>
+      </div>
+    </section>
+
+    <section class="admin-notes-section">
+      <label class="admin-notes-label">Admin Notes <span>(optional)</span></label>
+      <textarea
+        [(ngModel)]="adminNotes"
+        [ngModelOptions]="{ standalone: true }"
+        rows="4"
+        placeholder="Add a note for the requester…"
+        class="admin-notes-input"
+      ></textarea>
+    </section>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button
+        type="button"
+        (click)="closeReview()"
+        [disabled]="applyingAction"
+        class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition">
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="confirmReview()"
+        [disabled]="applyingAction"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-white transition disabled:opacity-60"
+        [class.bg-emerald-600]="reviewAction === 'approve'"
+        [class.hover:bg-emerald-700]="reviewAction === 'approve'"
+        [class.bg-rose-600]="reviewAction === 'reject'"
+        [class.hover:bg-rose-700]="reviewAction === 'reject'">
+        <i *ngIf="applyingAction" class="pi pi-spin pi-spinner text-xs"></i>
+        {{ applyingAction ? 'Processing…' : (reviewAction === 'approve' ? 'Approve & Apply' : 'Reject') }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

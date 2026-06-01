@@ -1,0 +1,146 @@
+.print-page {
+	font-size: 10.2px;
+	line-height: 1.2;
+	max-width: 192mm;
+	margin: 0 auto;
+}
+
+.print-title {
+	text-align: center;
+	font-weight: 700;
+	font-size: 14px;
+	margin: 8px 0 6px;
+	text-decoration: underline;
+	letter-spacing: 0.03em;
+}
+
+.meta-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 10px;
+	margin-bottom: 6px;
+	gap: 8px;
+}
+
+.event-block {
+	border: 1px solid #111827;
+}
+
+.event-block--compact {
+	margin-bottom: 6px;
+}
+
+.event-block__title {
+	margin: 0;
+	padding: 0.22rem 0.35rem;
+	font-size: 0.62rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	border-bottom: 1px solid #111827;
+}
+
+.section-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 5px;
+	padding: 5px;
+}
+
+.detail-section {
+	border: 1px solid #d1d5db;
+	break-inside: avoid;
+}
+
+.detail-section__title {
+	font-size: 0.56rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	padding: 0.2rem 0.3rem;
+	border-bottom: 1px solid #d1d5db;
+	background: #f9fafb;
+	letter-spacing: 0.04em;
+}
+
+.event-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+}
+
+.event-row {
+	display: grid;
+	grid-template-columns: 112px minmax(0, 1fr);
+	border-bottom: 1px solid #d1d5db;
+}
+
+.event-row:last-child {
+	border-bottom: 0;
+}
+
+.event-row__label {
+	padding: 0.18rem 0.26rem;
+	font-weight: 700;
+	background: #f9fafb;
+	border-right: 1px solid #d1d5db;
+	font-size: 0.58rem;
+}
+
+.event-row__value {
+	padding: 0.18rem 0.26rem;
+	white-space: normal;
+	word-break: break-word;
+	font-size: 0.58rem;
+}
+
+.instruction-list {
+	padding: 0.2rem 0.35rem;
+}
+
+.instruction-item {
+	border-bottom: 1px dashed #9ca3af;
+	padding: 0.2rem 0;
+}
+
+.instruction-item:last-child {
+	border-bottom: 0;
+}
+
+.instruction-item__label {
+	font-weight: 700;
+	font-size: 0.56rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 0.08rem;
+}
+
+.instruction-item__text {
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-size: 0.6rem;
+}
+
+.print-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 9px;
+	margin-top: 3px;
+	gap: 8px;
+}
+
+@media print {
+	@page {
+		size: A4 portrait;
+		margin: 7mm;
+	}
+
+	.print-shell {
+		padding: 0 !important;
+	}
+
+	.print-page {
+		zoom: 0.92;
+		transform-origin: top center;
+	}
+}

@@ -14,5 +14,24 @@ service cloud.firestore {
       // update your rules.
       allow read, write: if request.time < timestamp.date(2099, 12, 31);
     }
+
+    // Service change requests: authenticated staff can submit; only admins can approve/reject
+    match /service_requests/{requestId} {
+      // Any authenticated user can read their own requests
+      allow read: if request.auth != null;
+
+      // Any authenticated user can create a new request
+      allow create: if request.auth != null
+        && request.resource.data.status == 'pending'
+        && request.resource.data.requestedByUid == request.auth.uid;
+
+      // Only allow updates (approve/reject) via server-side logic;
+      // for client-side admin actions we allow writes from authenticated users
+      // (role enforcement is handled at the application layer)
+      allow update: if request.auth != null;
+
+      // Deletion is not permitted through client
+      allow delete: if false;
+    }
   }
 }

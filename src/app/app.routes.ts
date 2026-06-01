@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './shared/layout/main-layout/main-layout.component';
+import { AdminLayoutComponent } from './shared/layout/admin-layout/admin-layout.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UsersComponent } from './pages/users/users.component';
@@ -17,7 +18,10 @@ import { StatementOfAccount } from './document/statement-of-account/statement-of
 import { FuneralServiceContractPrinting } from './document/funeral-service-contract-printing/funeral-service-contract-printing';
 import { AuthorityToCremateRemainsPrinting } from './document/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
 import { CremationCertificate } from './document/cremation-certificate/cremation-certificate';
+import { EventDetailsInstructionsComponent } from './document/event-details-instructions/event-details-instructions.component';
 import { RoleAccess } from './utils/role-access.util';
+import { RequestsComponent } from './pages/requests/requests.component';
+import { EnclosionsComponent } from './forms/enclosions/enclosions.component';
 
 export const routes: Routes = [
 
@@ -37,7 +41,7 @@ export const routes: Routes = [
   // 🔐 ADMIN (AUTHENTICATED USERS WITH ADMIN ROLE)
   {
     path: 'admin',
-    component: MainLayout,
+    component: AdminLayoutComponent,
     canActivate: [roleGuard],
     data: { roleAccess: [RoleAccess.Admin], redirectTo: '/admin/dashboard' },
     children: [
@@ -72,6 +76,16 @@ export const routes: Routes = [
       {
         path: 'schedule',
         component: ScheduleComponent
+      },
+
+      {
+        path: 'requests',
+        component: RequestsComponent
+      },
+
+      {
+        path: 'enclosions',
+        component: EnclosionsComponent
       },
 
       {
@@ -274,6 +288,10 @@ export const routes: Routes = [
             {
               path: 'cremation-certificate/:contractId',
               component: CremationCertificate
+            },
+            {
+              path: 'event-details-instructions/:contractId',
+              component: EventDetailsInstructionsComponent
             },
 
 

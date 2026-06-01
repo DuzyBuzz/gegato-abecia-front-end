@@ -2,11 +2,16 @@ FuneralPayment {
     private long id;
     private String controlNumber;
     private Date dateIssued;
-    private Date checkDatel;
+    private Date checkDate;
     private String issuedBy;
-    private String bank;
+    private String paymentType;
     private String accountNumber;
     private double amount;
-	private long serviced;
+    private String description;
+    private String remarks;
+    private boolean checkCleared;
+    private long funeralServiceId;
+    private String orNumber;
+    private String arNumber;
 
 }

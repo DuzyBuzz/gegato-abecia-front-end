@@ -64,6 +64,27 @@
 
   <!-- HEADER -->
   <thead>
+    <tr class="border-b border-black">
+      <th colspan="5" class="text-left py-2 px-2 font-normal">
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+            <span class="font-bold">Contractee:</span>
+            <span class="uppercase"> {{ contract.contractee || '-' }}</span>
+          </div>
+          <div>
+            <span class="font-bold">Contract No.:</span>
+            <span class="uppercase"> {{ contract.contractNo || '-' }}</span>
+          </div>
+
+
+
+          <div class="col-span-3">
+            <span class="font-bold">Address:</span>
+            <span class="uppercase"> {{ contract.address || '-' }}</span>
+          </div>
+        </div>
+      </th>
+    </tr>
     <tr class="bg-gray-100 font-bold border-b  border-black">
       <th class="text-left py-1 px-2 border-r border-black">Description</th>
       <th class="text-left py-1 px-2 border-r border-black">Amount</th>
@@ -106,20 +127,20 @@
   <!-- TOTALS -->
   <div class="border-t grid grid-cols-4 border-black gap-2 font-bold">
     <div class=" "></div>
-    <div class="text-right  mt-3 grid grid-cols-2">
+    <div class="text-right mt-3 grid grid-cols-[220px_minmax(0,1fr)] gap-x-3">
         <div>
           Contract Net:
         </div>
             <div>
             {{ (contractBaseAmount - contractBaseDiscount) | number:'1.2-2' }}
         </div>
-
         <div>
-          Additional Charges Net:
+          Discount:
         </div>
-            <div>
-            {{ (additionalChargesAmount - additionalChargesDiscount) | number:'1.2-2' }}
+          <div>
+          {{ totalDiscount | number:'1.2-2' }}
         </div>
+        
 
         <div>
           Grand Billed:
@@ -128,13 +149,7 @@
             {{ subtotalBeforePayments | number:'1.2-2' }}
         </div>
 
-        <div>
-          Total Discount:
-        </div>
-          <div>
-          {{ totalDiscount | number:'1.2-2' }}
-        </div>
-        
+
             <div>
             Amount Paid: 
         </div>

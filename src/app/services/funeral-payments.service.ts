@@ -15,22 +15,14 @@ export class FuneralPaymentsService {
   constructor(private http: HttpClient) {}
 
   /**
-   * ✅ Fetch payment by funeral service ID
-   * Maps API response through mapper to UI format
+   * ✅ Fetch payment records by funeral service ID.
    */
   getFuneralPaymentByServiceId(serviceId: number): Observable<FuneralPayment | FuneralPayment[]> {
     console.log('📡 FuneralPaymentsService: getFuneralPaymentByServiceId', { serviceId });
+
     return this.http
       .get<any>(`${this.api}/find_record_service/${serviceId}`)
-      .pipe(
-        map((response) => {
-          // Handle both single object and array responses
-          if (Array.isArray(response)) {
-            return response.map((item) => mapFuneralPayment(item));
-          }
-          return mapFuneralPayment(response);
-        })
-      );
+      .pipe(map((response) => this.mapPaymentResponse(response)));
   }
 
   /**
@@ -45,14 +37,17 @@ export class FuneralPaymentsService {
   }
 
   /**
-   * ✅ Fetch payment by payment ID
+   * ✅ Fetch payment records by funeral service ID
    * Maps API response through mapper to UI format
    */
-  getPaymentById(id: number): Observable<FuneralPayment> {
-    console.log('📡 FuneralPaymentsService: getPaymentById', { id });
+  getPaymentById(serviceId: number): Observable<FuneralPayment> {
+    console.log('📡 FuneralPaymentsService: getPaymentById', { serviceId });
     return this.http
-      .get<any>(`${this.api}/find_record/${id}`)
-      .pipe(map((response) => mapFuneralPayment(response)));
+      .get<any>(`${this.api}/find_record_service/${serviceId}`)
+      .pipe(map((response) => {
+        const normalized = this.mapPaymentResponse(response);
+        return Array.isArray(normalized) ? normalized[0] : normalized;
+      }));
   }
 
   /**
@@ -104,4 +99,12 @@ delete(id: number): Observable<any> {
   console.log('🗑️ FuneralPaymentsService: delete', { id });
   return this.http.post(`${this.api}/delete/${id}`, {});
 }
+
+  private mapPaymentResponse(response: any): FuneralPayment | FuneralPayment[] {
+    if (Array.isArray(response)) {
+      return response.map((item) => mapFuneralPayment(item));
+    }
+
+    return mapFuneralPayment(response);
+  }
 }

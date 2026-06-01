@@ -67,6 +67,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
   form: FormGroup;
   deceasedName = '';
   comboboxesReady = false;
+  isSaving = false;
   contractId: number | null = null;
   currentSection = 1;
   private intersectionObserver: IntersectionObserver | null = null;
@@ -186,6 +187,22 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     const basePath = role === 'Admin' ? '/admin' : '/billing';
     this.router.navigate([`/print/cremation-certificate/${this.contractId}`]);
   }
+
+  printEventDetailsInstructions(): void {
+    if (!this.contractId) {
+      console.warn('[FuneralContractEntry] printEventDetailsInstructions - No contractId');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Create Contract First',
+        detail: 'Please save the contract first before printing',
+        life: 3000,
+      });
+      return;
+    }
+
+    this.router.navigate(['/print/event-details-instructions', this.contractId]);
+  }
+
   // ================= PRINTING =================
   printStatement(): void {
     if (!this.contractId) {
@@ -770,6 +787,10 @@ scrollToSection(sectionId: number): void {
   }
 
 submitContract(): void {
+  if (this.isSaving) {
+    return;
+  }
+
   if (!this.canEditCompactSections) {
     this.messageService.add({
       severity: 'warn',
@@ -802,8 +823,11 @@ submitContract(): void {
 
   console.log('UPSERT PAYLOAD:', payload);
 
+  this.isSaving = true;
+
   this.funeralContractService.save(payload).subscribe({
     next: (res: FuneralContract) => {
+      this.isSaving = false;
 
       // ✅ backend is source of truth
       if (res?.id) {
@@ -819,6 +843,7 @@ submitContract(): void {
 
     },
     error: (err) => {
+      this.isSaving = false;
       console.error(err);
       this.messageService.add({
         severity: 'error',

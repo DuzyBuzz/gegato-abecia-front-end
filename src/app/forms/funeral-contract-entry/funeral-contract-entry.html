@@ -9,7 +9,9 @@
           <h1 class="contract-entry-header__title">Funeral Contract</h1>
           <div class="contract-entry-header__meta">
             <span class="contract-entry-header__number">Contract #: {{ form.value.contractNo || 'FC-Draft' }}</span>
-            <span class="contract-entry-header__status-pill contract-entry-header__status-pill--completed">Complete</span>
+            <!-- <span class="contract-entry-header__status-pill contract-entry-header__status-pill--completed" *ngIf="isEditMode">
+              COMPLETE
+            </span> -->
           </div>
         </div>
       </div>
@@ -26,11 +28,13 @@
         *ngIf="canEditCompactSections"
         type="button"
         (click)="submitContract()"
+        [disabled]="isSaving"
+        [attr.aria-busy]="isSaving"
         class="contract-entry-header__btn contract-entry-header__btn--primary"
         title="Save Contract"
       >
-        <i class="pi pi-save"></i>
-        Save Contract
+        <i [class]="isSaving ? 'pi pi-spinner pi-spin' : 'pi pi-save'"></i>
+        {{ isSaving ? 'Saving...' : 'Save Contract' }}
       </button>
 
       <div class="contract-entry-header__dropdown-wrapper">
@@ -53,6 +57,9 @@
           </button>
           <button type="button" (click)="printCremationCertificate(); toggleDocumentsMenu()" *ngIf="isEditMode">
             <i class="pi pi-print"></i> Cremation Certificate
+          </button>
+          <button type="button" (click)="printEventDetailsInstructions(); toggleDocumentsMenu()" *ngIf="isEditMode">
+            <i class="pi pi-print"></i> Event Details &amp; Instructions
           </button>
           <button type="button" (click)="printStatement(); toggleDocumentsMenu()" *ngIf="isEditMode">
             <i class="pi pi-print"></i> Statement of Account
@@ -80,6 +87,7 @@
       <form [formGroup]="form" class="contract-entry-form">
 
         <div class="contract-entry-sections-grid">
+          <div class="contract-entry-column contract-entry-column--1">
 
              <!-- SECTION 1: CONTRACT INFORMATION -->
              <div class="contract-entry-section contract-entry-card" data-section="1">
@@ -178,7 +186,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 mt-4">
-              <div>
+              <div class="sm:col-span-2">
                 <label class="contract-entry-field__label">Date of Birth</label>
                 <input
                   type="date"
@@ -188,7 +196,7 @@
                   title="Date of Birth"
                 >
               </div>
-              <div>
+              <div class="max-w-[5.5rem]">
                 <label class="contract-entry-field__label">Age</label>
                 <input
                   type="number"
@@ -207,7 +215,7 @@
                   [isInvalid]="isFieldInvalid('gender')"
                 ></app-select-helper>
               </div>
-              <div>
+             <div>
                 <label class="contract-entry-field__label">Civil Status</label>
                 <app-select-helper size="sm"
                   formControlName="civilStatus"
@@ -216,21 +224,10 @@
                   [isInvalid]="isFieldInvalid('civilStatus')"
                 ></app-select-helper>
               </div>
-              <div>
-                <label class="contract-entry-field__label">Religion</label>
-                <app-select-helper size="sm"
-                  formControlName="religion"
-                  comboboxName="religion"
-                  [searchable]="true"
-                  [isInvalid]="isFieldInvalid('religion')"
-                ></app-select-helper>
-                <small *ngIf="isFieldInvalid('religion')" class="contract-entry-field__error">
-                  {{ getErrorMessage('religion') }}
-                </small>
-              </div>
+
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Father's Name</label>
                 <input
@@ -249,9 +246,9 @@
                   title="Mother's Name"
                 >
               </div>
-            </div>
+            </div> -->
 
-            <div class="grid grid-cols-1 gap-4 mt-4">
+            <!-- <div class="grid grid-cols-1 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Place of Birth</label>
                 <input
@@ -261,7 +258,7 @@
                   title="Place of Birth"
                 >
               </div>
-            </div>
+            </div> -->
 
             <div class="grid grid-cols-1 gap-4 mt-4">
               <div>
@@ -302,6 +299,7 @@
                   title="Time of Death"
                 >
               </div>
+   
             </div>
           </div>
         </div>
@@ -407,7 +405,7 @@
                 </small>
               </div>
             </div>
-
+<!-- 
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Barangay</label>
@@ -476,11 +474,14 @@
                   title="Name of Informant"
                 >
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
 
 
+
+          </div>
+          <div class="contract-entry-column contract-entry-column--2">
 
         <!-- SECTION 4: TRANSFER & BURIAL/CREMATION SCHEDULE -->
         <div class="contract-entry-section contract-entry-card" data-section="4">
@@ -621,73 +622,15 @@
           </div>
         </div>
         <!-- SECTION 5: DELIVERY -->
+       
+          </div>
+          <div class="contract-entry-column contract-entry-column--3">
+
+        <!-- SECTION 6: EMBALMING & MAKEUP -->
         <div class="contract-entry-section contract-entry-card" data-section="5">
           <div class="contract-entry-section__header">
             <div class="contract-entry-section__title-block">
-              <span class="contract-entry-section__number contract-entry-section__number--5">5</span>
-              <div>
-                <h3 class="contract-entry-section__title">Delivery</h3>
-                              </div>
-            </div>
-          </div>
-
-          <div class="contract-entry-section__content">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label class="contract-entry-field__label">Delivery Helper</label>
-                <input
-                  type="text"
-                  formControlName="deliveryHelper"
-                  class="contract-entry-field__input"
-                  title="Delivery Helper"
-                >
-              </div>
-              <div>
-                <label class="contract-entry-field__label">Delivery Driver</label>
-                <input
-                  type="text"
-                  formControlName="deliveryDriver"
-                  class="contract-entry-field__input"
-                  title="Delivery Driver"
-                >
-              </div>
-              <div>
-                <label class="contract-entry-field__label">Delivery Status</label>
-                <app-select-helper size="sm"
-                  formControlName="deliveryStatus"
-                  comboboxName="deliveryStatus"
-                  [searchable]="true"
-                ></app-select-helper>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label class="contract-entry-field__label">Delivery Date</label>
-                <input
-                  type="date"
-                  formControlName="deliveryDate"
-                  class="contract-entry-field__input"
-                  title="Delivery Date"
-                >
-              </div>
-              <div>
-                <label class="contract-entry-field__label">Delivery Remarks</label>
-                <textarea
-                  formControlName="deliveryRemarks"
-                  rows="2"
-                  class="contract-entry-field__input"
-                  title="Delivery Remarks"
-                ></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- SECTION 6: EMBALMING & MAKEUP -->
-        <div class="contract-entry-section contract-entry-card" data-section="6">
-          <div class="contract-entry-section__header">
-            <div class="contract-entry-section__title-block">
-              <span class="contract-entry-section__number contract-entry-section__number--6">6</span>
+              <span class="contract-entry-section__number contract-entry-section__number--">6</span>
               <div>
                 <h3 class="contract-entry-section__title">Embalming & Makeup</h3>
                               </div>
@@ -746,10 +689,10 @@
         </div>
 
         <!-- SECTION 7: MEDICAL -->
-        <div class="contract-entry-section contract-entry-card" data-section="7">
+        <div class="contract-entry-section contract-entry-card" data-section="6">
           <div class="contract-entry-section__header">
             <div class="contract-entry-section__title-block">
-              <span class="contract-entry-section__number contract-entry-section__number--7">7</span>
+              <span class="contract-entry-section__number contract-entry-section__number--6">6</span>
               <div>
                 <h3 class="contract-entry-section__title">Medical</h3>
                               </div>
@@ -775,10 +718,10 @@
         </div>
 
         <!-- SECTION 8: IDENTIFICATION DOCUMENTS -->
-        <div class="contract-entry-section contract-entry-card" data-section="8">
+        <div class="contract-entry-section contract-entry-card" data-section="7">
           <div class="contract-entry-section__header">
             <div class="contract-entry-section__title-block">
-              <span class="contract-entry-section__number contract-entry-section__number--8">8</span>
+              <span class="contract-entry-section__number contract-entry-section__number--7">7</span>
               <div>
                 <h3 class="contract-entry-section__title">Identification Documents</h3>
                               </div>
@@ -814,11 +757,14 @@
           </div>
         </div>
 
+          </div>
+          <div class="contract-entry-column contract-entry-column--4">
+
         <!-- SECTION 9: GOVERNMENT/SIGNATURES/REMARKS -->
-        <div class="contract-entry-section contract-entry-card" data-section="9">
+        <div class="contract-entry-section contract-entry-card" data-section="8">
           <div class="contract-entry-section__header">
             <div class="contract-entry-section__title-block">
-              <span class="contract-entry-section__number contract-entry-section__number--9">9</span>
+              <span class="contract-entry-section__number contract-entry-section__number--8">8</span>
               <div>
                 <h3 class="contract-entry-section__title">Government / Signatures</h3>
                               </div>
@@ -876,6 +822,68 @@
             </div>
           </div>
         </div>
+ <div class="contract-entry-section contract-entry-card" data-section="9">
+          <div class="contract-entry-section__header">
+            <div class="contract-entry-section__title-block">
+              <span class="contract-entry-section__number contract-entry-section__number--9">9</span>
+              <div>
+                <h3 class="contract-entry-section__title">Delivery</h3>
+                              </div>
+            </div>
+          </div>
+
+          <div class="contract-entry-section__content">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="contract-entry-field__label">Delivery Helper</label>
+                <input
+                  type="text"
+                  formControlName="deliveryHelper"
+                  class="contract-entry-field__input"
+                  title="Delivery Helper"
+                >
+              </div>
+              <div>
+                <label class="contract-entry-field__label">Delivery Driver</label>
+                <input
+                  type="text"
+                  formControlName="deliveryDriver"
+                  class="contract-entry-field__input"
+                  title="Delivery Driver"
+                >
+              </div>
+              <div>
+                <label class="contract-entry-field__label">Delivery Status</label>
+                <app-select-helper size="sm"
+                  formControlName="deliveryStatus"
+                  comboboxName="deliveryStatus"
+                  [searchable]="false"
+                ></app-select-helper>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label class="contract-entry-field__label">Delivery Date</label>
+                <input
+                  type="date"
+                  formControlName="deliveryDate"
+                  class="contract-entry-field__input"
+                  title="Delivery Date"
+                >
+              </div>
+              <div>
+                <label class="contract-entry-field__label">Delivery Remarks</label>
+                <textarea
+                  formControlName="deliveryRemarks"
+                  rows="2"
+                  class="contract-entry-field__input"
+                  title="Delivery Remarks"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- SECTION 10: REMARKS -->
         <div class="contract-entry-section contract-entry-card" data-section="10">
@@ -894,22 +902,27 @@
                 <label class="contract-entry-field__label">Remarks</label>
                 <textarea formControlName="remarks" rows="3" class="contract-entry-field__input" title="Remarks"></textarea>
               </div>
-              <div>
+              <!-- <div>
                 <label class="contract-entry-field__label">Billing Remarks</label>
                 <textarea formControlName="billingRemarks" rows="3" class="contract-entry-field__input" title="Billing Remarks"></textarea>
-              </div>
+              </div> -->
             </div>
                       <span *ngIf="!canEditCompactSections" class="contract-entry-footer__note">Read-only access</span>
           <button
             *ngIf="canEditCompactSections"
             type="button"
             (click)="submitContract()"
+            [disabled]="isSaving"
+            [attr.aria-busy]="isSaving"
             class="contract-entry-footer__submit"
           >
-            Save Contract
+            <i [class]="isSaving ? 'pi pi-spinner pi-spin' : 'pi pi-save'"></i>
+            {{ isSaving ? 'Saving...' : 'Save Contract' }}
           </button>
           </div>
         </div>
+
+          </div>
 
         <!-- FOOTER -->
       </div>

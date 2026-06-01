@@ -1,364 +1,538 @@
 <section class="dashboard-page">
-	<div *ngIf="loading" class="dashboard-state-card">
-		<div class="dashboard-state-card__spinner"></div>
-		<div>
-			<strong>Loading Admin Dashboard</strong>
-			<p>Gathering contracts, payments, and team activity.</p>
-		</div>
-	</div>
+  <div *ngIf="loading && !hasAnyData" class="dashboard-state-card">
+    <div class="dashboard-state-card__spinner"></div>
+    <div>
+      <strong>Loading Dashboard Data</strong>
+      <p>Preparing report datasets...</p>
+    </div>
+  </div>
 
-	<div *ngIf="!loading && errorMessage" class="dashboard-state-card dashboard-state-card--error">
-		<div>
-			<strong>Dashboard Unavailable</strong>
-			<p>{{ errorMessage }}</p>
-		</div>
-	</div>
+  <div *ngIf="!loading && errorMessage" class="dashboard-state-card dashboard-state-card--error">
+    <div>
+      <strong>Dashboard Unavailable</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
 
-	<ng-container *ngIf="!loading && !errorMessage">
-		<section class="dashboard-hero">
-			<div class="dashboard-hero__copy">
-				<p class="dashboard-hero__eyebrow">Admin Command Center</p>
-				<h1>Funeral Operations Dashboard</h1>
-				<p>
-					Monitor contract throughput, receivables, service schedules, collections, and user activity
-					from one admin view.
-				</p>
-				<div class="dashboard-hero__chips">
-					<span>{{ totalContracts }} total contracts</span>
-					<span>{{ paymentCount }} recorded payments</span>
-					<span>{{ totalUsers }} active users</span>
-					<span>{{ upcomingServices }} services in the next 7 days</span>
-				</div>
-			</div>
+  <ng-container *ngIf="!errorMessage && (!loading || hasAnyData)">
+    <section class="dashboard-shell">
+      <div class="dashboard-shell__top">
+        <div>
+          <p class="dashboard-shell__eyebrow">Operations Analytics</p>
+          <h1>Funeral Reports Dashboard</h1>
+          <p>Focused report workspace with period-based loading and tab-separated views.</p>
+        </div>
 
-			<div class="dashboard-hero__actions">
-				<a href="/admin/forms/contracts/funeral-contract/new" class="dashboard-hero__action">
-					<strong>Create New Contract</strong>
-					<span>Open a fresh funeral contract entry form.</span>
-				</a>
-				<a href="/admin/deceased" class="dashboard-hero__action">
-					<strong>Review Deceased Records</strong>
-					<span>Inspect active cases and follow up on service details.</span>
-				</a>
-				<a href="/admin/users" class="dashboard-hero__action">
-					<strong>Manage Staff Access</strong>
-					<span>Review admin, biller, and accounting user roles.</span>
-				</a>
-			</div>
-		</section>
+        <div class="dashboard-scope">
+          <p>Current Scope</p>
+          <strong>{{ scopeLabel }}</strong>
+          <span>{{ scopeDateRangeLabel }}</span>
+        </div>
+      </div>
 
-		<section class="dashboard-kpi-grid">
-			<article class="dashboard-kpi-card dashboard-kpi-card--plum">
-				<p>Total Collected</p>
-				<strong>{{ totalCollected | number:'1.2-2' }}</strong>
-				<span>{{ paymentCount }} payments posted across all channels</span>
-			</article>
+      <div class="dashboard-shell__controls">
+        <div class="dashboard-tabs" aria-label="Dashboard report tabs">
+          <button
+            *ngFor="let tab of reportTabs; trackBy: trackByReportTab"
+            type="button"
+            (click)="setActiveTab(tab.id)"
+            class="dashboard-tab"
+            [class.is-active]="activeTab === tab.id"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
 
-			<article class="dashboard-kpi-card dashboard-kpi-card--emerald">
-				<p>Average Payment</p>
-				<strong>{{ averagePayment | number:'1.2-2' }}</strong>
-				<span>{{ clearedPaymentRate | number:'1.0-0' }}% cleared payment rate</span>
-			</article>
+        <div class="dashboard-period-controls">
+          <button type="button" class="dashboard-chip" [class.is-active]="periodMode === 'monthly'" (click)="setPeriodMode('monthly')">Monthly</button>
+          <button type="button" class="dashboard-chip" [class.is-active]="periodMode === 'yearly'" (click)="setPeriodMode('yearly')">Yearly</button>
 
-			<article class="dashboard-kpi-card dashboard-kpi-card--amber">
-				<p>Overdue Contracts</p>
-				<strong>{{ overdueContracts }}</strong>
-				<span>{{ contractsDueThisWeek }} contracts due within the next 7 days</span>
-			</article>
+          <button type="button" class="dashboard-nav-btn" (click)="shiftPeriod(-1)">Prev</button>
+          <span class="dashboard-scope-pill">{{ scopeLabel }}</span>
+          <button type="button" class="dashboard-nav-btn" (click)="shiftPeriod(1)">Next</button>
 
-			<article class="dashboard-kpi-card">
-				<p>Service Mix</p>
-				<strong>{{ burialCases + cremationCases }}</strong>
-				<span>{{ burialCases }} burial and {{ cremationCases }} cremation cases</span>
-			</article>
-		</section>
+          <button type="button" class="dashboard-nav-btn" (click)="printBillingReport()" [disabled]="activeTab !== 'billing-report' || !billingReportRows.length">Print</button>
+          <button type="button" class="dashboard-nav-btn dashboard-nav-btn--primary" (click)="activeTab === 'billing-report' ? exportBillingReport() : exportCollectionReport()" [disabled]="(activeTab === 'billing-report' && !billingReportRows.length) || (activeTab === 'collections-report' && !collectionReportRows.length)">Export Excel</button>
+        </div>
+      </div>
 
-		<section class="dashboard-content-grid">
-			<div class="dashboard-panel-stack">
-				<article class="dashboard-panel dashboard-panel--wide">
-					<div class="dashboard-panel__header">
-						<div>
-							<p class="dashboard-panel__eyebrow">Operational Mix</p>
-							<h2>Service Type Distribution</h2>
-						</div>
-						<a href="/admin/deceased">Open Case List</a>
-					</div>
+      <div class="dashboard-status">
+        <span class="dashboard-status__badge">{{ dataStatusBadge }}</span>
+        <span>{{ scopeStatus }}</span>
+        <span *ngIf="reportLoading && periodMode === 'yearly'">{{ yearlyProgressPercent }}%</span>
+      </div>
 
-					<div *ngIf="serviceTypeBreakdown.length; else noServiceMix" class="dashboard-flow-list">
-						<div *ngFor="let item of serviceTypeBreakdown" class="dashboard-flow-item">
-							<div class="dashboard-flow-item__top">
-								<strong>{{ item.label }}</strong>
-								<span>{{ item.count }} cases</span>
-							</div>
-							<div class="dashboard-flow-item__bars">
-								<div class="dashboard-flow-item__meta">
-									<span>Share of workload</span>
-									<span>{{ item.count }}</span>
-								</div>
-								<div class="dashboard-bar-track">
-									<div class="dashboard-bar-fill dashboard-bar-fill--plum" [style.width.%]="getBarWidth(item.count, maxServiceTypeCount)"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</article>
+      <div *ngIf="loading && hasAnyData" class="dashboard-inline-loading">
+        Loading remaining sources... current data is already visible.
+      </div>
 
-				<article class="dashboard-panel dashboard-panel--wide">
-					<div class="dashboard-panel__header">
-						<div>
-							<p class="dashboard-panel__eyebrow">User Access</p>
-							<h2>Role Distribution</h2>
-						</div>
-						<div class="dashboard-stat-pill dashboard-stat-pill--soft">
-							<strong>{{ totalUsers }}</strong>
-							<span>Total users</span>
-						</div>
-					</div>
+      <div *ngIf="reportLoading && periodMode === 'yearly'" class="dashboard-progress">
+        <div class="dashboard-progress__bar" [style.width.%]="yearlyProgressPercent"></div>
+      </div>
 
-					<div *ngIf="userRoleBreakdown.length; else noRoles" class="dashboard-breakdown-list">
-						<div *ngFor="let item of userRoleBreakdown" class="dashboard-breakdown-item">
-							<div class="dashboard-breakdown-item__top">
-								<strong>{{ item.label }}</strong>
-								<span>{{ item.count }} users</span>
-							</div>
-							<div class="dashboard-bar-track">
-								<div class="dashboard-bar-fill dashboard-bar-fill--teal" [style.width.%]="getBarWidth(item.count, maxRoleCount)"></div>
-							</div>
-						</div>
-					</div>
-				</article>
-			</div>
+      <div *ngIf="reportErrorMessage" class="dashboard-error">
+        {{ reportErrorMessage }}
+      </div>
+    </section>
 
-			<div class="dashboard-panel-stack">
-				<article class="dashboard-panel">
-					<div class="dashboard-panel__header">
-						<div>
-							<p class="dashboard-panel__eyebrow">Receivables</p>
-							<h2>Aging Snapshot</h2>
-						</div>
-						<div class="dashboard-stat-pill">
-							<strong>{{ overdueContracts }}</strong>
-							<span>Overdue</span>
-						</div>
-					</div>
+    <section class="dashboard-panel" *ngIf="activeTab === 'billing-report'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Reports</p>
+          <h2>Billing Report</h2>
+        </div>
+      </header>
 
-					<div class="dashboard-aging-grid">
-						<div *ngFor="let bucket of agingBuckets" class="dashboard-aging-card" [ngClass]="'dashboard-aging-card--' + bucket.tone">
-							<strong>{{ bucket.count }}</strong>
-							<span>{{ bucket.label }}</span>
-						</div>
-					</div>
+      <div *ngIf="billingReportRows.length; else noBillingReport" class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Total Due</p>
+          <strong>{{ billingTotalDue | number:'1.2-2' }}</strong>
+          <span>{{ billingReportRows.length }} contracts in scope</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Open Contracts</p>
+          <strong>{{ billingOpenCount }}</strong>
+          <span>Still pending settlement</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Overdue Contracts</p>
+          <strong>{{ billingOverdueCount }}</strong>
+          <span>Requires follow-up action</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Average Due</p>
+          <strong>{{ billingAverageDue | number:'1.2-2' }}</strong>
+          <span>Per contract average exposure</span>
+        </article>
+      </div>
 
-					<div *ngIf="receivableWatchlist.length; else noReceivables" class="dashboard-queue-list">
-						<div *ngFor="let item of receivableWatchlist" class="dashboard-queue-item">
-							<div>
-								<strong>{{ item.contractNo }}</strong>
-								<div class="dashboard-table-secondary">{{ item.contractee }}</div>
-								<div class="dashboard-table-secondary">{{ item.serviceType }}</div>
-							</div>
-							<div class="dashboard-queue-item__meta">
-								<strong>{{ item.daysOverdue }} days</strong>
-								<span>{{ item.dueDate | date:'MMM dd, yyyy' }}</span>
-							</div>
-						</div>
-					</div>
-				</article>
+      <div *ngIf="billingReportRows.length" class="dashboard-chart-grid">
+        <article class="dashboard-chart-card">
+          <header>
+            <h3>Billing by Service</h3>
+            <p>Total due concentration by service type</p>
+          </header>
+          <div class="dashboard-chart-holder">
+            <p-chart type="bar" [data]="billingByServiceChartData" [options]="billingByServiceChartOptions"></p-chart>
+          </div>
+        </article>
 
-				<article class="dashboard-panel">
-					<div class="dashboard-panel__header">
-						<div>
-							<p class="dashboard-panel__eyebrow">Service Board</p>
-							<h2>Upcoming Services</h2>
-						</div>
-						<div class="dashboard-stat-pill dashboard-stat-pill--soft">
-							<strong>{{ upcomingServices }}</strong>
-							<span>Next 7 days</span>
-						</div>
-					</div>
+        <article class="dashboard-chart-card">
+          <header>
+            <h3>Billing Status Mix</h3>
+            <p>Open, overdue, and cleared account split</p>
+          </header>
+          <div class="dashboard-chart-holder dashboard-chart-holder--compact">
+            <p-chart type="doughnut" [data]="billingStatusChartData" [options]="billingStatusChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
 
-					<div *ngIf="upcomingServiceBoard.length; else noUpcomingServices" class="dashboard-queue-list">
-						<div *ngFor="let item of upcomingServiceBoard" class="dashboard-queue-item">
-							<div>
-								<strong>{{ item.contractNo }} · {{ item.deceasedName }}</strong>
-								<div class="dashboard-table-secondary">{{ item.scheduleLabel }} · {{ item.serviceType }}</div>
-								<div class="dashboard-table-secondary">{{ item.location }}</div>
-							</div>
-							<div class="dashboard-queue-item__meta">
-								<strong>{{ item.scheduledFor | date:'MMM dd, yyyy' }}</strong>
-								<span>{{ item.scheduledFor | date:'shortTime' }}</span>
-							</div>
-						</div>
-					</div>
-				</article>
-			</div>
-		</section>
+      <div class="dashboard-table-wrap" *ngIf="billingReportRows.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Contract No</th>
+              <th>Contractee</th>
+              <th>Deceased</th>
+              <th>Service</th>
+              <th>Total Due</th>
+              <th>Due Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of billingReportRows; trackBy: trackByContractNo">
+              <td>{{ item.contractNo }}</td>
+              <td>{{ item.contractee }}</td>
+              <td>{{ item.deceasedName }}</td>
+              <td>{{ item.serviceType }}</td>
+              <td>{{ item.totalDue | number:'1.2-2' }}</td>
+              <td>{{ item.dueDate | date:'MMM dd, yyyy' }}</td>
+              <td>{{ item.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-		<section class="dashboard-report-grid">
-			<article class="dashboard-panel dashboard-panel--wide">
-				<div class="dashboard-panel__header">
-					<div>
-						<p class="dashboard-panel__eyebrow">Six-Month Trend</p>
-						<h2>Contracts and Collections</h2>
-					</div>
-				</div>
+    <section class="dashboard-panel" *ngIf="activeTab === 'collections-report'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Reports</p>
+          <h2>Collections Report</h2>
+        </div>
+      </header>
 
-				<div *ngIf="monthlyActivity.length; else noMonthlyActivity" class="dashboard-flow-list">
-					<div *ngFor="let item of monthlyActivity" class="dashboard-flow-item">
-						<div class="dashboard-flow-item__top">
-							<strong>{{ item.label }}</strong>
-							<span>{{ item.contractsCreated }} contracts · {{ item.paymentsTotal | number:'1.0-0' }}</span>
-						</div>
+      <!-- <div *ngIf="collectionReportRows.length; else noCollectionReport" class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Total Collection</p>
+          <strong>{{ summaryTotalCollection | number:'1.2-2' }}</strong>
+          <span>{{ summaryTransactionCount }} transactions</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Average Payment</p>
+          <strong>{{ summaryAverageCollection | number:'1.2-2' }}</strong>
+          <span>{{ summaryClearedCount }} cleared, {{ summaryPendingCount }} pending</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Top Channel</p>
+          <strong>{{ summaryTopChannel }}</strong>
+          <span>Highest collected channel in scope</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Top Account</p>
+          <strong>{{ summaryTopAccount }}</strong>
+          <span>Most collected account reference</span>
+        </article>
+      </div> -->
 
-						<div class="dashboard-flow-item__bars">
-							<div>
-								<div class="dashboard-flow-item__meta">
-									<span>Collections</span>
-									<span>{{ item.paymentsTotal | number:'1.0-0' }}</span>
-								</div>
-								<div class="dashboard-bar-track">
-									<div class="dashboard-bar-fill dashboard-bar-fill--emerald" [style.width.%]="getBarWidth(item.paymentsTotal, maxPaymentMonthTotal)"></div>
-								</div>
-							</div>
+      <div *ngIf="collectionReportRows.length" class="dashboard-chart-grid">
+        <!-- <article class="dashboard-chart-card">
+          <header>
+            <h3>Collection by Channel</h3>
+            <p>Aggregated amount per payment type or description</p>
+          </header>
+          <div class="dashboard-chart-holder">
+            <p-chart type="bar" [data]="collectionByChannelChartData" [options]="collectionByChannelChartOptions"></p-chart>
+          </div>
+        </article>
 
-							<div>
-								<div class="dashboard-flow-item__meta">
-									<span>Contracts</span>
-									<span>{{ item.contractsCreated }}</span>
-								</div>
-								<div class="dashboard-bar-track">
-									<div class="dashboard-bar-fill dashboard-bar-fill--slate" [style.width.%]="getBarWidth(item.contractsCreated, maxContractMonthTotal)"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</article>
+        <article class="dashboard-chart-card">
+          <header>
+            <h3>Cleared vs Pending</h3>
+            <p>Transaction status distribution for this scope</p>
+          </header>
+          <div class="dashboard-chart-holder dashboard-chart-holder--compact">
+            <p-chart type="doughnut" [data]="collectionStatusChartData" [options]="collectionStatusChartOptions"></p-chart>
+          </div>
+        </article> -->
 
-			<article class="dashboard-panel dashboard-panel--wide">
-				<div class="dashboard-panel__header">
-					<div>
-						<p class="dashboard-panel__eyebrow">Collections</p>
-						<h2>Payment Channels</h2>
-					</div>
-				</div>
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Daily Collection Trend</h3>
+            <p>Last 10 payment dates by collected amount</p>
+          </header>
+          <div class="dashboard-chart-holder">
+            <p-chart type="line" [data]="collectionDailyTrendChartData" [options]="collectionDailyTrendChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
 
-				<div *ngIf="paymentChannelBreakdown.length; else noPaymentChannels" class="dashboard-breakdown-list">
-					<div *ngFor="let item of paymentChannelBreakdown" class="dashboard-breakdown-item">
-						<div class="dashboard-breakdown-item__top">
-							<strong>{{ item.label }}</strong>
-							<span>{{ item.total | number:'1.2-2' }} · {{ item.count }} payments</span>
-						</div>
-						<div class="dashboard-bar-track">
-							<div class="dashboard-bar-fill dashboard-bar-fill--teal" [style.width.%]="getBarWidth(item.total, maxPaymentChannelTotal)"></div>
-						</div>
-					</div>
-				</div>
-			</article>
-		</section>
+      <div class="dashboard-table-wrap" *ngIf="collectionReportRows.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Control No</th>
+              <th>Date Issued</th>
+              <th>Check Date</th>
+              <th>Account Number</th>
+              <th>Payment Type</th>
+              <th>Amount</th>
+              <th>Issued By</th>
+              <th>Description</th>
+              <th>Remarks</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of collectionReportRows; trackBy: trackByControlNo">
+              <td>{{ item.controlNumber }}</td>
+              <td>{{ item.dateIssued | date:'MMM dd, yyyy' }}</td>
+              <td>{{ item.checkDate | date:'MMM dd, yyyy' }}</td>
+              <td>{{ item.accountNumber }}</td>
+              <td>{{ item.paymentType }}</td>
+              <td>{{ item.amount | number:'1.2-2' }}</td>
+              <td>{{ item.issuedBy }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.remarks || '-' }}</td>
+              <td>{{ item.checkCleared ? 'Cleared' : 'Pending' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-		<section class="dashboard-table-grid">
-			<article class="dashboard-panel dashboard-panel--wide">
-				<div class="dashboard-panel__header">
-					<div>
-						<p class="dashboard-panel__eyebrow">Recent Activity</p>
-						<h2>Latest Contracts</h2>
-					</div>
-					  <a href="/admin/deceased">View all contracts</a>
-				</div>
+    <section class="dashboard-panel" *ngIf="activeTab === 'service-distribution'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Operational Mix</p>
+          <h2>Service Type Distribution</h2>
+        </div>
+      </header>
 
-				<div class="dashboard-table-wrap" *ngIf="recentContracts.length; else noRecentContracts">
-					<table>
-						<thead>
-							<tr>
-								<th>Contract</th>
-								<th>Deceased</th>
-								<th>Service</th>
-								<th>Date</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr *ngFor="let item of recentContracts">
-								<td>
-									<div class="dashboard-table-primary">{{ item.contractNo }}</div>
-								</td>
-								<td>{{ item.deceasedName }}</td>
-								<td>{{ item.type }}</td>
-								<td>{{ item.contractDate | date:'MMM dd, yyyy' }}</td>
-								<td>
-									<span
-										class="dashboard-status-pill"
-										[ngClass]="{
-											'dashboard-status-pill--green': item.status === 'Cleared',
-											'dashboard-status-pill--amber': item.status === 'Overdue',
-											'dashboard-status-pill--slate': item.status === 'Active'
-										}"
-									>
-										{{ item.status }}
-									</span>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</article>
+      <div *ngIf="serviceTypeBreakdown.length; else noServiceMix" class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Total Cases</p>
+          <strong>{{ serviceDistributionTotalCases }}</strong>
+          <span>Active cases in selected scope</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Top Service</p>
+          <strong>{{ serviceDistributionTopService }}</strong>
+          <span>Highest case concentration</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Burial Cases</p>
+          <strong>{{ burialCases }}</strong>
+          <span>Current burial demand</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Cremation Cases</p>
+          <strong>{{ cremationCases }}</strong>
+          <span>Current cremation demand</span>
+        </article>
+      </div>
 
-			<article class="dashboard-panel dashboard-panel--wide">
-				<div class="dashboard-panel__header">
-					<div>
-						<p class="dashboard-panel__eyebrow">Recent Activity</p>
-						<h2>Latest Payments</h2>
-					</div>
-					  <a href="/admin/schedule">View schedules</a>
-				</div>
+      <div *ngIf="serviceTypeBreakdown.length" class="dashboard-chart-grid">
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Service Mix by Case Count</h3>
+            <p>Distribution of services handled in the selected period</p>
+          </header>
+          <div class="dashboard-chart-holder">
+            <p-chart type="bar" [data]="serviceDistributionChartData" [options]="serviceDistributionChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
 
-				<div *ngIf="recentPayments.length; else noRecentPayments" class="dashboard-activity-list">
-					<div *ngFor="let item of recentPayments" class="dashboard-activity-item">
-						<div>
-							<strong>{{ item.controlNumber }}</strong>
-							<div class="dashboard-table-secondary">{{ item.accountNumber }}</div>
-							<span class="dashboard-activity-item__meta">{{ item.description }}</span>
-						</div>
+      <div class="dashboard-table-wrap" *ngIf="serviceTypeBreakdown.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Service Type</th>
+              <th>Cases</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of serviceTypeBreakdown; trackBy: trackByDistribution">
+              <td>{{ item.label }}</td>
+              <td>{{ item.count }}</td>
+              <td>{{ (serviceDistributionTotalCases ? ((item.count / serviceDistributionTotalCases) * 100) : 0) | number:'1.1-1' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-						<div class="dashboard-activity-item__amount">
-							<strong>{{ item.amount | number:'1.2-2' }}</strong>
-							<span>{{ item.dateIssued | date:'MMM dd, yyyy' }}</span>
-						</div>
-					</div>
-				</div>
-			</article>
-		</section>
-	</ng-container>
+    <section class="dashboard-panel" *ngIf="activeTab === 'receivables-aging'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Receivables</p>
+          <h2>Aging Snapshot</h2>
+        </div>
+      </header>
 
-	<ng-template #noServiceMix>
-		<div class="dashboard-empty-panel">No service type data is available yet.</div>
-	</ng-template>
+      <div class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Overdue Contracts</p>
+          <strong>{{ overdueContracts }}</strong>
+          <span>Total with past due dates</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>High Risk (30+)</p>
+          <strong>{{ receivableHighRiskCount }}</strong>
+          <span>Watchlist contracts over 30 days</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Max Days Overdue</p>
+          <strong>{{ receivableMaxOverdueDays }}</strong>
+          <span>Highest aging value in watchlist</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Due This Week</p>
+          <strong>{{ contractsDueThisWeek }}</strong>
+          <span>Potential near-term risk</span>
+        </article>
+      </div>
 
-	<ng-template #noRoles>
-		<div class="dashboard-empty-panel">No user role data is available yet.</div>
-	</ng-template>
+      <div class="dashboard-chart-grid">
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Receivables Aging Distribution</h3>
+            <p>Current, short-term, and long-term receivable exposure</p>
+          </header>
+          <div class="dashboard-chart-holder dashboard-chart-holder--compact">
+            <p-chart type="bar" [data]="agingDistributionChartData" [options]="agingDistributionChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
 
-	<ng-template #noReceivables>
-		<div class="dashboard-empty-panel">No overdue contracts are currently being tracked.</div>
-	</ng-template>
+      <div class="dashboard-aging-grid">
+        <div *ngFor="let bucket of agingBuckets; trackBy: trackByAgingBucket" class="dashboard-aging-card">
+          <strong>{{ bucket.count }}</strong>
+          <span>{{ bucket.label }}</span>
+        </div>
+      </div>
 
-	<ng-template #noUpcomingServices>
-		<div class="dashboard-empty-panel">No upcoming burial or cremation schedules are set.</div>
-	</ng-template>
+      <div *ngIf="receivableWatchlist.length; else noReceivables" class="dashboard-queue-list">
+        <div *ngFor="let item of receivableWatchlist; trackBy: trackByReceivable" class="dashboard-queue-item">
+          <div>
+            <strong>{{ item.contractNo }}</strong>
+            <div class="dashboard-table-secondary">{{ item.contractee }}</div>
+            <div class="dashboard-table-secondary">{{ item.serviceType }}</div>
+          </div>
+          <div class="dashboard-queue-item__meta">
+            <strong>{{ item.daysOverdue }} days</strong>
+            <span>{{ item.dueDate | date:'MMM dd, yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-	<ng-template #noMonthlyActivity>
-		<div class="dashboard-empty-panel">Monthly activity will appear after contracts and payments are recorded.</div>
-	</ng-template>
+    <section class="dashboard-panel" *ngIf="activeTab === 'upcoming-services'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Service Board</p>
+          <h2>Upcoming Services</h2>
+        </div>
+      </header>
 
-	<ng-template #noPaymentChannels>
-		<div class="dashboard-empty-panel">Payment channel totals will appear when collections are recorded.</div>
-	</ng-template>
+      <div *ngIf="upcomingServiceBoard.length; else noUpcomingServices" class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Total Upcoming</p>
+          <strong>{{ upcomingServiceBoard.length }}</strong>
+          <span>Scheduled services in scope</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Burial</p>
+          <strong>{{ upcomingBurialCount }}</strong>
+          <span>Planned burial activities</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Cremation</p>
+          <strong>{{ upcomingCremationCount }}</strong>
+          <span>Planned cremation activities</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Top Location</p>
+          <strong>{{ upcomingPrimaryLocation }}</strong>
+          <span>Most frequent schedule venue</span>
+        </article>
+      </div>
 
-	<ng-template #noRecentContracts>
-		<div class="dashboard-empty-panel">No recent contracts are available yet.</div>
-	</ng-template>
+      <div *ngIf="upcomingServiceBoard.length" class="dashboard-chart-grid">
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Upcoming Service Timeline</h3>
+            <p>Scheduled service load across upcoming dates</p>
+          </header>
+          <div class="dashboard-chart-holder dashboard-chart-holder--compact">
+            <p-chart type="line" [data]="upcomingScheduleChartData" [options]="upcomingScheduleChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
 
-	<ng-template #noRecentPayments>
-		<div class="dashboard-empty-panel">No recent payments are available yet.</div>
-	</ng-template>
+      <div *ngIf="upcomingServiceBoard.length" class="dashboard-queue-list">
+        <div *ngFor="let item of upcomingServiceBoard; trackBy: trackBySchedule" class="dashboard-queue-item">
+          <div>
+            <strong>{{ item.contractNo }} - {{ item.deceasedName }}</strong>
+            <div class="dashboard-table-secondary">{{ item.scheduleLabel }} - {{ item.serviceType }}</div>
+            <div class="dashboard-table-secondary">{{ item.location }}</div>
+          </div>
+          <div class="dashboard-queue-item__meta">
+            <strong>{{ item.scheduledFor | date:'MMM dd, yyyy' }}</strong>
+            <span>{{ item.scheduledFor | date:'shortTime' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-panel" *ngIf="activeTab === 'monthly-trend'">
+      <header class="dashboard-panel__header">
+        <div>
+          <p class="dashboard-panel__eyebrow">Trend</p>
+          <h2>Monthly Contracts vs Collections</h2>
+        </div>
+      </header>
+
+      <div *ngIf="monthlyActivity.length; else noMonthlyActivity" class="dashboard-summary-grid">
+        <article class="dashboard-summary-card">
+          <p>Total Collections</p>
+          <strong>{{ trendTotalCollections | number:'1.2-2' }}</strong>
+          <span>{{ trendTotalPayments }} payment transactions</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Total Contracts</p>
+          <strong>{{ trendTotalContracts }}</strong>
+          <span>Created within selected scope</span>
+        </article>
+        <article class="dashboard-summary-card">
+          <p>Peak Collection Period</p>
+          <strong>{{ trendPeakPeriod }}</strong>
+          <span>Highest collection amount bucket</span>
+        </article>
+      </div>
+
+      <div *ngIf="monthlyActivity.length" class="dashboard-chart-grid">
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Time Trend: Collections vs Contracts</h3>
+            <p>Chronological trend view by {{ periodMode === 'monthly' ? 'day' : 'month' }}</p>
+          </header>
+          <div class="dashboard-chart-holder">
+            <p-chart type="line" [data]="monthlyTrendChartData" [options]="monthlyTrendChartOptions"></p-chart>
+          </div>
+        </article>
+
+        <article class="dashboard-chart-card dashboard-chart-card--wide">
+          <header>
+            <h3>Payment Volume Over Time</h3>
+            <p>Number of payment transactions per time bucket</p>
+          </header>
+          <div class="dashboard-chart-holder dashboard-chart-holder--compact">
+            <p-chart type="bar" [data]="monthlyTrendVolumeChartData" [options]="monthlyTrendVolumeChartOptions"></p-chart>
+          </div>
+        </article>
+      </div>
+
+      <div class="dashboard-table-wrap" *ngIf="monthlyActivity.length">
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Contracts</th>
+              <th>Payment Count</th>
+              <th>Collections</th>
+              <th>Avg Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of monthlyActivity; trackBy: trackByMonthlyActivity">
+              <td>{{ item.label }}</td>
+              <td>{{ item.contractsCreated }}</td>
+              <td>{{ item.paymentCount }}</td>
+              <td>{{ item.paymentsTotal | number:'1.2-2' }}</td>
+              <td>{{ (item.paymentCount ? (item.paymentsTotal / item.paymentCount) : 0) | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-template #noServiceMix>
+    <div class="dashboard-empty-panel">No service type data is available for this scope.</div>
+  </ng-template>
+
+  <ng-template #noReceivables>
+    <div class="dashboard-empty-panel">No overdue contracts for this period.</div>
+  </ng-template>
+
+  <ng-template #noUpcomingServices>
+    <div class="dashboard-empty-panel">No upcoming schedules in this scope.</div>
+  </ng-template>
+
+  <ng-template #noMonthlyActivity>
+    <div class="dashboard-empty-panel">Trend metrics will appear once data exists in this scope.</div>
+  </ng-template>
+
+  <ng-template #noBillingReport>
+    <div class="dashboard-empty-panel">No billing report data available.</div>
+  </ng-template>
+
+  <ng-template #noCollectionReport>
+    <div class="dashboard-empty-panel">No collections report data available.</div>
+  </ng-template>
 </section>
