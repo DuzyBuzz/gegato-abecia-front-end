@@ -17,6 +17,7 @@ import { getRoleLabel } from '../../utils/role-access.util';
 export class CremationCertificate implements OnInit, OnDestroy {
 
   private readonly originalDocumentTitle = document.title;
+  readonly dateNow = new Date();
 
   contractId: number | null = null;
   selectedContract: FuneralContract | null = null;

@@ -219,21 +219,21 @@
 								</div>
 							</div>
 
-							<div class="mt-2 text-xs text-gray-500" *ngIf="selectedPackagePreset as selectedPackage">
+							<!-- <div class="mt-2 text-xs text-gray-500" *ngIf="selectedPackagePreset as selectedPackage">
 								Default discount: ₱{{ selectedPackage.discount | number:'1.2-2' }}
 								<span class="mx-1">|</span>
 								Enclosions: {{ selectedPackage.charges.length }}
 								<span class="mx-1">|</span>
 								{{ selectedPackage.notes || 'No notes' }}
-							</div>
-
+							</div> -->
+<!-- 
 							<div class="mt-1 text-xs text-emerald-700" *ngIf="autoMatchedPackageName">
 								Loaded preset from initialized enclosions: {{ autoMatchedPackageName }}
 							</div>
 
 							<div class="mt-2 text-xs text-amber-700" *ngIf="!canApplyPackagePreset">
 								Only biller and admin can apply package enclosions.
-							</div>
+							</div> -->
 						</div>
 			<ng-container *ngIf="isChargesSectionVisible">
 				<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">

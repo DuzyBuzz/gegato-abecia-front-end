@@ -152,7 +152,7 @@ dateNow: Date = new Date();
           : (payments ? [payments] : []);
 
         const paymentItems: StatementItem[] = paymentArray.map(p => ({
-          description: `Payment - OR: ${p.orNumber} || "" | AR: ${p.arNumber}`,
+          description: `Payment - OR: ${String(p.orNumber || '').trim()} | AR: ${String(p.arNumber || '').trim()}`,
           payment: Number(p.amount || 0),
           paymentDate: this.formatPaymentDate(p.dateIssued),
           kind: 'payment'
@@ -234,7 +234,7 @@ dateNow: Date = new Date();
     const availabilityText = casketAvailability ? ` -  ${casketAvailability}` : '';
 
     return {
-      description: `${serviceType} - ${itemLabel}: ${itemValue}${availabilityText}`,
+      description: `${serviceType} - ${itemLabel} ${itemValue}${availabilityText}`,
       amount,
       discount,
       kind: 'contract',

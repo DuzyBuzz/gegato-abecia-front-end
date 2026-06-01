@@ -200,7 +200,6 @@
 					<table class="enclosions-table">
 						<thead>
 							<tr>
-								<th>Type</th>
 								<th>Description</th>
 								<th>Qty</th>
 								<th>Unit Price</th>
@@ -210,14 +209,6 @@
 						</thead>
 						<tbody>
 							<tr *ngFor="let item of draft.charges; let i = index">
-								<td>
-									<app-select-helper
-										[(ngModel)]="item.chargeType"
-										[ngModelOptions]="{ standalone: true }"
-										comboboxName="chargeTypes"
-										[searchable]="true"
-									></app-select-helper>
-								</td>
 								<td>
 									<app-select-helper
 										[(ngModel)]="item.description"
@@ -236,11 +227,6 @@
 						</tbody>
 					</table>
 				</div>
-			</div>
-
-			<div class="enclosions-notes">
-				<label>Notes</label>
-				<textarea rows="3" [(ngModel)]="draft.notes" [ngModelOptions]="{ standalone: true }" class="enclosions-input"></textarea>
 			</div>
 		</section>
 	</div>
