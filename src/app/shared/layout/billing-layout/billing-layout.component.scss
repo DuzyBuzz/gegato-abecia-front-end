@@ -45,11 +45,11 @@
 	row-gap: 0.5rem;
 	padding: 0.65rem 1.5rem 0.8rem;
 	height: auto;
-	background: rgba(255, 255, 255, 0.92);
+	background: rgba(53, 16, 63, 0.95);
 	-webkit-backdrop-filter: blur(16px);
 	backdrop-filter: blur(16px);
-	border-bottom: 1px solid rgba(148, 163, 184, 0.22);
-	box-shadow: 0 14px 34px -28px rgba(15, 23, 42, 0.32);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+	box-shadow: 0 14px 34px -28px rgba(53, 16, 63, 0.5);
 	z-index: 40;
 }
 
@@ -66,7 +66,15 @@
 	align-items: center;
 	width: 100%;
 	padding-top: 0.15rem;
-	border-top: 1px solid rgba(226, 232, 240, 0.9);
+	border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.operations-header .operations-header__title {
+	color: #ffffff;
+}
+
+.operations-header .operations-header__subtitle {
+	color: rgba(255, 255, 255, 0.82);
 }
 
 .operations-header__brand,

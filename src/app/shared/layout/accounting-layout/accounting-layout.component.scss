@@ -46,12 +46,20 @@
 	gap: 1rem;
 	height: 5.5rem;
 	padding: 0 1.5rem;
-	background: rgba(255, 255, 255, 0.85);
+	background: rgba(53, 16, 63, 0.95);
 	-webkit-backdrop-filter: blur(16px);
 	backdrop-filter: blur(16px);
-	border-bottom: 1px solid rgba(148, 163, 184, 0.22);
-	box-shadow: 0 18px 40px -36px rgba(15, 23, 42, 0.5);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+	box-shadow: 0 18px 40px -36px rgba(53, 16, 63, 0.55);
 	z-index: 40;
+}
+
+.operations-header .operations-header__title {
+	color: #ffffff;
+}
+
+.operations-header .operations-header__subtitle {
+	color: rgba(255, 255, 255, 0.82);
 }
 
 .operations-header__brand,
