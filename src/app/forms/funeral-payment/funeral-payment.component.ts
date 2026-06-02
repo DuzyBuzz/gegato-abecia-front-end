@@ -38,16 +38,6 @@ export interface ChargeRow extends ContractCharges {
   _backup?: Partial<ChargeRow>;
 }
 
-interface PackageEnclosionDisplayRow {
-  key: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-  amount: number;
-  isSynthetic?: boolean;
-}
-
 @Component({
   selector: 'app-funeral-payment',
   standalone: true,
@@ -80,9 +70,10 @@ export class FuneralPaymentComponent implements OnInit {
   rows: PaymentRow[] = [];
   charges: ChargeRow[] = [];
   loading = false;
-  isChargesSectionVisible = false;
   private paymentKeyCounter = 0;
   private chargeKeyCounter = 0;
+  private paymentOriginalById = new Map<number, string>();
+  private chargeOriginalById = new Map<number, string>();
 
   // Computed values only (NO duplicated state)
   totalPaid = 0;
@@ -193,6 +184,31 @@ cancelRow(row: PaymentRow): void {
   row.isEditing = false;
   this.refreshPaymentTable();
 }
+
+  onPaymentRowFocus(index: number): void {
+    if (!this.canAddPayments && !this.canModifyExistingPayments) {
+      return;
+    }
+
+    if (index === this.rows.length - 1 && this.isPaymentRowEmpty(this.rows[index])) {
+      this.rows = [...this.rows, this.buildNewPaymentRow()];
+      this.computeTotals();
+      this.cdr.markForCheck();
+    }
+  }
+
+  onPaymentRowInput(index: number): void {
+    if (!this.canAddPayments && !this.canModifyExistingPayments) {
+      return;
+    }
+
+    if (index === this.rows.length - 1 && !this.isPaymentRowEmpty(this.rows[index])) {
+      this.rows = [...this.rows, this.buildNewPaymentRow()];
+    }
+
+    this.computeTotals();
+    this.cdr.markForCheck();
+  }
 
   // ================= CHARGES CRUD =================
   addCharge(): void {
@@ -376,28 +392,16 @@ cancelRow(row: PaymentRow): void {
     return this.charges.reduce((sum, c) => sum + this.getChargeAmount(c), 0);
   }
 
-  get packageEnclosionsRows(): PackageEnclosionDisplayRow[] {
-    const detailsRow: PackageEnclosionDisplayRow = {
-      key: 'service-details',
-      description: this.buildPackageEnclosionsSummaryDescription(),
-      quantity: 1,
-      unitPrice: this.getContractPrice(),
-      discount: 0,
-      amount: 0,
-      isSynthetic: true,
-    };
+  getEnclosionsGrossTotal(): number {
+    return this.charges.reduce((sum, charge) => {
+      const qty = Number(charge.quantity) || 0;
+      const price = Number(charge.unitPrice) || 0;
+      return sum + (qty * price);
+    }, 0);
+  }
 
-    const chargeRows: PackageEnclosionDisplayRow[] = this.charges.map((charge, index) => ({
-      key: String(charge.uiKey || charge.id || `charge-${index}`),
-      description: String(charge.description || '').trim() || '—',
-      quantity: Number(charge.quantity) || 0,
-      unitPrice: Number(charge.unitPrice) || 0,
-      discount: Number(charge.discount) || 0,
-      amount: this.getChargeAmount(charge),
-      isSynthetic: false,
-    }));
-
-    return [detailsRow, ...chargeRows];
+  getBilledBaseTotal(): number {
+    return this.getContractPrice() + this.getEnclosionsGrossTotal();
   }
 
   getContractPrice(): number {
@@ -431,16 +435,20 @@ cancelRow(row: PaymentRow): void {
   }
 
   private createNewRow(): void {
-    const issuedBy = this.getCurrentUserDisplayName();
+    this.rows = [...this.rows.filter((row) => !this.isPaymentRowEmpty(row)), this.buildNewPaymentRow()];
+    this.ensureTrailingEmptyPaymentRow();
+    this.refreshPaymentTable();
+  }
 
-    this.rows = [...this.rows, {
+  private buildNewPaymentRow(): PaymentRow {
+    return {
       uiKey: this.nextPaymentKey(),
       controlNumber: '',
       orNumber: '',
       arNumber: '',
       dateIssued: this.getToday(),
-      checkDate: this.getToday(),
-      issuedBy,
+      checkDate: '',
+      issuedBy: '',
       paymentType: '',
       accountNumber: '',
       amount: 0,
@@ -449,8 +457,7 @@ cancelRow(row: PaymentRow): void {
       checkCleared: false,
       FuneralContractId: this.serviceId,
       isEditing: true
-    }];
-    this.refreshPaymentTable();
+    };
   }
 
 editRow(row: PaymentRow): void {
@@ -484,7 +491,7 @@ editRow(row: PaymentRow): void {
   }
 
   private async persistAllPaymentRows(): Promise<void> {
-    const pendingRows = this.rows.filter((row) => row.isEditing);
+    const pendingRows = this.rows.filter((row) => !this.isPaymentRowEmpty(row) && this.isPaymentRowDirty(row));
     if (pendingRows.length === 0) {
       return;
     }
@@ -523,6 +530,7 @@ editRow(row: PaymentRow): void {
     const payload: FuneralPayment = {
       ...row,
       description: '',
+      issuedBy: row.issuedBy || this.getCurrentUserDisplayName(),
       funeralServiceId: this.serviceId,
     };
 
@@ -643,8 +651,6 @@ editRow(row: PaymentRow): void {
   private getToday(): string {
     return new Date().toISOString().split('T')[0];
   }
-
-  trackByPackageEnclosionsRow = (_index: number, row: PackageEnclosionDisplayRow): string => row.key;
 
   trackByChargeRow = (_index: number, charge: ChargeRow): string | number => {
     return charge.uiKey || charge.id || _index;
@@ -767,7 +773,7 @@ editRow(row: PaymentRow): void {
   }
 
   get hasPendingPaymentChanges(): boolean {
-    return this.rows.some((row) => row.isEditing);
+    return this.rows.some((row) => !this.isPaymentRowEmpty(row) && this.isPaymentRowDirty(row));
   }
 
   get canEditCharges(): boolean {
@@ -831,7 +837,7 @@ editRow(row: PaymentRow): void {
       remarks: payment.remarks || '',
       checkCleared: payment.checkCleared || false,
       FuneralContractId: this.serviceId,
-      isEditing: false
+      isEditing: true
     };
   }
 
@@ -849,31 +855,8 @@ editRow(row: PaymentRow): void {
       updatedBy: charge.updatedBy || '',
       createdOn: charge.createdOn,
       createdAt: charge.createdAt,
-      isEditing: false
+      isEditing: true
     };
-  }
-
-  private buildPackageEnclosionsSummaryDescription(): string {
-    const serviceType = this.getSafeContractText(this.FuneralContract?.type, 'Type of service not specified');
-    const casket = this.getSafeContractText(this.FuneralContract?.casket);
-    const urn = this.getSafeContractText(this.FuneralContract?.urnType)
-      || this.getSafeContractText(this.FuneralContract?.urnDescription);
-    const casketAvailability = this.getSafeContractText(this.FuneralContract?.casketAvailable, 'Not specified');
-
-    const selectedContainer = casket
-      ? `${casket}`
-      : (urn ? `Urn: ${urn}` : 'Casket/Urn: Not specified');
-
-    return `${serviceType} - ${selectedContainer} - ${casketAvailability}`;
-  }
-
-  private getSafeContractText(value: unknown, fallback = ''): string {
-    const text = String(value || '').trim();
-    if (!text) {
-      return fallback;
-    }
-
-    return text;
   }
 
   private applyPaymentsResponse(res: FuneralPayment | FuneralPayment[]): void {
@@ -885,11 +868,11 @@ editRow(row: PaymentRow): void {
 
     const editingRowsById = new Map(
       this.rows
-        .filter((row): row is PaymentRow & { id: number } => row.isEditing === true && typeof row.id === 'number')
+        .filter((row): row is PaymentRow & { id: number } => typeof row.id === 'number' && this.isPaymentRowDirty(row))
         .map((row) => [row.id, row])
     );
 
-    const draftRows = this.rows.filter((row) => row.isEditing && !row.id);
+    const draftRows = this.rows.filter((row) => !row.id && !this.isPaymentRowEmpty(row));
     const mappedRows = this.toPaymentArray(res).map((payment) => {
       if (typeof payment.id === 'number' && editingRowsById.has(payment.id)) {
         return editingRowsById.get(payment.id)!;
@@ -898,7 +881,14 @@ editRow(row: PaymentRow): void {
       return this.mapPaymentRow(payment, typeof payment.id === 'number' ? existingById.get(payment.id) : undefined);
     });
 
+    this.paymentOriginalById = new Map(
+      mappedRows
+        .filter((row): row is PaymentRow & { id: number } => typeof row.id === 'number')
+        .map((row) => [row.id, this.serializePaymentRow(row)])
+    );
+
     this.rows = [...mappedRows, ...draftRows];
+    this.ensureTrailingEmptyPaymentRow();
     this.refreshPaymentTable();
   }
 
@@ -911,11 +901,11 @@ editRow(row: PaymentRow): void {
 
     const editingChargesById = new Map(
       this.charges
-        .filter((charge): charge is ChargeRow & { id: number } => charge.isEditing === true && typeof charge.id === 'number')
+        .filter((charge): charge is ChargeRow & { id: number } => typeof charge.id === 'number' && this.isChargeRowDirty(charge))
         .map((charge) => [charge.id, charge])
     );
 
-    const draftCharges = this.charges.filter((charge) => charge.isEditing && !charge.id);
+    const draftCharges = this.charges.filter((charge) => !charge.id && !this.isChargeRowEmpty(charge));
     const mappedCharges = this.toChargeArray(res).map((charge) => {
       if (typeof charge.id === 'number' && editingChargesById.has(charge.id)) {
         return editingChargesById.get(charge.id)!;
@@ -923,6 +913,12 @@ editRow(row: PaymentRow): void {
 
       return this.mapChargeRow(charge, typeof charge.id === 'number' ? existingById.get(charge.id) : undefined);
     });
+
+    this.chargeOriginalById = new Map(
+      mappedCharges
+        .filter((charge): charge is ChargeRow & { id: number } => typeof charge.id === 'number')
+        .map((charge) => [charge.id, this.serializeChargeRow(charge)])
+    );
 
     this.charges = mappedCharges.length > 0
       ? [...mappedCharges, ...draftCharges]
@@ -948,6 +944,7 @@ editRow(row: PaymentRow): void {
   }
 
   private refreshPaymentTable(): void {
+    this.ensureTrailingEmptyPaymentRow();
     this.rows = [...this.rows];
     this.computeTotals();
     this.cdr.markForCheck();
@@ -957,6 +954,95 @@ editRow(row: PaymentRow): void {
     this.charges = [...this.charges];
     this.computeBalance();
     this.cdr.markForCheck();
+  }
+
+  isPaymentRowEmpty(row: Partial<PaymentRow> | null | undefined): boolean {
+    if (!row) {
+      return true;
+    }
+
+    return String(row.controlNumber || '').trim().length === 0
+      && String(row.orNumber || '').trim().length === 0
+      && String(row.arNumber || '').trim().length === 0
+      && String(row.accountNumber || '').trim().length === 0
+      && String(row.dateIssued || '').trim().length === 0
+      && String(row.checkDate || '').trim().length === 0
+      && String(row.paymentType || '').trim().length === 0
+      && String(row.remarks || '').trim().length === 0
+      && (Number(row.amount) || 0) === 0
+      && !row.checkCleared;
+  }
+
+  isChargeRowEmpty(row: Partial<ChargeRow> | null | undefined): boolean {
+    if (!row) {
+      return true;
+    }
+
+    return String(row.chargeType || '').trim().length === 0
+      && String(row.description || '').trim().length === 0
+      && (Number(row.quantity) || 0) === 0
+      && (Number(row.unitPrice) || 0) === 0
+      && (Number(row.discount) || 0) === 0;
+  }
+
+  private ensureTrailingEmptyPaymentRow(): void {
+    if (!this.canAddPayments && !this.canModifyExistingPayments) {
+      return;
+    }
+
+    const nonEmptyRows = this.rows.filter((row) => !this.isPaymentRowEmpty(row));
+    this.rows = [...nonEmptyRows, this.buildNewPaymentRow()];
+  }
+
+  private isPaymentRowDirty(row: PaymentRow): boolean {
+    if (!row.id) {
+      return !this.isPaymentRowEmpty(row);
+    }
+
+    const original = this.paymentOriginalById.get(row.id);
+    if (!original) {
+      return true;
+    }
+
+    return this.serializePaymentRow(row) !== original;
+  }
+
+  private isChargeRowDirty(row: ChargeRow): boolean {
+    if (!row.id) {
+      return !this.isChargeRowEmpty(row);
+    }
+
+    const original = this.chargeOriginalById.get(row.id);
+    if (!original) {
+      return true;
+    }
+
+    return this.serializeChargeRow(row) !== original;
+  }
+
+  private serializePaymentRow(row: Partial<PaymentRow>): string {
+    return [
+      String(row.controlNumber || '').trim(),
+      String(row.orNumber || '').trim(),
+      String(row.arNumber || '').trim(),
+      String(row.accountNumber || '').trim(),
+      String(row.dateIssued || '').trim(),
+      String(row.checkDate || '').trim(),
+      String(row.paymentType || '').trim(),
+      String(row.remarks || '').trim(),
+      Number(row.amount) || 0,
+      row.checkCleared ? 1 : 0,
+    ].join('|');
+  }
+
+  private serializeChargeRow(row: Partial<ChargeRow>): string {
+    return [
+      String(row.chargeType || '').trim(),
+      String(row.description || '').trim(),
+      Number(row.quantity) || 0,
+      Number(row.unitPrice) || 0,
+      Number(row.discount) || 0,
+    ].join('|');
   }
 
   private syncPaymentsSilently(): void {

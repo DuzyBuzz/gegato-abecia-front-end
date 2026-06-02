@@ -239,3 +239,13 @@ td {
 
 .xls-tag--cleared { background: #d1fae5; color: #065f46; }
 .xls-tag--pending { background: #f1f5f9; color: #475569; }
+
+.summary-table-compact td {
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+}
+
+.summary-remarks-panel textarea,
+.summary-remarks-panel > div {
+  min-height: 2.1rem;
+}

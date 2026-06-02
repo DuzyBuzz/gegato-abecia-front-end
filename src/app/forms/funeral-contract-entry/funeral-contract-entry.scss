@@ -305,6 +305,10 @@ app-select-helper {
   display: block;
 }
 
+app-auto-complete-helper {
+  display: block;
+}
+
 :host ::ng-deep app-select-helper .p-dropdown,
 :host ::ng-deep app-select-helper .p-select {
   width: 100%;
@@ -332,6 +336,28 @@ app-select-helper {
 :host ::ng-deep app-select-helper .p-dropdown-trigger,
 :host ::ng-deep app-select-helper .p-select-dropdown {
   width: 1.58rem;
+}
+
+:host ::ng-deep app-auto-complete-helper .p-autocomplete,
+:host ::ng-deep app-auto-complete-helper .p-autocomplete-input {
+  width: 100%;
+}
+
+:host ::ng-deep app-auto-complete-helper .p-autocomplete-input {
+  min-height: 1.58rem;
+  border: 1px solid #c7ced8;
+  border-radius: 0.22rem;
+  background: #ffffff;
+  box-shadow: none;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  padding: 0.38rem 0.44rem;
+  color: #1f2937;
+}
+
+:host ::ng-deep app-auto-complete-helper .p-autocomplete-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
 .contract-entry-field__input:focus {

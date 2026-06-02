@@ -69,6 +69,11 @@ td {
 .xls-grid tbody tr:nth-child(even) { background: #f8fafc; }
 .xls-grid tbody tr:hover { background: #eff6ff; }
 .xls-grid tbody tr.xls-row--editing { background: #fefce8 !important; }
+.xls-grid tbody tr.xls-row--deleted {
+	background: #f8fafc !important;
+	opacity: 0.78;
+	text-decoration: line-through;
+}
 
 .xls-grid td {
 	padding: 0.3rem 0.7rem;
@@ -100,6 +105,13 @@ td {
 	white-space: nowrap;
 	width: 5.5rem;
 	min-width: 5.5rem;
+}
+
+.xls-row__deleted-value {
+	display: inline-block;
+	width: 100%;
+	color: #64748b;
+	font-style: italic;
 }
 
 .xls-input {
@@ -276,6 +288,16 @@ td {
 }
 
 .xls-tag--cleared { background: #d1fae5; color: #065f46; }
+
+.summary-table-compact td {
+	padding-top: 0.35rem !important;
+	padding-bottom: 0.35rem !important;
+}
+
+.summary-remarks-panel textarea,
+.summary-remarks-panel > div {
+	min-height: 2.1rem;
+}
 .xls-tag--pending { background: #f1f5f9; color: #475569; }
 
 @media (max-width: 768px) {

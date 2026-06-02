@@ -24,6 +24,8 @@ interface CalendarWeek {
   days: CalendarDay[];
 }
 
+type SchedulePrintTarget = 'delivery' | 'interment';
+
 @Component({
   selector: 'app-schedule',
   standalone: true,
@@ -61,6 +63,13 @@ export class ScheduleComponent implements OnInit {
   monthName: string = '';
   dayNames: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  // Print range dialog
+  isPrintRangeDialogOpen = false;
+  printRangeFrom = '';
+  printRangeTo = '';
+  printRangeError = '';
+  pendingPrintTarget: SchedulePrintTarget = 'delivery';
+
   constructor(
     private funeralContractService: FuneralContractService,
     private funeralChargesService: FuneralChargesService,
@@ -75,6 +84,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setDefaultPrintRange();
     this.loadBurialSchedule();
   }
 
@@ -509,6 +519,82 @@ export class ScheduleComponent implements OnInit {
   refreshSchedule(): void {
     console.log('🔄 Refresh button clicked');
     this.loadBurialSchedule();
+  }
+
+  /**
+   * Print delivery schedule report.
+   */
+  printDeliveryScheduleReport(): void {
+    this.openPrintRangeDialog('delivery');
+  }
+
+  /**
+   * Print interment schedule report.
+   */
+  printIntermentScheduleReport(): void {
+    this.openPrintRangeDialog('interment');
+  }
+
+  openPrintRangeDialog(target: SchedulePrintTarget): void {
+    this.pendingPrintTarget = target;
+    this.printRangeError = '';
+
+    if (!this.printRangeFrom || !this.printRangeTo) {
+      this.setDefaultPrintRange();
+    }
+
+    this.isPrintRangeDialogOpen = true;
+  }
+
+  closePrintRangeDialog(): void {
+    this.isPrintRangeDialogOpen = false;
+    this.printRangeError = '';
+  }
+
+  confirmPrintRange(): void {
+    const fromDate = String(this.printRangeFrom || '').trim();
+    const toDate = String(this.printRangeTo || '').trim();
+
+    if (!fromDate || !toDate) {
+      this.printRangeError = 'Please select both From and To dates.';
+      return;
+    }
+
+    if (fromDate > toDate) {
+      this.printRangeError = 'From date must not be later than To date.';
+      return;
+    }
+
+    this.closePrintRangeDialog();
+    this.startPrintByTarget(this.pendingPrintTarget, fromDate, toDate);
+  }
+
+  private startPrintByTarget(target: SchedulePrintTarget, startDate: string, endDate: string): void {
+    const returnTo = this.router.url;
+
+    if (target === 'delivery') {
+      this.router.navigate(['/print/delivery-schedule'], {
+        queryParams: {
+          startDate,
+          endDate,
+          returnTo,
+        },
+      });
+      return;
+    }
+
+    this.router.navigate(['/print/interment-schedule'], {
+      queryParams: {
+        startDate,
+        endDate,
+        returnTo,
+      },
+    });
+  }
+
+  private setDefaultPrintRange(): void {
+    this.printRangeFrom = this.formatDate(this.getMonthStartDate());
+    this.printRangeTo = this.formatDate(this.getMonthEndDate());
   }
 
   /**

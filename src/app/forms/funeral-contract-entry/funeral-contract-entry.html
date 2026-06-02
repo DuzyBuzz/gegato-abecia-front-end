@@ -99,7 +99,6 @@
                               </div>
             </div>
           </div>
-
           <div class="contract-entry-section__content">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -263,13 +262,11 @@
             <div class="grid grid-cols-1 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Place of Death</label>
-                <input
-                  type="text"
+                <app-auto-complete-helper
                   formControlName="placeOfDeath"
-                  [class.contract-entry-field__input--invalid]="isFieldInvalid('placeOfDeath')"
-                  class="contract-entry-field__input"
-                  title="Place of Death"
-                >
+                  comboboxName="placeOfDeath"
+                  [isInvalid]="isFieldInvalid('placeOfDeath')"
+                ></app-auto-complete-helper>
                 <small *ngIf="isFieldInvalid('placeOfDeath')" class="contract-entry-field__error">
                   {{ getErrorMessage('placeOfDeath') }}
                 </small>
@@ -393,13 +390,11 @@
             <div class="grid grid-cols-1 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Address</label>
-                <input
-                  type="text"
+                <app-auto-complete-helper
                   formControlName="addressLine1"
-                  [class.contract-entry-field__input--invalid]="isFieldInvalid('addressLine1')"
-                  class="contract-entry-field__input"
-                  title="Address"
-                >
+                  comboboxName="addressLine1"
+                  [isInvalid]="isFieldInvalid('addressLine1')"
+                ></app-auto-complete-helper>
                 <small *ngIf="isFieldInvalid('addressLine1')" class="contract-entry-field__error">
                   {{ getErrorMessage('addressLine1') }}
                 </small>
@@ -535,41 +530,41 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="contract-entry-field__label">Burial Driver</label>
-                <input type="text" formControlName="burialDriver" class="contract-entry-field__input" title="Burial Driver">
+                <app-select-helper size="sm" formControlName="burialDriver" comboboxName="burialDriver" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Burial Helper</label>
-                <input type="text" formControlName="burialHelper" class="contract-entry-field__input" title="Burial Helper">
+                <app-select-helper size="sm" formControlName="burialHelper" comboboxName="burialHelper" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Family Car</label>
-                <input type="text" formControlName="familyCar" class="contract-entry-field__input" title="Family Car">
+                <app-select-helper size="sm" formControlName="familyCar" comboboxName="familyCar" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Family Car Driver</label>
-                <input type="text" formControlName="familyCarDriver" class="contract-entry-field__input" title="Family Car Driver">
+                <app-select-helper size="sm" formControlName="familyCarDriver" comboboxName="familyCarDriver" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Flower Car</label>
-                <input type="text" formControlName="flowerCar" class="contract-entry-field__input" title="Flower Car">
+                <app-select-helper size="sm" formControlName="flowerCar" comboboxName="flowerCar" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Flower Car Driver</label>
-                <input type="text" formControlName="flowerCarDriver" class="contract-entry-field__input" title="Flower Car Driver">
+                <app-select-helper size="sm" formControlName="flowerCarDriver" comboboxName="flowerCarDriver" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Car Rental</label>
-                <input type="text" formControlName="carRental" class="contract-entry-field__input" title="Car Rental">
+                <app-select-helper size="sm" formControlName="carRental" comboboxName="carRental" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Car Rental Driver</label>
-                <input type="text" formControlName="carRentalDriver" class="contract-entry-field__input" title="Car Rental Driver">
+                <app-select-helper size="sm" formControlName="carRentalDriver" comboboxName="carRentalDriver" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Cremation Date</label>
@@ -597,26 +592,26 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="contract-entry-field__label">Cremation Operator</label>
-                <input type="text" formControlName="cremationOperator" class="contract-entry-field__input" title="Cremation Operator">
+                <app-select-helper size="sm" formControlName="cremationOperator" comboboxName="cremationOperator" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Burial Benefit</label>
-                <input type="text" formControlName="burialBenefit" class="contract-entry-field__input" title="Burial Benefit">
+                <app-select-helper size="sm" formControlName="burialBenefit" comboboxName="burialBenefit" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Setup Crew</label>
-                <input type="text" formControlName="setupCrew" class="contract-entry-field__input" title="Setup Crew">
+                <app-select-helper size="sm" formControlName="setupCrew" comboboxName="setupCrew" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Pall Bearers</label>
-                <input type="text" formControlName="pallBearrer" class="contract-entry-field__input" title="Pall Bearers">
+                <app-select-helper size="sm" formControlName="pallBearrer" comboboxName="pallBearrer" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Funeral Director</label>
-                <input type="text" formControlName="funeralDirector" class="contract-entry-field__input" title="Funeral Director">
+                <app-select-helper size="sm" formControlName="funeralDirector" comboboxName="funeralDirector" [searchable]="true"></app-select-helper>
               </div>
             </div>
           </div>
@@ -649,33 +644,33 @@
               </div>
               <div>
                 <label class="contract-entry-field__label">Makeup & Dress Up</label>
-                <input type="text" formControlName="makeupDressUp" class="contract-entry-field__input" title="Makeup & Dress Up">
+                <app-select-helper size="sm" formControlName="makeupDressUp" comboboxName="makeupDressUp" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Makeup Request</label>
-                <input type="text" formControlName="makeUprequest" class="contract-entry-field__input" title="Makeup Request">
+                <app-select-helper size="sm" formControlName="makeUprequest" comboboxName="makeUprequest" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Nails</label>
-                <input type="text" formControlName="nails" class="contract-entry-field__input" title="Nails">
+                <app-select-helper size="sm" formControlName="nails" comboboxName="nails" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Lips</label>
-                <input type="text" formControlName="lips" class="contract-entry-field__input" title="Lips">
+                <app-select-helper size="sm" formControlName="lips" comboboxName="lips" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <label class="contract-entry-field__label">Finished By</label>
-                <input type="text" formControlName="finishedBy" class="contract-entry-field__input" title="Finished By">
+                <app-select-helper size="sm" formControlName="finishedBy" comboboxName="finishedBy" [searchable]="true"></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Embalmed By</label>
-                <input type="text" formControlName="embalmedBy" class="contract-entry-field__input" title="Embalmed By">
+                <app-select-helper size="sm" formControlName="embalmedBy" comboboxName="embalmedBy" [searchable]="true"></app-select-helper>
               </div>
             </div>
 
@@ -836,21 +831,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="contract-entry-field__label">Delivery Helper</label>
-                <input
-                  type="text"
+                <app-select-helper size="sm"
                   formControlName="deliveryHelper"
-                  class="contract-entry-field__input"
-                  title="Delivery Helper"
-                >
+                  comboboxName="deliveryHelper"
+                  [searchable]="true"
+                ></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Delivery Driver</label>
-                <input
-                  type="text"
+                <app-select-helper size="sm"
                   formControlName="deliveryDriver"
-                  class="contract-entry-field__input"
-                  title="Delivery Driver"
-                >
+                  comboboxName="deliveryDriver"
+                  [searchable]="true"
+                ></app-select-helper>
               </div>
               <div>
                 <label class="contract-entry-field__label">Delivery Status</label>

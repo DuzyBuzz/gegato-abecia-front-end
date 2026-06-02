@@ -7,11 +7,89 @@
           <h1 class="text-3xl font-bold text-gray-900">Burial Schedule</h1>
             <p class="mt-2 text-sm text-gray-500">Operations calendar with contract base pricing and additional inclusion visibility.</p>
         </div>
+        <div class="mt-4 sm:mt-0 flex items-center gap-2">
+          <button
+            (click)="printDeliveryScheduleReport()"
+            class="inline-flex items-center px-4 py-2 border border-slate-700 rounded-md shadow-sm text-sm font-medium text-white bg-slate-700 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-600 transition-colors"
+          >
+            Delivery Print
+          </button>
+
+          <button
+            (click)="printIntermentScheduleReport()"
+            class="inline-flex items-center px-4 py-2 border border-slate-600 rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-600 transition-colors"
+          >
+            Interment Print
+          </button>
+
+          <button
+            (click)="refreshSchedule()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Range Dialog -->
+  <div
+    *ngIf="isPrintRangeDialogOpen"
+    class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+    (click)="closePrintRangeDialog()"
+  >
+    <div class="schedule-modal-backdrop fixed inset-0 transition-opacity"></div>
+
+    <div
+      class="schedule-dialog relative w-full max-w-lg bg-white overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="schedule-dialog__header px-6 py-5">
+        <h3 class="text-lg font-semibold text-slate-900">Select Print Date Range</h3>
+        <p class="mt-1 text-sm text-slate-500">Only records within this range will be printed.</p>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="print-range-from" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">From</label>
+            <input
+              id="print-range-from"
+              type="date"
+              [(ngModel)]="printRangeFrom"
+              class="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+
+          <div>
+            <label for="print-range-to" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">To</label>
+            <input
+              id="print-range-to"
+              type="date"
+              [(ngModel)]="printRangeTo"
+              class="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+        </div>
+
+        <p *ngIf="printRangeError" class="text-sm font-medium text-red-600">{{ printRangeError }}</p>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-2">
         <button
-          (click)="refreshSchedule()"
-          class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          type="button"
+          (click)="closePrintRangeDialog()"
+          class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
         >
-          Refresh
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="confirmPrintRange()"
+          class="inline-flex items-center px-4 py-2 rounded-md border border-slate-700 text-sm font-medium text-white bg-slate-700 hover:bg-slate-800"
+        >
+          Print
         </button>
       </div>
     </div>

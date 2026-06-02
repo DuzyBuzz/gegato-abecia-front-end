@@ -19,9 +19,10 @@ import { FuneralServiceContractPrinting } from './document/funeral-service-contr
 import { AuthorityToCremateRemainsPrinting } from './document/authority-to-cremate-remains-printing/authority-to-cremate-remains-printing';
 import { CremationCertificate } from './document/cremation-certificate/cremation-certificate';
 import { EventDetailsInstructionsComponent } from './document/event-details-instructions/event-details-instructions.component';
+import { DeliverySchedulePrintComponent } from './document/delivery-schedule-print/delivery-schedule-print.component';
+import { IntermentSchedulePrintComponent } from './document/interment-schedule-print/interment-schedule-print.component';
 import { RoleAccess } from './utils/role-access.util';
 import { RequestsComponent } from './pages/requests/requests.component';
-import { EnclosionsComponent } from './forms/enclosions/enclosions.component';
 
 export const routes: Routes = [
 
@@ -81,11 +82,6 @@ export const routes: Routes = [
       {
         path: 'requests',
         component: RequestsComponent
-      },
-
-      {
-        path: 'enclosions',
-        component: EnclosionsComponent
       },
 
       {
@@ -292,6 +288,14 @@ export const routes: Routes = [
             {
               path: 'event-details-instructions/:contractId',
               component: EventDetailsInstructionsComponent
+            },
+            {
+              path: 'delivery-schedule',
+              component: DeliverySchedulePrintComponent
+            },
+            {
+              path: 'interment-schedule',
+              component: IntermentSchedulePrintComponent
             },
 
 

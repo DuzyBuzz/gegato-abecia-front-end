@@ -9,9 +9,8 @@ import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
+import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
 import { firstValueFrom } from 'rxjs';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '../../../firebase';
 
 import { ContractCharges } from '../../models/contract-charges.model';
 import { FuneralContract } from '../../models/funeral-contract.model';
@@ -26,17 +25,8 @@ import { AuthService } from '../../services/auth.service';
 interface ChargeRow extends ContractCharges {
   uiKey?: string;
   isEditing?: boolean;
+  isDeleted?: boolean;
   _backup?: Partial<ChargeRow>;
-}
-
-interface PackageEnclosionDisplayRow {
-  key: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-  amount: number;
-  isSynthetic?: boolean;
 }
 
 interface PricingDraft {
@@ -53,30 +43,6 @@ interface ServiceDetailsDraft {
   urnDescription: string;
 }
 
-interface PackagePresetCharge {
-  chargeType: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-}
-
-interface PackagePreset {
-  id: string;
-  name: string;
-  isActive: boolean;
-  notes: string;
-  price: number;
-  discount: number;
-  type: string;
-  casket: string;
-  casketAvailable: string;
-  financialAssitance: string;
-  urnType: string;
-  urnDescription: string;
-  charges: PackagePresetCharge[];
-}
-
 @Component({
   selector: 'app-funeral-billing',
   standalone: true,
@@ -88,6 +54,7 @@ interface PackagePreset {
     ConfirmDialogModule,
     InputNumberModule,
     DialogModule,
+    SelectHelperComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './funeral-billing.component.html',
@@ -110,11 +77,6 @@ export class FuneralBillingComponent implements OnInit {
   balanceRemaining = 0;
   pricingDraft: PricingDraft = this.createPricingDraft();
   serviceDetailsDraft: ServiceDetailsDraft = this.createServiceDetailsDraft();
-  packagePresets: PackagePreset[] = [];
-  selectedPackageId = '';
-  autoMatchedPackageName = '';
-  isLoadingPackagePresets = false;
-  isApplyingPackage = false;
 
   // Request Change dialog
   requestDialogVisible = false;
@@ -126,6 +88,7 @@ export class FuneralBillingComponent implements OnInit {
   };
 
   private chargeKeyCounter = 0;
+  private chargeOriginalById = new Map<number, ContractCharges>();
 
   constructor(
     private funeralChargesService: FuneralChargesService,
@@ -141,8 +104,6 @@ export class FuneralBillingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    void this.loadPackagePresets();
-
     this.route.paramMap.subscribe((params) => {
       const id = Number(params.get('contractId'));
 
@@ -171,10 +132,11 @@ export class FuneralBillingComponent implements OnInit {
       this.funeralContractService.getFuneralService(id).subscribe({
         next: (contract) => {
           this.FuneralContract = contract;
+          this.pricingDraft = this.createPricingDraft(contract);
+          this.serviceDetailsDraft = this.createServiceDetailsDraft(contract);
           this.cdr.markForCheck();
           this.loadChargesData();
           this.loadPaymentsSummary();
-          this.tryAutoSelectMatchingPackagePreset();
         },
         error: (err) => {
           console.error('Failed to load contract', err);
@@ -234,7 +196,261 @@ export class FuneralBillingComponent implements OnInit {
       return;
     }
 
-    this.charges = [...this.charges, this.buildNewChargeRow()];
+    this.charges = [...this.charges.filter((row) => !this.isChargeRowEmpty(row)), this.buildNewChargeRow()];
+    this.ensureTrailingEmptyChargeRow();
+    this.refreshChargeTable();
+  }
+
+  saveBilling(): void {
+    if (!this.hasPendingBillingChanges) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'No changes',
+        detail: 'There are no billing changes to save.',
+      });
+      return;
+    }
+
+    this.confirmationService.confirm({
+      header: 'Save Billing',
+      message: 'Do you want to save and finalize all billing changes?',
+      icon: 'pi pi-check-circle',
+      acceptLabel: 'Save Billing',
+      rejectLabel: 'Cancel',
+      accept: () => void this.persistBillingChanges(),
+    });
+  }
+
+  onChargeRowFocus(index: number): void {
+    if (!this.canEditCharges) {
+      return;
+    }
+
+    if (index === this.charges.length - 1 && this.isChargeRowEmpty(this.charges[index])) {
+      this.charges = [...this.charges, this.buildNewChargeRow()];
+      this.refreshChargeTable();
+    }
+  }
+
+  onChargeRowInput(index: number): void {
+    if (!this.canEditCharges) {
+      return;
+    }
+
+    if (index === this.charges.length - 1 && !this.isChargeRowEmpty(this.charges[index])) {
+      this.charges = [...this.charges, this.buildNewChargeRow()];
+    }
+
+    this.refreshChargeTable();
+  }
+
+  async saveAllCharges(): Promise<void> {
+    await this.persistAllCharges();
+  }
+
+  private async persistBillingChanges(): Promise<void> {
+    if (!this.FuneralContract) {
+      return;
+    }
+
+    this.loading = true;
+
+    try {
+      await this.persistBillingSetupChanges();
+      await this.persistAllCharges(false, false);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Saved',
+        detail: 'Billing changes saved successfully.',
+      });
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to save billing changes.',
+      });
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private async persistBillingSetupChanges(): Promise<void> {
+    const updates: Partial<FuneralContract> = {
+      price: Number(this.pricingDraft.price) || 0,
+      discount: Number(this.pricingDraft.discount) || 0,
+      type: this.serviceDetailsDraft.type || null,
+      casket: this.serviceDetailsDraft.casket || null,
+      casketAvailable: this.serviceDetailsDraft.casketAvailable || null,
+      financialAssitance: this.serviceDetailsDraft.financialAssitance || null,
+      urnType: this.serviceDetailsDraft.urnType || null,
+      urnDescription: this.serviceDetailsDraft.urnDescription || null,
+    };
+
+    const hasSetupChanges = (Object.keys(updates) as Array<keyof FuneralContract>).some((fieldKey) => {
+      const currentValue = this.FuneralContract?.[fieldKey];
+      return this.hasFieldChanged(currentValue, updates[fieldKey]);
+    });
+
+    if (!hasSetupChanges) {
+      return;
+    }
+
+    if (!this.FuneralContract) {
+      return;
+    }
+
+    if (this.auth.isAdmin()) {
+      const savedContract = await this.persistContractUpdateAsync(updates);
+      this.FuneralContract = savedContract;
+      this.resetBillingSetupEditState();
+      return;
+    }
+
+    const directUpdates: Partial<FuneralContract> = {};
+    const requestChanges: Array<{ fieldKey: keyof FuneralContract; label: string; oldValue: unknown; newValue: unknown }> = [];
+
+    const fieldLabelMap: Record<string, string> = {
+      price: 'Contract Price',
+      discount: 'Contract Discount',
+      type: 'Type of Service',
+      casket: 'Casket',
+      casketAvailable: 'Casket Availability',
+      financialAssitance: 'Financial Assistance',
+      urnType: 'Urn Type',
+      urnDescription: 'Urn Description',
+    };
+
+    (Object.keys(updates) as Array<keyof FuneralContract>).forEach((fieldKey) => {
+      const newValue = updates[fieldKey];
+      const oldValue = this.FuneralContract?.[fieldKey];
+
+      if (!this.hasFieldChanged(oldValue, newValue)) {
+        return;
+      }
+
+      if (this.isContractFieldInitialized(fieldKey, oldValue)) {
+        requestChanges.push({
+          fieldKey,
+          label: fieldLabelMap[String(fieldKey)] || String(fieldKey),
+          oldValue,
+          newValue,
+        });
+        return;
+      }
+
+      (directUpdates as Record<string, unknown>)[String(fieldKey)] = newValue;
+    });
+
+    if (Object.keys(directUpdates).length > 0) {
+      const savedContract = await this.persistContractUpdateAsync(directUpdates);
+      this.FuneralContract = savedContract;
+    }
+
+    if (requestChanges.length > 0) {
+      await this.submitContractFieldRequests(requestChanges, false);
+    }
+
+    this.resetBillingSetupEditState();
+  }
+
+  private async persistContractUpdateAsync(updates: Partial<FuneralContract>): Promise<FuneralContract> {
+    if (!this.FuneralContract) {
+      throw new Error('Missing contract');
+    }
+
+    const payload: FuneralContract = {
+      ...this.FuneralContract,
+      ...updates,
+    };
+
+    return await firstValueFrom(this.funeralContractService.save(payload));
+  }
+
+  private async persistAllCharges(showSuccessMessage = true, manageLoading = true): Promise<void> {
+    if (!this.hasPendingChargeChanges) {
+      if (showSuccessMessage) {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'No changes',
+          detail: 'There are no enclosions changes to save.',
+        });
+      }
+      return;
+    }
+
+    if (manageLoading) {
+      this.loading = true;
+    }
+
+    const pendingRows = this.charges.filter((row) => this.isChargeRowDirty(row));
+    if (pendingRows.length === 0) {
+      if (manageLoading) {
+        this.loading = false;
+      }
+      return;
+    }
+
+    try {
+      for (const row of pendingRows) {
+        if (row.isDeleted) {
+          await this.deleteChargeOnce(row);
+
+          this.charges = this.charges.filter((candidate) => candidate !== row);
+          continue;
+        }
+
+        if (this.auth.isBiller() && this.isBillingInitialized && !!row.id) {
+          await this.submitChargeUpdateRequest(row, false);
+          continue;
+        }
+
+        await this.persistChargeOnce(row);
+      }
+
+      if (showSuccessMessage) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Saved',
+          detail: 'Enclosions changes processed successfully.',
+        });
+      }
+
+      this.syncChargesSilently();
+    } catch {
+      if (showSuccessMessage) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to save some enclosions changes.',
+        });
+      }
+      throw new Error('Failed to persist charges');
+    } finally {
+      if (manageLoading) {
+        this.loading = false;
+      }
+    }
+  }
+
+  private async deleteChargeOnce(charge: ChargeRow): Promise<void> {
+    if (!charge.id) {
+      return;
+    }
+
+    await firstValueFrom(this.funeralChargesService.delete(charge.id));
+  }
+
+  private async persistChargeOnce(charge: ChargeRow): Promise<void> {
+    const payload: ContractCharges = {
+      ...charge,
+      funeralContractId: this.serviceId,
+    };
+
+    const res = await firstValueFrom(this.funeralChargesService.save(payload));
+    Object.assign(charge, this.mapChargeRow(res, charge));
+    charge.isEditing = false;
+    charge._backup = undefined;
     this.refreshChargeTable();
   }
 
@@ -323,69 +539,15 @@ export class FuneralBillingComponent implements OnInit {
     }
 
     const charge = this.charges[index];
-    const label = charge?.description || `#${index + 1}`;
-
-    if (this.auth.isBiller() && this.isBillingInitialized && !!charge?.id) {
-      this.confirmationService.confirm({
-        header: 'Submit Charge Deletion Request',
-        message: `Submit deletion request for charge ${label}?`,
-        icon: 'pi pi-send',
-        acceptLabel: 'Submit Request',
-        rejectLabel: 'Cancel',
-        accept: () => void this.submitChargeDeleteRequest(charge),
-      });
+    if (!charge) {
       return;
     }
 
-    this.confirmationService.confirm({
-      header: 'Delete Charge',
-      message: `Are you sure you want to delete charge ${label}?`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
-      acceptLabel: 'Delete',
-      rejectLabel: 'Cancel',
-      accept: () => this.performDeleteCharge(index),
-    });
-  }
+    charge.isDeleted = !charge.isDeleted;
+    charge.isEditing = false;
+    charge._backup = undefined;
 
-  private performDeleteCharge(index: number): void {
-    const charge = this.charges[index];
-
-    if (charge.id) {
-      this.loading = true;
-      this.funeralChargesService.delete(charge.id).subscribe({
-        next: () => {
-          this.loading = false;
-          this.charges = this.charges.filter((_, currentIndex) => currentIndex !== index);
-          this.refreshChargeTable();
-          this.syncChargesSilently();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Deleted',
-            detail: 'Charge deleted successfully',
-          });
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.loading = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Delete Failed',
-            detail: 'Unable to delete charge. Please try again.',
-          });
-          this.refreshChargeTable();
-        },
-      });
-      return;
-    }
-
-    this.charges = this.charges.filter((_, currentIndex) => currentIndex !== index);
     this.refreshChargeTable();
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Removed',
-      detail: 'Unsaved charge row removed',
-    });
   }
 
   cancelCharge(charge: ChargeRow): void {
@@ -406,38 +568,34 @@ export class FuneralBillingComponent implements OnInit {
   }
 
   getChargeAmount(charge: ChargeRow): number {
+    if (charge.isDeleted) {
+      return 0;
+    }
+
     const quantity = Number(charge.quantity) || 0;
     const unitPrice = Number(charge.unitPrice) || 0;
     const discount = Number(charge.discount) || 0;
     return (quantity * unitPrice) - discount;
   }
 
-  get packageEnclosionsRows(): PackageEnclosionDisplayRow[] {
-    const detailsRow: PackageEnclosionDisplayRow = {
-      key: 'service-details',
-      description: this.buildPackageEnclosionsSummaryDescription(),
-      quantity: 1,
-      unitPrice: this.getContractPrice(),
-      discount: 0,
-      amount: 0,
-      isSynthetic: true,
-    };
-
-    const chargeRows: PackageEnclosionDisplayRow[] = this.charges.map((charge, index) => ({
-      key: String(charge.uiKey || charge.id || `charge-${index}`),
-      description: String(charge.description || '').trim() || '—',
-      quantity: Number(charge.quantity) || 0,
-      unitPrice: Number(charge.unitPrice) || 0,
-      discount: Number(charge.discount) || 0,
-      amount: this.getChargeAmount(charge),
-      isSynthetic: false,
-    }));
-
-    return [detailsRow, ...chargeRows];
-  }
-
   getTotalCharges(): number {
     return this.charges.reduce((sum, charge) => sum + this.getChargeAmount(charge), 0);
+  }
+
+  getEnclosionsGrossTotal(): number {
+    return this.charges.reduce((sum, charge) => {
+      if (charge.isDeleted) {
+        return sum;
+      }
+
+      const quantity = Number(charge.quantity) || 0;
+      const unitPrice = Number(charge.unitPrice) || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+  }
+
+  getBilledBaseTotal(): number {
+    return this.getContractPrice() + this.getEnclosionsGrossTotal();
   }
 
   getContractPrice(): number {
@@ -449,7 +607,7 @@ export class FuneralBillingComponent implements OnInit {
   }
 
   getTotalDiscount(): number {
-    const chargeDiscount = this.charges.reduce((sum, charge) => sum + (Number(charge.discount) || 0), 0);
+    const chargeDiscount = this.charges.reduce((sum, charge) => sum + (charge.isDeleted ? 0 : (Number(charge.discount) || 0)), 0);
     return this.getContractDiscount() + chargeDiscount;
   }
 
@@ -474,8 +632,6 @@ export class FuneralBillingComponent implements OnInit {
   get paymentCount(): number {
     return this.payments.length;
   }
-
-  trackByPackageEnclosionsRow = (_index: number, row: PackageEnclosionDisplayRow): string => row.key;
 
   printStatement(): void {
     if (!this.serviceId) {
@@ -528,20 +684,7 @@ export class FuneralBillingComponent implements OnInit {
   }
 
   saveBillingSetupEdit(): void {
-    if (!this.canEditPricing) {
-      this.openRequestForBlockedBillingAction('price-change');
-      this.showChargeAccessDenied();
-      return;
-    }
-
-    this.confirmationService.confirm({
-      header: 'Save Billing Setup',
-      message: 'Do you want to save pricing and service details?',
-      icon: 'pi pi-check-circle',
-      acceptLabel: 'Save',
-      rejectLabel: 'Cancel',
-      accept: () => this.persistBillingSetupEdit(),
-    });
+    this.persistBillingSetupEdit();
   }
 
   private persistBillingSetupEdit(): void {
@@ -615,31 +758,6 @@ export class FuneralBillingComponent implements OnInit {
     if (requestChanges.length > 0) {
       void this.submitContractFieldRequests(requestChanges);
     }
-  }
-
-  private persistPricingEdit(): void {
-    this.persistContractUpdate(
-      {
-        price: Number(this.pricingDraft.price) || 0,
-        discount: Number(this.pricingDraft.discount) || 0,
-      },
-      'Contract pricing saved successfully',
-      () => {
-        this.pricingEditMode = false;
-        this.pricingDraft = this.createPricingDraft(this.FuneralContract);
-      }
-    );
-  }
-
-  cancelPricingEdit(): void {
-    this.cancelBillingSetupEdit();
-  }
-
-  cancelBillingSetupEdit(): void {
-    this.pricingEditMode = false;
-    this.serviceDetailsEditMode = false;
-    this.pricingDraft = this.createPricingDraft(this.FuneralContract);
-    this.serviceDetailsDraft = this.createServiceDetailsDraft(this.FuneralContract);
   }
 
   startServiceDetailsEdit(): void {
@@ -767,16 +885,39 @@ export class FuneralBillingComponent implements OnInit {
     return this.auth.isAdmin() || this.auth.isBiller();
   }
 
-  get canApplyPackagePreset(): boolean {
-    return this.auth.isAdmin() || this.auth.isBiller();
-  }
-
-  get selectedPackagePreset(): PackagePreset | null {
-    return this.packagePresets.find((item) => item.id === this.selectedPackageId) || null;
-  }
-
   get canRequestAdminChangeForBilling(): boolean {
     return this.auth.isBiller() && this.isBillingInitialized;
+  }
+
+  get hasPendingBillingChanges(): boolean {
+    if (!this.FuneralContract) {
+      return false;
+    }
+
+    const hasPricingChanges =
+      this.hasFieldChanged(this.FuneralContract.price, this.pricingDraft.price)
+      || this.hasFieldChanged(this.FuneralContract.discount, this.pricingDraft.discount);
+
+    const hasServiceChanges = [
+      'type',
+      'casket',
+      'casketAvailable',
+      'financialAssitance',
+      'urnType',
+      'urnDescription',
+    ].some((fieldKey) => {
+      const currentValue = this.FuneralContract?.[fieldKey as keyof FuneralContract];
+      const draftValue = this.serviceDetailsDraft[fieldKey as keyof typeof this.serviceDetailsDraft];
+      return this.hasFieldChanged(currentValue, draftValue);
+    });
+
+    const hasChargeChanges = this.charges.some((row) => !this.isChargeRowEmpty(row) && this.isChargeRowDirty(row));
+
+    return hasPricingChanges || hasServiceChanges || hasChargeChanges;
+  }
+
+  get hasPendingChargeChanges(): boolean {
+    return this.charges.some((row) => !this.isChargeRowEmpty(row) && this.isChargeRowDirty(row));
   }
 
   get isBillingInitialized(): boolean {
@@ -818,12 +959,13 @@ export class FuneralBillingComponent implements OnInit {
       funeralContractId: this.serviceId,
       chargeType: '',
       description: '',
-      quantity: 1,
+      quantity: 0,
       unitPrice: 0,
       discount: 0,
       createdBy: '',
       updatedBy: '',
       isEditing: true,
+      isDeleted: false,
     };
   }
 
@@ -842,30 +984,8 @@ export class FuneralBillingComponent implements OnInit {
       createdOn: charge.createdOn,
       createdAt: charge.createdAt,
       isEditing: false,
+      isDeleted: existing?.isDeleted || false,
     };
-  }
-
-  private buildPackageEnclosionsSummaryDescription(): string {
-    const serviceType = this.getSafeContractText(this.FuneralContract?.type, 'Type of service not specified');
-    const casket = this.getSafeContractText(this.FuneralContract?.casket);
-    const urn = this.getSafeContractText(this.FuneralContract?.urnType)
-      || this.getSafeContractText(this.FuneralContract?.urnDescription);
-    const casketAvailability = this.getSafeContractText(this.FuneralContract?.casketAvailable, 'Not specified');
-
-    const selectedContainer = casket
-      ? `${casket}`
-      : (urn ? `Urn: ${urn}` : 'Casket/Urn: Not specified');
-
-    return `${serviceType} - ${selectedContainer} - ${casketAvailability}`;
-  }
-
-  private getSafeContractText(value: unknown, fallback = ''): string {
-    const text = String(value || '').trim();
-    if (!text) {
-      return fallback;
-    }
-
-    return text;
   }
 
   private applyChargesResponse(res: ContractCharges[] | ContractCharges): void {
@@ -881,7 +1001,7 @@ export class FuneralBillingComponent implements OnInit {
         .map((charge) => [charge.id, charge])
     );
 
-    const draftCharges = this.charges.filter((charge) => charge.isEditing && !charge.id);
+    const draftCharges = this.charges.filter((charge) => !charge.id && !this.isChargeRowEmpty(charge));
     const mappedCharges = this.toChargeArray(res).map((charge) => {
       if (typeof charge.id === 'number' && editingChargesById.has(charge.id)) {
         return editingChargesById.get(charge.id)!;
@@ -893,11 +1013,18 @@ export class FuneralBillingComponent implements OnInit {
       );
     });
 
+    this.chargeOriginalById = new Map(
+      mappedCharges
+        .filter((charge): charge is ChargeRow & { id: number } => typeof charge.id === 'number')
+        .map((charge) => [charge.id, this.toRequestChargePayload(charge)])
+    );
+
     this.charges = mappedCharges.length > 0
       ? [...mappedCharges, ...draftCharges]
       : (draftCharges.length > 0 ? draftCharges : []);
 
-    this.tryAutoSelectMatchingPackagePreset();
+    this.ensureTrailingEmptyChargeRow();
+
     this.refreshChargeTable();
   }
 
@@ -948,8 +1075,8 @@ export class FuneralBillingComponent implements OnInit {
       'price-change': 'Contract Price',
       'discount-change': 'Contract Discount',
       'billing-remarks-change': 'Billing Remarks',
-      'charge-update': 'Package Enclosions',
-      'charge-delete': 'Package Enclosions',
+      'charge-update': 'Enclosions',
+      'charge-delete': 'Enclosions',
       'contract-correction': 'Contract Data',
     };
 
@@ -988,6 +1115,7 @@ export class FuneralBillingComponent implements OnInit {
   }
 
   private refreshChargeTable(): void {
+    this.ensureTrailingEmptyChargeRow();
     this.charges = [...this.charges];
     this.computeBalance();
     this.cdr.markForCheck();
@@ -1138,7 +1266,8 @@ export class FuneralBillingComponent implements OnInit {
   }
 
   private async submitContractFieldRequests(
-    changes: Array<{ fieldKey: keyof FuneralContract; label: string; oldValue: unknown; newValue: unknown }>
+    changes: Array<{ fieldKey: keyof FuneralContract; label: string; oldValue: unknown; newValue: unknown }>,
+    showSuccessMessage = true
   ): Promise<void> {
     for (const change of changes) {
       await this.serviceRequestService.submitRequest({
@@ -1161,20 +1290,21 @@ export class FuneralBillingComponent implements OnInit {
       });
     }
 
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Request Submitted',
-      detail: 'Initialized fields were submitted for admin approval.',
-    });
+    if (showSuccessMessage) {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Request Submitted',
+        detail: 'Initialized fields were submitted for admin approval.',
+      });
+    }
   }
 
-  private async submitChargeUpdateRequest(charge: ChargeRow): Promise<void> {
+  private async submitChargeUpdateRequest(charge: ChargeRow, showSuccessMessage = true): Promise<void> {
     if (!charge.id || !this.serviceId) {
       return;
     }
 
-    const backup = charge._backup || {};
-    const oldPayload = this.toRequestChargePayload(backup as ChargeRow);
+    const oldPayload = this.chargeOriginalById.get(charge.id) || this.toRequestChargePayload(charge);
     const newPayload = this.toRequestChargePayload(charge);
 
     this.loading = true;
@@ -1189,7 +1319,7 @@ export class FuneralBillingComponent implements OnInit {
           : undefined,
         requestedBy: this.getCurrentUserDisplayName(),
         requestedByUid: this.auth.currentUser?.id ? String(this.auth.currentUser.id) : undefined,
-        fieldLabel: 'Package Enclosions',
+        fieldLabel: 'Enclosions',
         fieldKey: 'charge',
         targetId: charge.id,
         oldValue: oldPayload,
@@ -1197,16 +1327,17 @@ export class FuneralBillingComponent implements OnInit {
         chargeData: newPayload,
       });
 
-      Object.assign(charge, backup);
+      this.syncChargesSilently();
       charge.isEditing = false;
       charge._backup = undefined;
-      this.refreshChargeTable();
 
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Request Submitted',
-        detail: 'Package enclosions update submitted for admin approval.',
-      });
+      if (showSuccessMessage) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Request Submitted',
+          detail: 'Enclosions update submitted for admin approval.',
+        });
+      }
     } catch {
       this.messageService.add({
         severity: 'error',
@@ -1235,7 +1366,7 @@ export class FuneralBillingComponent implements OnInit {
           : undefined,
         requestedBy: this.getCurrentUserDisplayName(),
         requestedByUid: this.auth.currentUser?.id ? String(this.auth.currentUser.id) : undefined,
-        fieldLabel: 'Package Enclosions',
+        fieldLabel: 'Enclosions',
         fieldKey: 'charge',
         targetId: charge.id,
         oldValue: this.toRequestChargePayload(charge),
@@ -1245,7 +1376,7 @@ export class FuneralBillingComponent implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Request Submitted',
-        detail: 'Package enclosions deletion submitted for admin approval.',
+        detail: 'Enclosions deletion submitted for admin approval.',
       });
     } catch {
       this.messageService.add({
@@ -1300,259 +1431,63 @@ export class FuneralBillingComponent implements OnInit {
     this.openRequestChangeDialog(type);
   }
 
-  async loadPackagePresets(): Promise<void> {
-    this.isLoadingPackagePresets = true;
-
-    try {
-      const ref = collection(db, 'enclosionsPackages');
-      const snapshot = await getDocs(query(ref, orderBy('name', 'asc')));
-
-      this.packagePresets = snapshot.docs
-        .map((item: any) => this.mapPackagePreset(item.id, item.data()))
-        .filter((item: PackagePreset | null): item is PackagePreset => item !== null && item.isActive);
-      this.tryAutoSelectMatchingPackagePreset();
-    } catch (error) {
-      console.error('[FuneralBilling] Failed to load package presets', error);
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Package presets',
-        detail: 'Unable to load enclosions package presets.',
-      });
-      this.packagePresets = [];
-    } finally {
-      this.isLoadingPackagePresets = false;
+  isChargeRowEmpty(row: Partial<ChargeRow> | null | undefined): boolean {
+    if (!row) {
+      return true;
     }
+
+    const description = String(row.description || '').trim();
+    const chargeType = String(row.chargeType || '').trim();
+    const quantity = Number(row.quantity) || 0;
+    const unitPrice = Number(row.unitPrice) || 0;
+    const discount = Number(row.discount) || 0;
+
+    return description.length === 0
+      && chargeType.length === 0
+      && quantity === 0
+      && unitPrice === 0
+      && discount === 0;
   }
 
-  applySelectedPackagePreset(): void {
-    if (!this.canApplyPackagePreset) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Access denied',
-        detail: 'Only biller and admin can apply package enclosions.',
-      });
+  private ensureTrailingEmptyChargeRow(): void {
+    if (!this.canEditCharges) {
       return;
     }
 
-    const selected = this.selectedPackagePreset;
-    if (!selected) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'No package selected',
-        detail: 'Select a package preset first.',
-      });
-      return;
-    }
-
-    this.confirmationService.confirm({
-      header: 'Apply Package Preset',
-      message: 'Applying this package will replace all current contract charges. Continue?',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Apply',
-      rejectLabel: 'Cancel',
-      accept: () => void this.performApplyPackagePreset(selected),
-    });
+    const nonEmptyRows = this.charges.filter((row) => row.isDeleted || !this.isChargeRowEmpty(row));
+    this.charges = [...nonEmptyRows, this.buildNewChargeRow()];
   }
 
-  private async performApplyPackagePreset(pkg: PackagePreset): Promise<void> {
-    if (!this.FuneralContract || !this.serviceId) {
-      return;
+  private isChargeRowDirty(row: ChargeRow): boolean {
+    if (row.isDeleted) {
+      return true;
     }
 
-    this.isApplyingPackage = true;
-
-    try {
-      const contractUpdates: Partial<FuneralContract> = {
-        price: Number(pkg.price) || 0,
-        discount: Number(pkg.discount) || 0,
-        type: pkg.type || null,
-        casket: pkg.casket || null,
-        casketAvailable: pkg.casketAvailable || null,
-        financialAssitance: pkg.financialAssitance || null,
-        urnType: pkg.urnType || null,
-        urnDescription: pkg.urnDescription || null,
-      };
-
-      const contractPayload: FuneralContract = {
-        ...this.FuneralContract,
-        ...contractUpdates,
-      };
-
-      const savedContract = await firstValueFrom(this.funeralContractService.save(contractPayload));
-      this.FuneralContract = savedContract;
-      this.pricingDraft = this.createPricingDraft(savedContract);
-      this.serviceDetailsDraft = this.createServiceDetailsDraft(savedContract);
-
-      const persistedChargeIds = this.charges
-        .map((item) => item.id)
-        .filter((id): id is number => typeof id === 'number');
-
-      for (const id of persistedChargeIds) {
-        await firstValueFrom(this.funeralChargesService.delete(id));
-      }
-
-      for (const item of pkg.charges) {
-        const payload: ContractCharges = {
-          funeralContractId: this.serviceId,
-          chargeType: item.chargeType || '',
-          description: item.description || '',
-          quantity: Number(item.quantity) || 0,
-          unitPrice: Number(item.unitPrice) || 0,
-          discount: Number(item.discount) || 0,
-          createdBy: '',
-          updatedBy: '',
-        };
-
-        await firstValueFrom(this.funeralChargesService.save(payload));
-      }
-
-      this.loadChargesData();
-      this.loadPaymentsSummary();
-      this.cdr.markForCheck();
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Package applied',
-        detail: `Package "${pkg.name}" was applied to this contract.`,
-      });
-    } catch (error) {
-      console.error('[FuneralBilling] Failed to apply package preset', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Apply failed',
-        detail: 'Unable to apply the selected package preset.',
-      });
-    } finally {
-      this.isApplyingPackage = false;
+    if (!row.id) {
+      return !this.isChargeRowEmpty(row);
     }
+
+    const original = this.chargeOriginalById.get(row.id);
+    if (!original) {
+      return true;
+    }
+
+    const currentPayload = this.toRequestChargePayload(row);
+    return this.serializeChargePayload(original) !== this.serializeChargePayload(currentPayload);
   }
 
-  private mapPackagePreset(id: string, raw: any): PackagePreset | null {
-    if (!raw) {
-      return null;
-    }
-
-    const charges = Array.isArray(raw.charges)
-      ? raw.charges
-          .map((item: any) => ({
-            chargeType: String(item?.chargeType || ''),
-            description: String(item?.description || ''),
-            quantity: Number(item?.quantity) || 0,
-            unitPrice: Number(item?.unitPrice) || 0,
-            discount: Number(item?.discount) || 0,
-          }))
-          .filter((item: PackagePresetCharge) => item.description.trim().length > 0)
-      : [];
-
-    return {
-      id,
-      name: String(raw.name || ''),
-      isActive: raw.isActive !== false,
-      notes: String(raw.notes || ''),
-      price: Number(raw.price) || 0,
-      discount: Number(raw.discount) || 0,
-      type: String(raw.type || ''),
-      casket: String(raw.casket || ''),
-      casketAvailable: String(raw.casketAvailable || ''),
-      financialAssitance: String(raw.financialAssitance || ''),
-      urnType: String(raw.urnType || ''),
-      urnDescription: String(raw.urnDescription || ''),
-      charges,
-    };
+  private serializeChargePayload(charge: ContractCharges): string {
+    return [
+      String(charge.chargeType || '').trim(),
+      String(charge.description || '').trim(),
+      Number(charge.quantity) || 0,
+      Number(charge.unitPrice) || 0,
+      Number(charge.discount) || 0,
+    ].join('|');
   }
 
-  private tryAutoSelectMatchingPackagePreset(): void {
-    if (!this.FuneralContract || this.packagePresets.length === 0 || !this.isBillingInitialized) {
-      this.autoMatchedPackageName = '';
-      return;
-    }
-
-    const matches = this.packagePresets.filter((preset) => this.isPresetMatchingCurrentBilling(preset));
-    if (matches.length !== 1) {
-      this.autoMatchedPackageName = '';
-      return;
-    }
-
-    const [matchedPreset] = matches;
-    this.selectedPackageId = matchedPreset.id;
-    this.autoMatchedPackageName = matchedPreset.name;
-  }
-
-  private isPresetMatchingCurrentBilling(preset: PackagePreset): boolean {
-    if (this.roundTo2(preset.price) !== this.roundTo2(this.getContractPrice())) {
-      return false;
-    }
-
-    if (this.roundTo2(preset.discount) !== this.roundTo2(this.getContractDiscount())) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.type) !== this.normalizeText(this.FuneralContract?.type)) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.casket) !== this.normalizeText(this.FuneralContract?.casket)) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.casketAvailable) !== this.normalizeText(this.FuneralContract?.casketAvailable)) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.financialAssitance) !== this.normalizeText(this.FuneralContract?.financialAssitance)) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.urnType) !== this.normalizeText(this.FuneralContract?.urnType)) {
-      return false;
-    }
-
-    if (this.normalizeText(preset.urnDescription) !== this.normalizeText(this.FuneralContract?.urnDescription)) {
-      return false;
-    }
-
-    const normalizedPresetCharges = this.normalizePresetCharges(preset.charges);
-    const normalizedCurrentCharges = this.normalizeCurrentCharges(this.charges);
-
-    if (normalizedPresetCharges.length !== normalizedCurrentCharges.length) {
-      return false;
-    }
-
-    return normalizedPresetCharges.every((entry, index) => entry === normalizedCurrentCharges[index]);
-  }
-
-  private normalizePresetCharges(charges: PackagePresetCharge[]): string[] {
-    return charges
-      .filter((charge) => this.normalizeText(charge.description).length > 0)
-      .map((charge) => [
-        this.normalizeText(charge.chargeType),
-        this.normalizeText(charge.description),
-        this.roundTo2(charge.quantity),
-        this.roundTo2(charge.unitPrice),
-        this.roundTo2(charge.discount),
-      ].join('|'))
-      .sort();
-  }
-
-  private normalizeCurrentCharges(charges: ChargeRow[]): string[] {
-    return charges
-      .filter((charge) => this.normalizeText(charge.description).length > 0)
-      .map((charge) => [
-        this.normalizeText(charge.chargeType),
-        this.normalizeText(charge.description),
-        this.roundTo2(charge.quantity),
-        this.roundTo2(charge.unitPrice),
-        this.roundTo2(charge.discount),
-      ].join('|'))
-      .sort();
-  }
-
-  private normalizeText(value: unknown): string {
-    return String(value || '').trim().toLowerCase();
-  }
-
-  private roundTo2(value: unknown): number {
-    return Math.round((Number(value) || 0) * 100) / 100;
+  get activeChargeCount(): number {
+    return this.charges.filter((row) => !row.isDeleted && !this.isChargeRowEmpty(row)).length;
   }
 
 }

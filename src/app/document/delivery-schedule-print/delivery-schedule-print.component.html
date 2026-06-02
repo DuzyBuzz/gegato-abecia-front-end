@@ -1,0 +1,49 @@
+<div class="print-shell" *ngIf="isReady">
+	<div class="print-page text-black text-[11px] leading-tight">
+
+		<h2 class="text-center text-[24px] font-bold mt-2 tracking-[0.02em]">DELIVERY SCHEDULE</h2>
+		<div class="text-center text-[12px] mb-2">Date Range: {{ rangeLabel }}</div>
+
+		<table class="schedule-table w-full border-collapse text-[10px]">
+			<thead>
+				<tr>
+					<th>DELIVERY DATE</th>
+					<th>DECEASED</th>
+					<th>CONTRACT NUMBER</th>
+					<th>ADDRESS</th>
+					<th>CASKET / DESCRIPTION</th>
+					<th>WAKE LOCATION</th>
+					<th>TRANSFER TIME</th>
+					<th>DELIVERY REMARKS</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let row of rows">
+					<td>{{ row.date }}</td>
+					<td>{{ row.deceased }}</td>
+					<td>{{ row.contractNo }}</td>
+					<td>{{ row.address }}</td>
+					<td>{{ row.casketDescription }}</td>
+					<td>{{ row.wakeLocation }}</td>
+					<td>{{ row.time }}</td>
+					<td>{{ row.remarks }}</td>
+				</tr>
+
+				<tr *ngIf="rows.length === 0">
+					<td colspan="8" class="empty-state">No delivery schedule records found for this date range.</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="signature-row">
+			<div class="signature-block">
+				<div class="name">DENNIS JUTAJERO</div>
+				<div class="role">LIAISON OFFICER</div>
+			</div>
+			<div class="signature-block">
+				<div class="name">BABES PANES</div>
+				<div class="role">ADM. SECRETARY</div>
+			</div>
+		</div>
+	</div>
+</div>

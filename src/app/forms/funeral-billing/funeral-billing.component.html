@@ -42,8 +42,8 @@
 		<div class="px-4 pt-3">
 			<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
 				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
-					<div class="text-[11px] uppercase text-gray-400">Casket/Urn Price</div>
-					<div class="text-sm font-semibold text-slate-700">₱{{ getContractPrice() | number:'1.2-2' }}</div>
+					<div class="text-[11px] uppercase text-gray-400">Contract Price</div>
+					<div class="text-sm font-semibold text-slate-700">₱{{ getBilledBaseTotal() | number:'1.2-2' }}</div>
 				</div>
 
 				<div class="border border-gray-200 rounded-lg bg-white px-3 py-2 shadow-sm">
@@ -72,105 +72,23 @@
 			</div>
 		</div>
 
-		<div class="px-4 py-2.5 border-t border-gray-200">
-			<table class="w-full text-sm">
+
+		<div class="px-4 py-2 border-t border-gray-200">
+			<table class="w-full text-sm summary-table-compact">
 				<tbody class="divide-y">
 					<tr>
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[110px]">Deceased</td>
-						<td class="px-2.5 py-2 font-semibold text-gray-800">
+						<td class="px-2.5 py-2 align-top bg-gray-50 text-gray-500 text-xs w-[110px]">Deceased</td>
+						<td class="px-2.5 py-2 align-top font-semibold text-gray-800">
 							{{ ((FuneralContract?.firstName || '') + ' ' + (FuneralContract?.lastName || '')).trim() || '—' }}
 						</td>
 
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[110px]">Contract #</td>
-						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.contractNo || '—' }}</td>
+						<td class="px-2.5 py-2 align-top bg-gray-50 text-gray-500 text-xs w-[110px]">Contract #</td>
+						<td class="px-2.5 py-2 align-top text-gray-800">{{ FuneralContract?.contractNo || '—' }}</td>
 
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs w-[96px]">Contractee</td>
-						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.contractee || '—' }}</td>
-
-						<td rowspan="3" class="w-[320px] align-top border-l border-gray-200 bg-white p-0">
-							<div class="h-full p-2.5 flex flex-col">
-								<div class="flex items-start justify-between gap-3">
-									<div>
-										<div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
-											Billing Remarks
-										</div>
-									</div>
-
-									<div class="flex gap-2">
-										<button
-											*ngIf="!editMode && canEditRemarks"
-											(click)="startEdit()"
-											class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
-										>
-											Edit
-										</button>
-
-										<button
-											*ngIf="editMode"
-											(click)="saveEdit()"
-											[disabled]="loading"
-											class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 transition"
-										>
-											{{ loading ? 'Saving...' : 'Save' }}
-										</button>
-
-										<button
-											*ngIf="editMode"
-											(click)="cancelEdit()"
-											[disabled]="loading"
-											class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 transition"
-										>
-											Cancel
-										</button>
-									</div>
-								</div>
-
-								<div class="mt-2 flex-1 flex">
-									<textarea
-										*ngIf="editMode"
-										[(ngModel)]="editedContract.billingRemarks"
-										[ngModelOptions]="{ standalone: true }"
-										rows="4"
-										class="w-full flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
-										placeholder="Add billing remarks here"
-									></textarea>
-
-									<div
-										*ngIf="!editMode"
-										class="w-full flex-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap"
-									>
-										{{ FuneralContract?.billingRemarks || 'No billing remarks yet.' }}
-									</div>
-								</div>
-							</div>
-						</td>
+						<td class="px-2.5 py-2 align-top bg-gray-50 text-gray-500 text-xs w-[96px]">Contractee</td>
+						<td class="px-2.5 py-2 align-top text-gray-800">{{ FuneralContract?.contractee || '—' }}</td>
 					</tr>
 
-					<tr>
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Due Date</td>
-						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.dueDate | date:'MMMM dd, yyyy' }}</td>
-
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Service Type</td>
-						<td class="px-2.5 py-2 text-gray-800">{{ FuneralContract?.type || '—' }}</td>
-
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Location</td>
-						<td class="px-2.5 py-2 text-gray-800">
-							{{ FuneralContract?.baranggay && FuneralContract?.municipality ? FuneralContract?.baranggay + ', ' + FuneralContract?.municipality : FuneralContract?.baranggay || FuneralContract?.municipality || '—' }}
-						</td>
-					</tr>
-
-					<tr>
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Contract Price</td>
-						<td class="px-2.5 py-2 text-gray-800 font-semibold">₱{{ getContractPrice() | number:'1.2-2' }}</td>
-
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Contract Discount</td>
-						<td class="px-2.5 py-2 text-amber-700 font-semibold">₱{{ getContractDiscount() | number:'1.2-2' }}</td>
-
-						<td class="px-2.5 py-2 bg-gray-50 text-gray-500 text-xs">Latest Payment</td>
-						<td class="px-2.5 py-2 text-gray-800">
-							{{ latestPayment?.dateIssued ? (latestPayment?.dateIssued | date:'MMMM dd, yyyy') : 'No payment posted yet' }}
-						</td>
-					</tr>
 				</tbody>
 			</table>
 		</div>
@@ -179,67 +97,91 @@
 
 			<div class="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center gap-3">
 				<div>
-					<h2 class="text-lg font-semibold text-gray-800">Package Enclosions</h2>
+					<h2 class="text-lg font-semibold text-gray-800">Enclosions</h2>
 				</div>
 
-				<button
-					type="button"
-					(click)="isChargesSectionVisible = !isChargesSectionVisible"
-					class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
-				>
-					<i class="pi" [ngClass]="isChargesSectionVisible ? 'pi-eye-slash' : 'pi-eye'"></i>
-					{{ isChargesSectionVisible ? 'Hide Enclosions' : 'Show Enclosions' }}
-				</button>
+				<div class="flex items-center gap-2">
+					<button
+						type="button"
+						(click)="saveBilling()"
+						[disabled]="loading"
+						class="inline-flex items-center gap-2 rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 transition"
+					>
+						<i class="pi pi-save text-xs"></i>
+						{{ loading ? 'Saving...' : 'Save Billing' }}
+					</button>
+
+
+				</div>
 			</div>
-						<div class="px-4 py-3 border-b border-slate-200 bg-slate-50/70">
-							<div class="package-preset-grid">
-								<div>
-									<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">Enclosions Package</div>
-									<select
-										[(ngModel)]="selectedPackageId"
-										[ngModelOptions]="{ standalone: true }"
-										title="Enclosions package preset"
-										class="package-preset-select"
-										[disabled]="isLoadingPackagePresets || !canApplyPackagePreset"
-									>
-										<option [ngValue]="''">Select package preset</option>
-										<option *ngFor="let pkg of packagePresets" [ngValue]="pkg.id">{{ pkg.name }}</option>
-									</select>
-								</div>
-
-								<div class="package-preset-actions">
-									<button
-										type="button"
-										(click)="applySelectedPackagePreset()"
-										[disabled]="!canApplyPackagePreset || !selectedPackageId || isApplyingPackage"
-										class="inline-flex items-center justify-center rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 transition"
-									>
-										{{ isApplyingPackage ? 'Applying...' : 'Apply Package' }}
-									</button>
-								</div>
-							</div>
-
-							<!-- <div class="mt-2 text-xs text-gray-500" *ngIf="selectedPackagePreset as selectedPackage">
-								Default discount: ₱{{ selectedPackage.discount | number:'1.2-2' }}
-								<span class="mx-1">|</span>
-								Enclosions: {{ selectedPackage.charges.length }}
-								<span class="mx-1">|</span>
-								{{ selectedPackage.notes || 'No notes' }}
-							</div> -->
-<!-- 
-							<div class="mt-1 text-xs text-emerald-700" *ngIf="autoMatchedPackageName">
-								Loaded preset from initialized enclosions: {{ autoMatchedPackageName }}
-							</div>
-
-							<div class="mt-2 text-xs text-amber-700" *ngIf="!canApplyPackagePreset">
-								Only biller and admin can apply package enclosions.
-							</div> -->
-						</div>
+			<div class="px-4 py-3 border-b border-slate-200 bg-slate-50/70">
+				<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-3">Service and Casket or Urn Details</div>
+				<div class="grid grid-cols-1 gap-3 xl:grid-cols-6">
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Type of Service</div>
+						<app-select-helper
+							[(ngModel)]="serviceDetailsDraft.type"
+							[ngModelOptions]="{ standalone: true }"
+							comboboxName="type"
+							[searchable]="true"
+						></app-select-helper>
+					</div>
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Price</div>
+						<p-inputNumber
+							[(ngModel)]="pricingDraft.price"
+							[ngModelOptions]="{ standalone: true }"
+							mode="decimal"
+							[min]="0"
+							[minFractionDigits]="2"
+							[maxFractionDigits]="2"
+							[useGrouping]="false"
+							styleClass="w-full"
+							inputStyleClass="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
+						></p-inputNumber>
+					</div>
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Casket</div>
+						<app-select-helper
+							[(ngModel)]="serviceDetailsDraft.casket"
+							[ngModelOptions]="{ standalone: true }"
+							comboboxName="casket"
+							[searchable]="true"
+						></app-select-helper>
+					</div>
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Casket Availability</div>
+						<app-select-helper
+							[(ngModel)]="serviceDetailsDraft.casketAvailable"
+							[ngModelOptions]="{ standalone: true }"
+							comboboxName="casketAvailable"
+							[searchable]="true"
+						></app-select-helper>
+					</div>
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Urn Type</div>
+						<app-select-helper
+							[(ngModel)]="serviceDetailsDraft.urnType"
+							[ngModelOptions]="{ standalone: true }"
+							comboboxName="urnType"
+							[searchable]="true"
+						></app-select-helper>
+					</div>
+					<div class="min-w-0">
+						<div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 mb-1">Description</div>
+						<app-select-helper
+							[(ngModel)]="serviceDetailsDraft.urnDescription"
+							[ngModelOptions]="{ standalone: true }"
+							comboboxName="urnDescription"
+							[searchable]="true"
+						></app-select-helper>
+					</div>
+				</div>
+			</div>
 			<ng-container *ngIf="isChargesSectionVisible">
 				<div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
 					<div class="px-3 py-2.5 border-b border-gray-200 bg-slate-50/80 flex items-center justify-between gap-3">
-						<!-- <div class="text-sm font-semibold text-gray-800">Additional Charges List</div> -->
-						<div class="text-xs text-gray-500">{{ packageEnclosionsRows.length }} item{{ packageEnclosionsRows.length === 1 ? '' : 's' }}</div>
+						<div class="text-xs text-gray-500">{{ activeChargeCount }} item{{ activeChargeCount === 1 ? '' : 's' }}</div>
 					</div>
 
 					<div class="xls-wrap">
@@ -252,33 +194,100 @@
 									<th class="xls-th--right" style="width:9rem">Unit Price</th>
 									<th class="xls-th--right" style="width:8rem">Discount</th>
 									<th class="xls-th--right" style="width:9rem">Amount</th>
+									<th class="xls-th--center" style="width:5.5rem">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr *ngFor="let row of packageEnclosionsRows; let i = index; trackBy: trackByPackageEnclosionsRow"
-									[class.xls-row--editing]="false">
+								<tr *ngFor="let row of charges; let i = index; trackBy: trackByChargeRow"
+									[class.xls-row--editing]="!isChargeRowEmpty(row) && !row.isDeleted"
+									[class.xls-row--deleted]="row.isDeleted">
 									<td class="xls-cell--seq">{{ i + 1 }}</td>
-									<td>{{ row.description }}</td>
-									<td class="xls-cell--num">
-										{{ row.quantity | number:'1.0-0' }}
+									<td>
+										<ng-container *ngIf="!row.isDeleted; else deletedChargeDescription">
+											<app-select-helper
+												[(ngModel)]="row.description"
+												(ngModelChange)="onChargeRowInput(i)"
+												(focus)="onChargeRowFocus(i)"
+												[ngModelOptions]="{ standalone: true }"
+												comboboxName="chargeDescriptions"
+												[searchable]="true"
+											></app-select-helper>
+										</ng-container>
+										<ng-template #deletedChargeDescription>
+											<span class="xls-row__deleted-value">{{ row.description || '—' }}</span>
+										</ng-template>
 									</td>
 									<td class="xls-cell--num">
-										<span class="font-semibold">₱{{ row.unitPrice | number:'1.2-2' }}</span>
+										<ng-container *ngIf="!row.isDeleted; else deletedChargeQuantity">
+											<input
+												type="number"
+												min="0"
+												step="1"
+												[(ngModel)]="row.quantity"
+												(ngModelChange)="onChargeRowInput(i)"
+												(focus)="onChargeRowFocus(i)"
+												[ngModelOptions]="{ standalone: true }"
+												class="xls-input"
+											>
+										</ng-container>
+										<ng-template #deletedChargeQuantity>
+											<span class="xls-row__deleted-value">{{ row.quantity || 0 }}</span>
+										</ng-template>
 									</td>
 									<td class="xls-cell--num">
-										₱{{ row.discount | number:'1.2-2' }}
+										<ng-container *ngIf="!row.isDeleted; else deletedChargeUnitPrice">
+											<p-inputNumber
+												[(ngModel)]="row.unitPrice"
+												(ngModelChange)="onChargeRowInput(i)"
+												(onFocus)="onChargeRowFocus(i)"
+												[ngModelOptions]="{ standalone: true }"
+												mode="decimal"
+												[min]="0"
+												[minFractionDigits]="2"
+												[maxFractionDigits]="2"
+												[useGrouping]="false"
+												styleClass="w-full"
+												inputStyleClass="xls-input"
+											></p-inputNumber>
+										</ng-container>
+										<ng-template #deletedChargeUnitPrice>
+											<span class="xls-row__deleted-value">₱{{ row.unitPrice || 0 | number:'1.2-2' }}</span>
+										</ng-template>
 									</td>
-									<td class="xls-cell--num" style="color:#047857;font-weight:700">
-										₱{{ row.amount | number:'1.2-2' }}
+									<td class="xls-cell--num">
+										<ng-container *ngIf="!row.isDeleted; else deletedChargeDiscount">
+											<p-inputNumber
+												[(ngModel)]="row.discount"
+												(ngModelChange)="onChargeRowInput(i)"
+												(onFocus)="onChargeRowFocus(i)"
+												[ngModelOptions]="{ standalone: true }"
+												mode="decimal"
+												[min]="0"
+												[minFractionDigits]="2"
+												[maxFractionDigits]="2"
+												[useGrouping]="false"
+												styleClass="w-full"
+												inputStyleClass="xls-input"
+											></p-inputNumber>
+										</ng-container>
+										<ng-template #deletedChargeDiscount>
+											<span class="xls-row__deleted-value">₱{{ row.discount || 0 | number:'1.2-2' }}</span>
+										</ng-template>
 									</td>
-								</tr>
-								<tr *ngIf="charges.length === 0">
-									<td colspan="6" class="text-center py-4 text-gray-500">No package enclosions applied yet.</td>
+									<td class="xls-cell--num" [class.xls-row__deleted-value]="row.isDeleted" style="color:#047857;font-weight:700">
+										₱{{ getChargeAmount(row) | number:'1.2-2' }}
+									</td>
+									<td class="xls-cell--actions">
+										<div class="flex items-center justify-center gap-1">
+											<button *ngIf="canEditCharges && !row.isDeleted && !isChargeRowEmpty(row)" type="button" (click)="deleteCharge(i)" class="inline-flex items-center justify-center rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">Delete</button>
+											<button *ngIf="canEditCharges && row.isDeleted" type="button" (click)="deleteCharge(i)" class="inline-flex items-center justify-center rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-100">Undo</button>
+										</div>
+									</td>
 								</tr>
 							</tbody>
 							<tfoot>
 								<tr class="xls-totals">
-									<td colspan="5" class="xls-total-label">Total Package Enclosions</td>
+									<td colspan="6" class="xls-total-label">Total Enclosions</td>
 									<td class="xls-cell--num">₱{{ getTotalCharges() | number:'1.2-2' }}</td>
 								</tr>
 							</tfoot>
@@ -288,7 +297,7 @@
 			</ng-container>
 
 			<div *ngIf="!isChargesSectionVisible" class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-center text-sm text-gray-500">
-				Package enclosions breakdown is hidden.
+				Enclosions breakdown is hidden.
 			</div>
 		</div>
 
@@ -315,13 +324,6 @@
 					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
 						<div class="text-[11px] uppercase text-gray-400">Total Paid</div>
 						<div class="mt-1 text-sm font-semibold text-blue-600">₱{{ totalPaid | number:'1.2-2' }}</div>
-					</div>
-
-					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
-						<div class="text-[11px] uppercase text-gray-400">Latest Payment Date</div>
-						<div class="mt-1 text-sm font-semibold text-gray-800">
-							{{ latestPayment?.dateIssued ? (latestPayment?.dateIssued | date:'MMMM dd, yyyy') : 'No payments yet' }}
-						</div>
 					</div>
 
 					<div class="rounded-lg border border-gray-200 px-3 py-2.5 bg-white">
@@ -397,8 +399,8 @@
         <option value="" disabled>Select a change type…</option>
         <option value="price-change">Contract Price Change</option>
         <option value="discount-change">Contract Discount Change</option>
-				<option value="charge-update">Package Enclosions Update</option>
-				<option value="charge-delete">Package Enclosions Deletion</option>
+				<option value="charge-update">Enclosions Update</option>
+				<option value="charge-delete">Enclosions Deletion</option>
         <option value="billing-remarks-change">Billing Remarks Update</option>
         <option value="contract-correction">Contract Data Correction</option>
       </select>

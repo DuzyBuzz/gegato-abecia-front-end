@@ -138,7 +138,7 @@ dateNow: Date = new Date();
         // Add charges to items
         const chargesArray: ContractCharges[] = Array.isArray(charges) ? charges : (charges ? [charges] : []);
         const chargeItems: StatementItem[] = chargesArray.map(c => ({
-          description: String(c.description || '').trim() || 'Package Enclosions - No description',
+          description: String(c.description || '').trim() || 'Enclosions - No description',
           amount: this.calculateChargeAmount(c),
           discount: Number(c.discount) || 0,
           kind: 'charge'
@@ -229,12 +229,12 @@ dateNow: Date = new Date();
     const casketAvailability = String(contract.casketAvailable || '').trim();
     const serviceType = String(contract.type || '').trim() || 'Service type not specified';
 
-    const itemLabel = casket ? '' : (urn ? '' : 'Package Enclosions');
+    const itemLabel = casket ? '' : (urn ? '' : '');
     const itemValue = casket || urn || String(contract.type || '').trim() || 'Not specified';
     const availabilityText = casketAvailability ? ` -  ${casketAvailability}` : '';
 
     return {
-      description: `${serviceType} - ${itemLabel} ${itemValue}${availabilityText}`,
+      description: ` ${itemLabel} ${itemValue}${availabilityText}`,
       amount,
       discount,
       kind: 'contract',

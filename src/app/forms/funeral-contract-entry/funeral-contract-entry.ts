@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { ComboboxFirestoreService } from '../../services/combobox-firestore.service';
 import { FuneralContractService } from '../../services/funeral-contract.service';
 import { SelectHelperComponent } from '../../shared/components/select-helper/select-helper.component';
+import { AutoCompleteHelperComponent } from '../../shared/components/auto-complete-helper/auto-complete-helper.component';
 import { DialogModule } from "primeng/dialog";
 import { FuneralContract } from '../../models/funeral-contract.model';
 import { deceasedAgeAtDeath } from '../../utils/deceased-age.util';
@@ -57,7 +58,7 @@ const SECTION_FIELDS: Record<number, string[]> = {
 @Component({
   selector: 'app-funeral-contract-entry',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, ToastModule, DialogModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectHelperComponent, AutoCompleteHelperComponent, ToastModule, DialogModule],
   templateUrl: './funeral-contract-entry.html',
   styleUrl: './funeral-contract-entry.scss',
   providers: [MessageService]
@@ -92,6 +93,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       // Reset form if no contract is selected (new contract mode)
       this.contractId = null;
       this.form.reset();
+      this.form.patchValue({ contractDate: this.getTodayDateString() }, { emitEvent: false });
       this.deceasedName = '';
     }
   }
@@ -107,6 +109,10 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
     { id: 9, name: 'Government Signatures' },
     { id: 10, name: 'Remarks' }
   ];
+
+  private getTodayDateString(): string {
+    return new Date().toISOString().split('T')[0];
+  }
 
   openBillingRecord(): void {
     if (!this.contractId) {
@@ -230,7 +236,7 @@ export class FuneralContractEntry implements OnInit, OnDestroy, AfterViewInit {
       // ========== SECTION 1: CONTRACT INFORMATION ==========
       contractNo: [''],
       type: [''],
-      contractDate: [''],
+      contractDate: [this.getTodayDateString()],
       dueDate: [''],
       price: [0],
       discount: [0],
