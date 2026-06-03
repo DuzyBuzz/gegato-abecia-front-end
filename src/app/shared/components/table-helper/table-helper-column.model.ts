@@ -7,6 +7,7 @@ export interface TableHelperColumn {
   filterable?: boolean;
   filterMatchMode?: FilterMatchMode;
   filterType?: 'text' | 'numeric' | 'date' | 'select';
+  currencyCode?: string;
   width?: string;
-  template?: 'text' | 'date' | 'currency' | 'status' | 'progress' | 'tag';
+  template?: 'text' | 'date' | 'currency' | 'status' | 'progress' | 'tag' | 'actions';
 }

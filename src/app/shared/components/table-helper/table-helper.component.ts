@@ -36,6 +36,7 @@ import { TableHelperColumn } from './table-helper-column.model';
 export class TableHelperComponent {
 
   @ViewChild('dt') table!: Table;
+  @ContentChild('rowActions') rowActionsTemplate?: TemplateRef<any>;
 
   @Input() value: any[] = [];
   @Input() columns: TableHelperColumn[] = [];
@@ -62,7 +63,6 @@ export class TableHelperComponent {
   searchValue = '';
 
 triggerSearch() {
-  console.log("SEARCH TRIGGERED", this.searchValue);
   const value = this.searchValue?.trim() || '';
 
   this.onSearch.emit(value);
@@ -113,12 +113,13 @@ exportToExcel() {
   import('xlsx').then(({ utils, writeFile }) => {
 
     const source = this.table?.filteredValue || this.value;
+    const exportColumns = this.columns.filter((col) => col.template !== 'actions');
 
     const exportData = source.map(row => {
 
       const obj: any = {};
 
-      this.columns.forEach(col => {
+      exportColumns.forEach(col => {
 
         let value = row[col.field];
 
@@ -188,19 +189,20 @@ normalizeExcelValue(value: any): any {
 printTable() {
 
   const source = this.table?.filteredValue || this.value;
+  const printColumns = this.columns.filter((col) => col.template !== 'actions');
 
   const start = this.table?.first ?? 0;
   const rows = this.table?.rows ?? this.rows;
 
   const visibleData = source.slice(start, start + rows);
 
-  const headers = this.columns
+  const headers = printColumns
     .map(c => `<th>${c.header}</th>`)
     .join('');
 
   const bodyRows = visibleData
     .map(row =>
-      `<tr>${this.columns
+      `<tr>${printColumns
         .map(c => `<td>${row[c.field] ?? ''}</td>`)
         .join('')}</tr>`
     )

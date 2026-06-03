@@ -33,3 +33,11 @@
 .p-toast-top-center {
   top: var(--dashboard-toast-top-offset) !important;
 }
+
+.p-dialog-mask {
+  z-index: 1100 !important;
+}
+
+.p-dialog {
+  z-index: 1101 !important;
+}

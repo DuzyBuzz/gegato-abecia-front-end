@@ -5,7 +5,6 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { UsersComponent } from './pages/users/users.component';
 import { ScheduleComponent } from './pages/schedule/schedule.component';
-
 import { FuneralContractEntry } from './forms/funeral-contract-entry/funeral-contract-entry';
 import { authGuard, roleGuard } from './guards/auth/auth-guard';
 import { DeceasedComponent } from './pages/deceased/deceased.component';
@@ -21,43 +20,37 @@ import { CremationCertificate } from './document/cremation-certificate/cremation
 import { EventDetailsInstructionsComponent } from './document/event-details-instructions/event-details-instructions.component';
 import { DeliverySchedulePrintComponent } from './document/delivery-schedule-print/delivery-schedule-print.component';
 import { IntermentSchedulePrintComponent } from './document/interment-schedule-print/interment-schedule-print.component';
+import { ExpensesMonthlyReportPrintComponent } from './document/expenses-monthly-report-print';
+import { ExpensesYearlyReportPrintComponent } from './document/expenses-yearly-report-print';
 import { RoleAccess } from './utils/role-access.util';
 import { RequestsComponent } from './pages/requests/requests.component';
+import { ExpensesComponent } from './pages/expenses/expenses.component';
 
 export const routes: Routes = [
-
-  // DEFAULT
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
   },
-
-  // AUTH
   {
     path: 'login',
     component: LoginComponent
   },
-
-  // 🔐 ADMIN (AUTHENTICATED USERS WITH ADMIN ROLE)
   {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [roleGuard],
     data: { roleAccess: [RoleAccess.Admin], redirectTo: '/admin/dashboard' },
     children: [
-
       {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },
-
       {
         path: 'dashboard',
         component: DashboardComponent
       },
-
       {
         path: 'users',
         component: UsersComponent,
@@ -68,22 +61,24 @@ export const routes: Routes = [
         path: 'profile',
         component: ProfileComponent
       },
-
       {
         path: 'deceased',
         component: DeceasedComponent
       },
-
       {
         path: 'schedule',
         component: ScheduleComponent
       },
-
+      {
+        path: 'expenses',
+        component: ExpensesComponent,
+        canActivate: [roleGuard],
+        data: { roleAccess: [RoleAccess.Accounting, RoleAccess.Admin], redirectTo: '/admin/deceased' }
+      },
       {
         path: 'requests',
         component: RequestsComponent
       },
-
       {
         path: 'forms',
         children: [
@@ -110,8 +105,6 @@ export const routes: Routes = [
           }
         ]
       },
-
-      // DOCUMENT ENTRY FORMS
       {
         path: 'documents',
         children: [
@@ -123,29 +116,21 @@ export const routes: Routes = [
                 component: FuneralContractEntry
               }
             ]
-          },
-
+          }
         ]
       },
-
-      // DOCUMENT PRINTING
       {
         path: 'print',
-        children: [
-
-        ]
+        children: []
       }
     ]
   },
-
-  // 🔐 BILLER (AUTHENTICATED USERS WITH BILLER ROLE)
   {
     path: 'billing',
     component: BillingLayoutComponent,
     canActivate: [roleGuard],
     data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' },
     children: [
-
       {
         path: '',
         redirectTo: 'deceased',
@@ -163,48 +148,42 @@ export const routes: Routes = [
         path: 'profile',
         component: ProfileComponent
       },
-
-      // DOCUMENT ENTRY FORMS
       {
         path: 'forms',
         children: [
           {
             path: 'contracts',
             children: [
-                {
-                  path: 'funeral-contract/new',
-                    component: FuneralContractEntry,
-                    canActivate: [roleGuard],
-                    data: { roleAccess: [RoleAccess.Admin, RoleAccess.Biller], redirectTo: '/billing/deceased' }
-                },
-                {
-                  path: 'funeral-contract/:contractId',
-                    component: FuneralContractEntry,
-                    canActivate: [roleGuard],
-                    data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
-                },
-                {
-                  path: 'billing/:contractId',
-                    component: FuneralBillingComponent,
-                    canActivate: [roleGuard],
-                    data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
-                },
-                {
-                  path: 'payments/:contractId',
-                    component: FuneralPaymentComponent,
-                    canActivate: [roleGuard],
-                    data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/billing/deceased' }
-                }
+              {
+                path: 'funeral-contract/new',
+                component: FuneralContractEntry,
+                canActivate: [roleGuard],
+                data: { roleAccess: [RoleAccess.Admin, RoleAccess.Biller], redirectTo: '/billing/deceased' }
+              },
+              {
+                path: 'funeral-contract/:contractId',
+                component: FuneralContractEntry,
+                canActivate: [roleGuard],
+                data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
+              },
+              {
+                path: 'billing/:contractId',
+                component: FuneralBillingComponent,
+                canActivate: [roleGuard],
+                data: { roleAccess: [RoleAccess.Biller], redirectTo: '/billing/deceased' }
+              },
+              {
+                path: 'payments/:contractId',
+                component: FuneralPaymentComponent,
+                canActivate: [roleGuard],
+                data: { roleAccess: [RoleAccess.Accounting], redirectTo: '/billing/deceased' }
+              }
             ]
-          },
-
+          }
         ]
-      },
-
-
+      }
     ]
   },
-
   {
     path: 'accounting',
     component: AccountingLayoutComponent,
@@ -223,6 +202,12 @@ export const routes: Routes = [
       {
         path: 'schedule',
         component: ScheduleComponent
+      },
+      {
+        path: 'expenses',
+        component: ExpensesComponent,
+        canActivate: [roleGuard],
+        data: { roleAccess: [RoleAccess.Accounting, RoleAccess.Admin], redirectTo: '/accounting/deceased' }
       },
       {
         path: 'profile',
@@ -264,45 +249,47 @@ export const routes: Routes = [
       }
     ]
   },
-
-      // DOCUMENT PRINTING
+  {
+    path: 'print',
+    children: [
       {
-        path: 'print',
-        children: [
-            {
-              path: 'statement-of-account/:contractId',
-              component: StatementOfAccount
-            },
-            {
-              path: 'funeral-service-contract/:contractId',
-              component: FuneralServiceContractPrinting
-            },
-            {
-              path: 'authority-to-cremate-remains/:contractId',
-              component: AuthorityToCremateRemainsPrinting
-            },
-            {
-              path: 'cremation-certificate/:contractId',
-              component: CremationCertificate
-            },
-            {
-              path: 'event-details-instructions/:contractId',
-              component: EventDetailsInstructionsComponent
-            },
-            {
-              path: 'delivery-schedule',
-              component: DeliverySchedulePrintComponent
-            },
-            {
-              path: 'interment-schedule',
-              component: IntermentSchedulePrintComponent
-            },
-
-
-        ]
+        path: 'statement-of-account/:contractId',
+        component: StatementOfAccount
       },
-
-  // 🔐 SCHEDULE (ACCESSIBLE FROM ANYWHERE WITH AUTHENTICATION)
+      {
+        path: 'funeral-service-contract/:contractId',
+        component: FuneralServiceContractPrinting
+      },
+      {
+        path: 'authority-to-cremate-remains/:contractId',
+        component: AuthorityToCremateRemainsPrinting
+      },
+      {
+        path: 'cremation-certificate/:contractId',
+        component: CremationCertificate
+      },
+      {
+        path: 'event-details-instructions/:contractId',
+        component: EventDetailsInstructionsComponent
+      },
+      {
+        path: 'delivery-schedule',
+        component: DeliverySchedulePrintComponent
+      },
+      {
+        path: 'interment-schedule',
+        component: IntermentSchedulePrintComponent
+      },
+      {
+        path: 'expenses-monthly/:year/:month',
+        component: ExpensesMonthlyReportPrintComponent
+      },
+      {
+        path: 'expenses-yearly/:year',
+        component: ExpensesYearlyReportPrintComponent
+      }
+    ]
+  },
   {
     path: 'schedule',
     component: MainLayout,
@@ -314,8 +301,6 @@ export const routes: Routes = [
       }
     ]
   },
-
-  // FALLBACK
   {
     path: '**',
     redirectTo: 'login'

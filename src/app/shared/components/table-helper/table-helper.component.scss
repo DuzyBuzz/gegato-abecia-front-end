@@ -1,16 +1,47 @@
 :host ::ng-deep {
+  .card {
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 18px 34px -30px rgba(15, 23, 42, 0.35);
+  }
+
   .p-datatable {
+    border: 0;
+
     .p-datatable-thead > tr > th {
-      padding: 1rem 0.5rem;
+      padding: 0.95rem 0.75rem;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      color: #0f172a;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .p-datatable-tbody > tr > td {
-      padding: 0.75rem 0.5rem;
+      padding: 0.85rem 0.75rem;
+      color: #334155;
+    }
+
+    .p-datatable-tbody > tr:nth-child(even) {
+      background: rgba(248, 250, 252, 0.88);
+    }
+
+    .p-datatable-tbody > tr:hover {
+      background: rgba(224, 231, 255, 0.55);
+    }
+
+    .p-datatable-tbody > tr > td:last-child {
+      white-space: nowrap;
     }
   }
 
   .p-paginator {
-    padding: 1rem;
+    padding: 0.95rem 1rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.95);
+    background: #fff;
   }
 
   .flex {
@@ -52,6 +83,10 @@
 
   .p-selectable-row:hover {
     background-color: var(--surface-hover);
+  }
+
+  .p-button {
+    border-radius: 0.8rem;
   }
 
   .text-center {

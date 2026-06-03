@@ -95,6 +95,14 @@
         </div>
       </a>
 
+      <a routerLink="/admin/expenses" routerLinkActive="is-active" class="workspace-nav__item">
+        <span class="material-icons">receipt_long</span>
+        <div *ngIf="sidebarExpanded" class="workspace-nav__text">
+          <strong>Expenses</strong>
+          <span>Expense ledger and reports</span>
+        </div>
+      </a>
+
       <a routerLink="/admin/requests" routerLinkActive="is-active" class="workspace-nav__item">
         <span class="material-icons">pending_actions</span>
         <div *ngIf="sidebarExpanded" class="workspace-nav__text">

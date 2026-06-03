@@ -18,11 +18,11 @@
   >
 
     <!-- CAPTION -->
-    <ng-template pTemplate="caption" *ngIf="showGlobalFilter">
+    <ng-template pTemplate="caption" *ngIf="showGlobalFilter || showClearButton || showPrintButton || showExportButton">
 
       <div class="flex justify-between items-center gap-4 w-full flex-wrap">
 
-        <p-iconField iconPosition="left" class="flex-grow">
+        <p-iconField *ngIf="showGlobalFilter" iconPosition="left" class="flex-grow">
 
           <p-inputIcon>
             <i class="pi pi-search"></i>
@@ -40,13 +40,14 @@
         </p-iconField>
 
         <div class="flex gap-2">
-        <p-button
-          icon="pi pi-search"
-          label="Search"
-          severity="primary"
-          [disabled]="!searchValue"
-          (click)="triggerSearch()">
-        </p-button>
+          <p-button
+            *ngIf="showGlobalFilter"
+            icon="pi pi-search"
+            label="Search"
+            severity="primary"
+            [disabled]="!searchValue"
+            (click)="triggerSearch()">
+          </p-button>
           <p-button
             *ngIf="showClearButton"
             severity="danger"
@@ -141,7 +142,7 @@
             </span>
 
             <span *ngSwitchCase="'currency'">
-              {{ row[col.field] | currency:'USD':'symbol' }}
+              {{ row[col.field] | currency:(col.currencyCode || 'USD'):'symbol' }}
             </span>
 
             <p-tag
@@ -160,6 +161,15 @@
               *ngSwitchCase="'tag'"
               [value]="row[col.field]"
             ></p-tag>
+
+            <ng-container *ngSwitchCase="'actions'">
+              <ng-container
+                *ngIf="rowActionsTemplate; else emptyActions"
+                [ngTemplateOutlet]="rowActionsTemplate"
+                [ngTemplateOutletContext]="{ $implicit: row }"
+              ></ng-container>
+              <ng-template #emptyActions></ng-template>
+            </ng-container>
 
           </ng-container>
 
