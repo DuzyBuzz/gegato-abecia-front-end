@@ -115,7 +115,7 @@ export class ExpensesService {
   }
 
   deleteExpense(id: number): Observable<void> {
-    return this.http.post<void>(`${this.api}/delete/${id}`, {});
+    return this.http.post<void>(`${this.api}/delete/${id}`, [{}]);
   }
 
   getCategories(): Observable<ExpenseCategory[]> {
