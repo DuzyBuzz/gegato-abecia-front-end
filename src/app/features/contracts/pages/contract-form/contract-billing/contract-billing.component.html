@@ -1,0 +1,289 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="true"
+  [dismissableMask]="true"
+  [showHeader]="true"
+  
+  [(visible)]="visible"
+  styleClass="full-dialog"
+  [style]="{
+    width: '100vw',
+    height: '100vh'
+  }"
+  appendTo="body"
+  [contentStyle]="{ padding: '0', overflow: 'hidden' }"
+>
+  <ng-template pTemplate="header">
+    <div class="layout-grid">
+      <!-- LEFT COLUMN -->
+      <div class="col left-col">
+
+        <section class="panel">
+
+          <div class="panel-body">
+<div class="grid grid-cols-[78%_20.5%] gap-2">
+
+  <div class="flex items-center gap-[0px]">
+    <label class="w-24 shrink-0">Contract No.</label>
+    <input type="text"  />
+  </div>
+
+  <div class="flex items-center gap-0">
+    <label class="w-10 shrink-0">Age</label>
+    <input type="number"  class="flex-1 " />
+  </div>
+</div>
+<div class="grid grid-cols-[80_10%] gap-2">
+
+  <div class="flex items-center gap-[0px]">
+    <label class="w-24 shrink-0">Contractee</label>
+    <input type="text"  />
+  </div>
+
+
+</div>
+
+<div class="grid grid-cols-[80_10%] gap-2">
+
+  <div class="flex items-center gap-[0px]">
+    <label class="w-24 shrink-0">Address</label>
+    <input type="text"  />
+  </div>
+
+
+</div>
+
+
+<div class="grid grid-cols-[50%_49%] gap-2">
+
+  <div class="flex items-center gap-[10px]">
+    <label class="w-30 shrink-0">Type of Service</label>
+    <input type="text"  class="flex-1 " readonly   />
+  </div>
+
+  <div class="flex items-center gap-[10px]">
+    <label class="w-30 shrink-0">Crem. Type</label>
+    <input type="text"  class="flex-1 " readonly   />
+
+  </div>
+    <div class="flex items-center gap-[57px]">
+    <label class="w-30 shrink-0">Casket</label>
+    <input type="text"  class="flex-1 " readonly   />
+
+  </div>
+
+  <div class="flex items-center gap-[9px]">
+    <label class="w-30 shrink-0">Description</label>
+    <input type="text"  class="flex-1 " readonly   />
+
+  </div>
+</div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- MIDDLE COLUMN -->
+      <div class="col middle-col">
+
+        <section class="panel">
+          <div class="panel-title">Important Requirements!!! Documents/I.D./Payment</div>
+
+          <div class="panel-body">
+            <div class="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr] gap-2 items-center">
+              <label>Age</label>
+              <input type="number" />
+
+                <label>City Docs</label>
+              <input type="text" />
+
+                                <label>Financial Asst.</label>
+                <select >
+
+
+                    <option value="">Select Asst.</option>
+                    <option value="">CITY INDIGENT</option>
+                    <option value="">DSWD GL</option>
+                    <option value="">PROVINCE GL</option>
+                    <option value="">LGU GL</option>
+                    <option value="">CITY COVID/ DSWD GL</option>
+                    <option value="">CITY COVID</option>
+                                      
+
+
+
+
+
+                </select>
+
+
+                <label>Submitted</label>
+              <input type="text" />
+              <label>Disc. ID No.</label>
+              <input type="text" />
+
+                <label>Date Submitted</label>
+              <input type="date" />
+
+                <label>Issued At</label>
+              <input type="text" />
+
+
+                              <label>Barangay</label>
+              <input type="text" />
+              
+
+                              <label>Rec Date</label>
+              <input type="date" />
+              
+                <label>Issued On</label>
+              <input type="text" />
+                              <label>Chairman</label>
+              <input type="text" />
+                                            <label>Promisory Date</label>
+              <input type="date" />
+              
+
+            </div>
+    <div class="flex items-center gap-[12px] mt-2">
+    <label class="w-30 shrink-0">Released By</label>
+              <input type="text"  class="w-full"/>
+
+
+
+            </div>
+
+
+           
+          </div>
+          
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+       
+      <div class="col right-col">
+        <section class="panel">
+
+<div class="grid grid-cols-[50%_49%] gap-2">
+
+  <div class="flex items-center gap-1">
+    <label class="w-30 shrink-0">Delivery Date</label>
+    <input type="date"  class="flex-1 " readonly   />
+  </div>
+
+  <div class="flex items-center gap-[30px]">
+    <label class="w-30 shrink-0">Cremation</label>
+    <input type="date"  class="flex-1 " readonly   />
+
+  </div>
+    <div class="flex items-center gap-[20px]">
+    <label class="w-30 shrink-0">Burial Date</label>
+    <input type="date"  class="flex-1 " readonly   />
+
+  </div>
+
+  <div class="flex items-center gap-[20px]">
+    <label class="w-30 shrink-0">Ash Relesed</label>
+    <input type="date"  class="flex-1 " readonly   />
+
+  </div>
+
+</div>
+    <div class="flex items-center gap-[12px] mt-2">
+    <label class="w-30 shrink-0">Released By</label>
+              <input type="text"  class="w-full"/>
+
+
+
+            </div>
+                            <label>Deliveries/Transfer Notes</label>
+<textarea class="small-textarea"></textarea>
+        </section>
+
+
+
+      </div>
+    </div>
+  </ng-template>
+
+
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Trans. No.</th>
+            <th>Item</th>
+            <th>Amount</th>
+            <th>Discount</th>
+            <th>Cash</th>
+            <th>Check</th>
+            <th>O.R. Amount</th>
+            <th>A.R.</th>
+            <th>O.R. No.</th>
+            <th>PLAN</th>
+            <th>DSWD GI</th>
+            <th>GM</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of transactions">
+            <td class="trans-no">{{ row.transNo }}</td>
+            <td class="item-col"><div class="item-cell">{{ row.item }}</div></td>
+            <td>{{ row.amount }}</td>
+            <td>{{ row.discount }}</td>
+            <td>{{ row.cash }}</td>
+            <td>{{ row.check }}</td>
+            <td>{{ row.orAmount }}</td>
+            <td>{{ row.ar }}</td>
+            <td>{{ row.orNo }}</td>
+            <td>{{ row.plan }}</td>
+            <td>{{ row.dswdGi }}</td>
+            <td>{{ row.gm }}</td>
+            <td>{{ row.date }}</td>
+            <td class="audit-col">
+              <div class="audit-name">{{ row.auditName }}</div>
+              <div class="audit-time">{{ row.auditTime }}</div>
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+      <ng-template pTemplate="footer">
+<span>
+            <div class="summary-grid">
+          <div class="summary-head">Amount</div>
+          <div class="summary-head">Discount</div>
+          <div class="summary-head">Amount Due</div>
+          <div class="summary-head">Cash</div>
+          <div class="summary-head">Check</div>
+          <div class="summary-head">Amount Paid</div>
+          <div class="summary-head">DSWD</div>
+          <div class="summary-head">PLAN AMOUNT</div>
+          <div class="summary-head">G.M. AMOUNT</div>
+          <div class="summary-head">Balance</div>
+
+          <div class="summary-val">0.00</div>
+          <div class="summary-val">6,000.00</div>
+          <div class="summary-val">-6,000.00</div>
+          <div class="summary-val">3,000.00</div>
+          <div class="summary-val">0.00</div>
+          <div class="summary-val">3,000.00</div>
+          <div class="summary-val blue"></div>
+          <div class="summary-val blue"></div>
+          <div class="summary-val blue"></div>
+          <div class="summary-val"></div>
+                      <button type="button" class="flat-btn">Print</button>
+            <button type="button" class="flat-btn">Update</button>
+            <button type="button" class="flat-btn-red" (click)="closeDialog()">Close</button>
+
+        </div>
+
+</span>
+  </ng-template>
+</p-dialog>

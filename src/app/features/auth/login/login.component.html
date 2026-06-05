@@ -1,0 +1,25 @@
+<section class="login-shell">
+  <article class="login-card">
+    <img class="brand-logo" src="assets/images/gegato-logo.jpg" alt="Gegato Abecia logo" />
+    <p class="eyebrow">Funeral management</p>
+    <h1>Secure staff access</h1>
+    <p class="muted">Use the demo credentials below to enter the production-style workspace.</p>
+
+    <form (ngSubmit)="submit()" class="login-form">
+      <label>
+        Email
+        <input type="email" [(ngModel)]="email" name="email" required />
+      </label>
+
+      <label>
+        Password
+        <input type="password" [(ngModel)]="password" name="password" required />
+      </label>
+
+      <button type="submit" [disabled]="loading">{{ loading ? 'Signing in…' : 'Sign in' }}</button>
+      <p class="error" *ngIf="error">{{ error }}</p>
+    </form>
+
+    <p class="hint">Demo users: owner@gegato.test, admin@gegato.test, accounting@gegato.test, biller@gegato.test</p>
+  </article>
+</section>

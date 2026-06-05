@@ -1,0 +1,38 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand-block">
+      <img class="brand-logo" src="assets/images/gegato-logo.jpg" alt="Gegato Abecia logo" />
+      <p class="eyebrow">Funeral Management</p>
+      <h2>Gegato Abecia</h2>
+      <p class="user-chip" *ngIf="user() as currentUser">{{ currentUser.name }} · {{ currentUser.role }}</p>
+    </div>
+
+    <nav class="nav-group">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/contracts" routerLinkActive="active">Contracts</a>
+      <a routerLink="/clients" routerLinkActive="active">Clients</a>
+      <a routerLink="/packages" routerLinkActive="active">Packages</a>
+      <a routerLink="/dashboard" routerLinkActive="active">Collections</a>
+      <a routerLink="/dashboard" routerLinkActive="active">Inventory</a>
+      <a routerLink="/dashboard" routerLinkActive="active">Reports</a>
+      <button type="button" class="logout-btn" (click)="logout()">Sign out</button>
+    </nav>
+  </aside>
+
+  <div class="content-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Operations center</p>
+        <h1>Production business workspace</h1>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="ghost-btn">Branch: {{ user()?.branchId || 'Main' }}</button>
+        <button type="button" class="ghost-btn">Quick actions</button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

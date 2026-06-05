@@ -1,0 +1,59 @@
+<section class="page-card clients-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Clients</p>
+      <h2>Client management</h2>
+      <p class="muted">Search active families, review billing history, and open a quick statement of account view.</p>
+    </div>
+    <button type="button" class="primary-btn">Add client</button>
+  </div>
+
+  <div class="cards-grid">
+    <article class="stat-card" *ngFor="let card of summaryCards">
+      <span class="stat-label">{{ card.label }}</span>
+      <strong class="stat-value">{{ card.value }}</strong>
+    </article>
+  </div>
+
+  <div class="content-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <h3>Client list</h3>
+        <input class="search-input" type="search" placeholder="Search by name or contact" [(ngModel)]="searchTerm" />
+      </div>
+
+      <ul class="client-list">
+        <li *ngFor="let client of filteredClients" class="client-item" [class.active]="selectedClient.id === client.id" (click)="selectClient(client)">
+          <div>
+            <strong>{{ client.name }}</strong>
+            <p>{{ client.contact }}</p>
+          </div>
+          <span class="pill" [class]="client.status.toLowerCase()">{{ client.status }}</span>
+        </li>
+      </ul>
+    </article>
+
+    <article class="panel-card" *ngIf="selectedClient as client">
+      <h3>{{ client.name }}</h3>
+      <p class="muted">{{ client.address }}</p>
+
+      <dl class="detail-grid">
+        <div><dt>Primary contact</dt><dd>{{ client.contact }}</dd></div>
+        <div><dt>Branch</dt><dd>{{ client.branch }}</dd></div>
+        <div><dt>Last payment</dt><dd>{{ client.lastPayment }}</dd></div>
+        <div><dt>Outstanding</dt><dd>{{ client.outstanding }}</dd></div>
+      </dl>
+
+      <div class="mini-grid">
+        <article class="mini-card">
+          <h4>Active contracts</h4>
+          <p>{{ client.activeContracts }}</p>
+        </article>
+        <article class="mini-card">
+          <h4>SOA status</h4>
+          <p>{{ client.soaStatus }}</p>
+        </article>
+      </div>
+    </article>
+  </div>
+</section>

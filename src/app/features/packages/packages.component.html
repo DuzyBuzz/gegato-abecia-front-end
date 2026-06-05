@@ -1,0 +1,37 @@
+<section class="page-card packages-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Packages</p>
+      <h2>Service package catalog</h2>
+      <p class="muted">Configure reusable funeral bundles, pricing tiers, and included services for fast billing.</p>
+    </div>
+    <button type="button" class="primary-btn">New package</button>
+  </div>
+
+  <div class="cards-grid">
+    <article class="stat-card" *ngFor="let card of summaryCards">
+      <span class="stat-label">{{ card.label }}</span>
+      <strong class="stat-value">{{ card.value }}</strong>
+    </article>
+  </div>
+
+  <div class="package-grid">
+    <article class="package-card" *ngFor="let pkg of packages">
+      <div class="package-top">
+        <div>
+          <p class="eyebrow">{{ pkg.category }}</p>
+          <h3>{{ pkg.name }}</h3>
+        </div>
+        <span class="price-tag">{{ pkg.price }}</span>
+      </div>
+      <p class="muted">{{ pkg.description }}</p>
+      <ul class="feature-list">
+        <li *ngFor="let item of pkg.items">{{ item }}</li>
+      </ul>
+      <div class="package-actions">
+        <button type="button" class="ghost-btn">Edit</button>
+        <button type="button" class="primary-btn compact">Use in contract</button>
+      </div>
+    </article>
+  </div>
+</section>

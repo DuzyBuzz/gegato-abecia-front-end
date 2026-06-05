@@ -1,0 +1,63 @@
+<section class="page-card contract-list-page">
+  <app-contract-billing
+    [visible]="billingVisible"
+    (visibleChange)="billingVisible = $event"
+  ></app-contract-billing>
+
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Contracts</p>
+      <h2>Billing and contract overview</h2>
+      <p class="muted">Track active contracts, recent payments, and the billing record for each case.</p>
+    </div>
+    <a class="primary-btn" routerLink="/contracts/new">Create contract</a>
+  </div>
+
+  <div class="cards-grid">
+    <article class="stat-card" *ngFor="let card of summaryCards">
+      <span class="stat-label">{{ card.label }}</span>
+      <strong class="stat-value">{{ card.value }}</strong>
+    </article>
+  </div>
+
+  <div class="content-grid">
+    <article class="panel-card">
+      <div class="panel-header">
+        <h3>Current contracts</h3>
+        <button type="button" class="ghost-btn" (click)="openBilling()">Open billing record</button>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Contract No.</th>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- <tr *ngFor="let row of rows" [class.active-row]="selectedContract.contractNo === row.contractNo" (click)="selectContract(row)">
+            <td>{{ row.contractNo }}</td>
+            <td>{{ row.client }}</td>
+            <td><span class="status-chip" [class]="row.status.toLowerCase()">{{ row.status }}</span></td>
+            <td>₱ {{ row.balance | number }}</td>
+          </tr> -->
+        </tbody>
+      </table>
+    </article>
+
+    <article class="panel-card detail-card">
+      <!-- <h3>{{ selectedContract.client }}</h3> -->
+      <!-- <p class="muted">{{ selectedContract.deceasedName }} · {{ selectedContract.branch }}</p> -->
+      <ul class="detail-list">
+        <!-- <li><strong>Service type:</strong> {{ selectedContract.serviceType }}</li>
+        <li><strong>Contract date:</strong> {{ selectedContract.contractDate }}</li>
+        <li><strong>Gross amount:</strong> ₱ {{ selectedContract.grossAmount | number }}</li>
+        <li><strong>Total paid:</strong> ₱ {{ selectedContract.totalPaid | number }}</li>
+        <li><strong>Balance:</strong> ₱ {{ selectedContract.balance | number }}</li>
+        <li><strong>Last payment:</strong> {{ selectedContract.lastPaymentDate }}</li> -->
+      </ul>
+      <button type="button" class="primary-btn full-width" (click)="openBilling()">Review payment history</button>
+    </article>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+<section class="dashboard-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Owner dashboard</p>
+      <h2>Daily operations overview</h2>
+      <p class="muted">This screen is now wired into the feature-first layout and ready for real Firestore data.</p>
+    </div>
+    <a class="primary-btn" routerLink="/contracts/new">New contract</a>
+  </div>
+
+  <div class="cards-grid">
+    <article class="stat-card" *ngFor="let card of summaryCards">
+      <span class="stat-label">{{ card.label }}</span>
+      <strong class="stat-value">{{ card.value }}</strong>
+    </article>
+  </div>
+
+  <div class="panel-grid">
+    <article class="panel-card">
+      <h3>Recent activity</h3>
+      <ul>
+        <li>Payment posted for contract CTR-2026-0012</li>
+        <li>Inventory alert: low stock on premium casket units</li>
+        <li>Schedule confirmed for burial service tomorrow</li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <h3>Quick actions</h3>
+      <div class="quick-actions">
+        <a routerLink="/contracts/new">Create contract</a>
+        <a routerLink="/dashboard">Review collections</a>
+        <a routerLink="/dashboard">Open reports</a>
+      </div>
+    </article>
+  </div>
+</section>

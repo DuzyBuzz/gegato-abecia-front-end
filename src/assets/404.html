@@ -1,0 +1,120 @@
+<section class="page_404">
+  <div class="error-container">
+   <h1 class="text-red-500 text-9xl">404</h1>
+    <div class="four_zero_four_bg">
+   
+    </div>
+
+    <div class="content_box_404">
+      <h3>Looks like you're lost</h3>
+
+      <p>The page you are looking for is not available!</p>
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+/*======================
+        404 Page
+=======================*/
+
+.page_404 {
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Arvo', serif;
+}
+
+.error-container {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+}
+
+.four_zero_four_bg {
+  width: 100%;
+  height: 350px;
+  background-image: url('https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.four_zero_four_bg h1 {
+  font-size: 100px;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.content_box_404 {
+  margin-top: -20px;
+}
+
+.content_box_404 h3 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.content_box_404 p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.link_404 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  height: 48px;
+  padding: 0 24px;
+  background: #39ac31;
+  color: #fff !important;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.link_404:hover {
+  background: #2f9128;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .four_zero_four_bg {
+    height: 250px;
+  }
+
+  .four_zero_four_bg h1 {
+    font-size: 70px;
+  }
+
+  .content_box_404 h3 {
+    font-size: 24px;
+  }
+
+  .content_box_404 p {
+    font-size: 14px;
+  }
+
+  .link_404 {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+</style>
